@@ -1,5 +1,12 @@
 # 更新日志
 
+## 1.0.1 - 2026-11-13
+
+- 安装包、便携版、主程序、快捷方式和卸载入口统一使用 RoseCode 名称。
+- 更新 Windows 和 Linux 打包、自动更新附件及 Codex 增强菜单的名称。
+- 保留原作者署名与上游链接；旧配置、导入链接和拓展 API 继续兼容。
+- 从 1.0.0 升级请在 GitHub Releases 下载 RoseCode 安装包；新版可直接识别 RoseCode 命名的更新附件。
+
 ## 1.0.0 - 2026-11-13
 
 RoseCode 首次开源，基于 BigPizzaV3 及贡献者的 CodexPlusPlus，继续采用 AGPL-3.0-only 许可证。
