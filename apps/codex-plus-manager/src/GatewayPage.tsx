@@ -93,6 +93,7 @@ export function GatewayPage({
   codexRun?: CodexRunControls;
 }) {
   const [payload, setPayload] = useState<GatewayPayload | null>(memo.payload);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [busy, setBusy] = useState<string | null>(memo.payload ? null : "load");
   const [ownTab, setTabState] = useState<Tab>(memo.tab);
   const tab = controlledTab ?? ownTab;
@@ -127,12 +128,16 @@ export function GatewayPage({
 
   const refresh = async (silent = true) => {
     setBusy("load");
+    setLoadFailed(false);
     try {
       const result = await invoke<GatewayResult>("load_gateway");
       accept(result);
-      if (result.status !== "ok") await notify(t("读取失败"), result.message, "failed");
-      else if (!silent) await notify(t("已刷新"), result.message, "ok");
+      if (result.status !== "ok" || !hasPayload(result)) {
+        setLoadFailed(true);
+        await notify(t("读取失败"), result.message, "failed");
+      } else if (!silent) await notify(t("已刷新"), result.message, "ok");
     } catch (error) {
+      setLoadFailed(true);
       await notify(t("调用失败"), String(error), "failed");
     } finally {
       setBusy(null);
@@ -230,7 +235,7 @@ export function GatewayPage({
             <span>{t("本地网关当前没有运行，走网关的 Agent 会连不上。请重新保存一次绑定或重启 RoseCode。")}</span>
           </p>
         ) : null}
-        {tab === "agents" ? <AgentsView busy={busy} codexRun={codexRun} notify={notify} onManage={() => setTab("providers")} onOpenCodexProviderSettings={onOpenCodexProviderSettings} payload={payload} run={run} /> : null}
+        {tab === "agents" ? <AgentsView busy={busy} codexRun={codexRun} loadFailed={loadFailed} notify={notify} onManage={() => setTab("providers")} onOpenCodexProviderSettings={onOpenCodexProviderSettings} onRetry={() => void refresh()} payload={payload} run={run} /> : null}
         {tab === "sessions" ? <SessionsView notify={notify} /> : null}
         {tab === "providers" ? <ProvidersView busy={busy} notify={notify} payload={payload} run={run} /> : null}
         {tab === "routing" ? <RoutingView busy={busy} payload={payload} run={run} /> : null}

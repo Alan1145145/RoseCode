@@ -1,5 +1,5 @@
 /** 本地网关 · 智能体：每个 Agent 一行，接入后供应商池里的模型都出现在它自己的模型列表里，也可以在这里直接选。 */
-import { useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode, type RefObject } from "react";
+import { useContext, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode, type RefObject } from "react";
 import { createPortal } from "react-dom";
 import { invoke } from "@tauri-apps/api/core";
 import { AlertTriangle, Check, ChevronDown, ChevronRight, Copy, FolderOpen, List, Loader2, Play, RotateCcw, Search, Shuffle, Square, Star, Waypoints, X } from "lucide-react";
@@ -82,6 +82,8 @@ export function AgentsView({
   onManage,
   onOpenCodexProviderSettings,
   codexRun,
+  loadFailed = false,
+  onRetry,
 }: {
   payload: GatewayPayload | null;
   busy: string | null;
@@ -91,6 +93,8 @@ export function AgentsView({
   onOpenCodexProviderSettings?: () => void;
   /** Codex 行的启动 / 停止：不传（比如总览里的接入弹窗）就不显示那个键。 */
   codexRun?: CodexRunControls;
+  loadFailed?: boolean;
+  onRetry?: () => void;
 }) {
   // 没勾选的 Agent 不列；它们已经接入的话照常工作，到设置里「我用的 Agent」重新勾选就能再管理。
   const focus = useAgentFocus();
@@ -121,8 +125,14 @@ export function AgentsView({
   const list = (items: GatewayAgentView[]) => <div className="rose-access-grid">{items.map((agent) => <CxCard className="gw-agent-card" key={agent.agent}>{row(agent)}</CxCard>)}</div>;
   return (
     <div className="gw-agents cx-page">
-      <div className="rose-access-summary"><div><strong>{t("连接与模型")}</strong><span>{tf("已接入 {0} / {1} 个 Agent", [connected.length, agents.length])}</span></div><button className="gw-soft-button" onClick={onManage} type="button">{t("管理供应商")}</button></div>
-      {!payload ? <CxCard><CxEmpty title={t("正在读取…")} /></CxCard> : null}
+      <div className="rose-access-summary"><div><strong>{t("连接与模型")}</strong>{payload ? <span>{tf("已接入 {0} / {1} 个 Agent", [connected.length, agents.length])}</span> : null}</div><button className="gw-soft-button" onClick={onManage} type="button">{t("管理供应商")}</button></div>
+      {!payload ? (
+        <CxCard>
+          <CxEmpty title={t(loadFailed ? "读取失败" : "正在读取…")}>
+            {loadFailed && onRetry ? <button className="gw-soft-button" disabled={busy !== null} onClick={onRetry} type="button">{t("重试")}</button> : null}
+          </CxEmpty>
+        </CxCard>
+      ) : null}
       {solo && agents.length ? list(agents) : null}
       {!solo && connected.length ? <CxSection count={connected.length} title={t("已接入")}>{list(connected)}</CxSection> : null}
       {/* 未接入也直接列出，用户可在名称旁决定是否接入；仍可按组收起。 */}
@@ -213,6 +223,9 @@ function AgentRow({
     setDraft(draftFromBinding(binding));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bindingKey]);
+  useEffect(() => {
+    if (busy !== null) setPickerOpen(false);
+  }, [busy]);
 
   // 「Agent 接入」页里 Claude Desktop 的绑定 id 是 `claude-desktop`；`claude` 是 Claude Code（命令行），
   // 两行都要能展开档位，但只有前者有本地启动器。
@@ -266,6 +279,7 @@ function AgentRow({
     }
   };
   const save = async (next: BindingDraft, updateDraft = true, item?: PickerItem) => {
+    if (busy !== null) return false;
     const error = validateDraft(next, payload, connected ? binding?.model : undefined, connected && !item ? binding?.defaultModelSelection : null);
     if (error) {
       void notify(t("还不能接入"), t(error), "warning");
@@ -365,12 +379,13 @@ function AgentRow({
             </span>
           </span>
         </div>
-        <div className="rose-agent-access-toggle"><span data-connected={connected}>{connected ? t("已接入") : t("未接入")}</span><Switch pending={busy !== null} label={tf("{0} 接入 RoseCode", [agent.name])} on={connected} onToggle={toggle} /></div>
+        <div className="rose-agent-access-toggle"><span data-connected={connected} aria-hidden="true">{connected ? t("已接入") : t("未接入")}</span><Switch optimistic={false} pending={busy !== null} label={tf("{0} 接入 RoseCode", [agent.name])} on={connected} onToggle={toggle} /></div>
         <div className="cx-row-controls rose-agent-connection-controls">
           <div className="rose-agent-default-model">
           <ModelPicker
             agent={agent}
             connected={connected}
+            disabled={busy !== null}
             draft={draft}
             onDisconnect={() => {
               setPickerOpen(false);
@@ -427,22 +442,21 @@ function AgentRow({
           ) : null}
           {binding ? <ResetModelSelections agent={agent} busy={busy !== null} run={run} /> : null}
           <button
-            aria-expanded={expanded}
-            aria-label={isClaude ? t("档位") : t("详情")}
+            aria-expanded={expanded && connected}
             className="rose-agent-configure"
-            data-open={expanded}
+            data-open={expanded && connected}
             disabled={!connected}
             onClick={onToggleExpand}
             type="button"
           >
-            {expanded ? t("收起配置") : t("配置连接")}
-            <ChevronRight className="h-4 w-4" />
+            {expanded && connected ? t("收起配置") : t("配置连接")}
+            <ChevronRight aria-hidden="true" className="h-4 w-4" />
           </button>
           </div>
         </div>
       </div>
       {expanded && connected ? (
-        <AgentDetail agent={agent} busy={busy} draft={draft} onDisconnect={() => void disconnect()} onManage={onManage} onSave={(next) => void save(next)} payload={payload} run={run} />
+        <AgentDetail agent={agent} busy={busy} draft={draft} onDisconnect={() => void disconnect()} onManage={onManage} onSave={save} payload={payload} run={run} />
       ) : null}
       {disconnectTarget ? (
         <AgentDisconnectDialog
@@ -495,7 +509,7 @@ function AgentDetail({
   draft: BindingDraft;
   busy: string | null;
   run: Run;
-  onSave: (next: BindingDraft) => void;
+  onSave: (next: BindingDraft) => Promise<boolean>;
   onDisconnect: () => void;
   /** 去供应商池（弹窗里是关掉弹窗再去）。 */
   onManage: () => void;
@@ -505,6 +519,11 @@ function AgentDetail({
   const isClaude = agent.agent === "claude" || agent.agent === "claude-desktop";
   const [selecting, setSelecting] = useState(false);
   const [windowText, setWindowText] = useState(draft.contextWindow);
+  const [windowTouched, setWindowTouched] = useState(false);
+  const windowErrorId = useId();
+  const windowValue = parseContextWindow(windowText);
+  const validWindow = windowValue === null || (Number.isFinite(windowValue) && windowValue >= 1000);
+  const windowInvalid = windowTouched && !validWindow;
   // 通用 Agent 有的只能在自己界面里填 Key（如 Zed 存在钥匙串里）：给出地址和本 Agent 的网关 token 一键复制。
   const [copied, setCopied] = useState<"url" | "token" | null>(null);
   const token = payload?.gateway.bindings[agent.agent as GatewayAgentId]?.token ?? "";
@@ -515,7 +534,10 @@ function AgentDetail({
     }).catch(() => undefined);
   };
   const selectRef = useRef<HTMLButtonElement>(null);
-  useEffect(() => setWindowText(draft.contextWindow), [draft.contextWindow]);
+  useEffect(() => {
+    setWindowText(draft.contextWindow);
+    setWindowTouched(false);
+  }, [draft.contextWindow]);
   const providers = (payload?.pool ?? []).filter(providerEnabled);
   const used = agentPoolProviders(payload, draft.poolExclude);
   const groups = (payload?.groups ?? []).filter((group) => !group.disabled && group.members.length);
@@ -569,7 +591,7 @@ function AgentDetail({
             {used.length > 5 ? <span className="gw-avatar gw-avatar-more" data-size="sm">+{used.length - 5}</span> : null}
           </span>
         ) : null}
-        <button aria-expanded={selecting} className="gw-secondary-button gw-set-line-button" onClick={() => setSelecting(!selecting)} ref={selectRef} type="button">
+        <button aria-expanded={selecting} className="gw-secondary-button gw-set-line-button" disabled={busy !== null} onClick={() => setSelecting(!selecting)} ref={selectRef} type="button">
           {t("挑选")}
           <ChevronDown className="h-3.5 w-3.5" />
         </button>
@@ -611,6 +633,7 @@ function AgentDetail({
           {tiers.map(([key, label]) => (
             <TierPicker
               key={key}
+              disabled={busy !== null}
               label={label}
               onPick={(model) => onSave({ ...draft, [key]: model })}
               payload={payload}
@@ -632,6 +655,7 @@ function AgentDetail({
         {agent.agent === "codex" ? (
           <SetLine hint={t("给会话起名用；不指定时跟 Codex 自己选的一样")} title={t("起名模型")} tooltip={t("Codex 给会话起名、重新起名的请求发给这个模型；不指定时照 Codex 自己选的模型路由")}>
             <TierPicker
+              disabled={busy !== null}
               emptyLabel={t("不单独指定")}
               exclude={draft.poolExclude}
               inactiveBlocksRequest
@@ -646,6 +670,7 @@ function AgentDetail({
         {agent.agent === "codex" ? (
           <SetLine hint={t("「替我审批」的请求发给它")} title={t("审批模型")} tooltip={t("Codex「替我审批」的请求（codex-auto-review）发给这个模型；同默认模型时按「未知模型名」规则处理")}>
             <TierPicker
+              disabled={busy !== null}
               exclude={draft.poolExclude}
               inactiveBlocksRequest
               label=""
@@ -670,17 +695,28 @@ function AgentDetail({
         </SetLine>
         {/* 窗口按模型在供应商池里填；这里只给池里没写窗口的模型兜底。 */}
         <SetLine hint={t("供应商池里没写窗口的模型用这个")} title={t("默认窗口")} tooltip={t("供应商池里没写窗口的模型用这个；按模型的窗口在供应商池的详情里填")}>
-          <input
-            aria-label={t("默认窗口")}
-            className="gw-inline-input"
-            onBlur={() => {
-              const parsed = parseContextWindow(windowText);
-              if (windowText !== draft.contextWindow && (parsed === null || (Number.isFinite(parsed) && parsed >= 1000))) onSave({ ...draft, contextWindow: windowText });
-            }}
-            onChange={(event) => setWindowText(event.currentTarget.value)}
-            placeholder={t("例如 200k")}
-            value={windowText}
-          />
+          <div className="gw-context-window-field">
+            <input
+              aria-describedby={windowInvalid ? windowErrorId : undefined}
+              aria-invalid={windowInvalid || undefined}
+              aria-label={t("默认窗口")}
+              className="gw-inline-input"
+              disabled={busy !== null}
+              onBlur={() => {
+                setWindowTouched(true);
+                if (windowText !== draft.contextWindow && validWindow) {
+                  void onSave({ ...draft, contextWindow: windowText }).then((saved) => {
+                    if (!saved) setWindowText((current) => current === windowText ? draft.contextWindow : current);
+                  });
+                }
+              }}
+              onChange={(event) => setWindowText(event.currentTarget.value)}
+              onKeyDown={(event) => { if (event.key === "Enter" && !event.nativeEvent.isComposing) event.currentTarget.blur(); }}
+              placeholder={t("例如 200k")}
+              value={windowText}
+            />
+            {windowInvalid ? <small id={windowErrorId} role="alert">{t("上下文窗口格式不对，例如 200000、200k 或 1M")}</small> : null}
+          </div>
         </SetLine>
         {isClaude ? (
           <SetLine hint={t("非 claude-* 模型名时也照常发送 effort")} title={t("强制启用推理强度")} tooltip={t("非 claude-* 模型名时 Claude Code 默认不发 effort，打开后照常发送。")}>
@@ -692,13 +728,17 @@ function AgentDetail({
         </SetLine>
       </details>
       <div className="gw-detail-row gw-detail-foot">
-        <span className="gw-detail-label gw-detail-file" title={agent.configPath ?? ""}>
-          {t("改动了")} <code>{agent.configPath ?? ""}</code>
-        </span>
+        {agent.configPath ? (
+          <span className="gw-detail-label gw-detail-file" title={agent.configPath}>
+            {t("改动了")} <code>{agent.configPath}</code>
+          </span>
+        ) : <span />}
         <div className="gw-detail-value">
-          <button aria-label={t("在文件管理器中显示配置文件")} className="gw-icon-button" onClick={() => void run(`reveal:${agent.agent}`, "reveal_gateway_agent_config", { agent: agent.agent }, t("查看"), true)} title={t("在文件管理器中显示配置文件")} type="button">
-            <FolderOpen aria-hidden="true" className="h-4 w-4" />
-          </button>
+          {agent.configPath ? (
+            <button aria-label={t("在文件管理器中显示配置文件")} className="gw-icon-button" disabled={busy !== null} onClick={() => void run(`reveal:${agent.agent}`, "reveal_gateway_agent_config", { agent: agent.agent }, t("查看"), true)} title={t("在文件管理器中显示配置文件")} type="button">
+              <FolderOpen aria-hidden="true" className="h-4 w-4" />
+            </button>
+          ) : null}
           <button className="gw-danger-link" disabled={busy !== null} onClick={onDisconnect} type="button">{t("断开并还原")}</button>
         </div>
       </div>
@@ -808,15 +848,20 @@ export function Floating({
 }) {
   const panelRef = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState<CSSProperties | null>(null);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
   useLayoutEffect(() => {
-    if (!open) return;
+    if (!open) {
+      setPosition(null);
+      return;
+    }
     const panel = panelRef.current;
     const list = panel?.querySelector<HTMLElement>("[data-gw-popover-scroll]");
     const place = () => {
       const rect = anchorRef.current?.getBoundingClientRect();
       if (!rect) return;
       const viewport = { width: window.innerWidth, height: window.innerHeight };
-      if (!isTriggerVisible(rect, viewport, 4)) { onClose(); return; }
+      if (!isTriggerVisible(rect, viewport, 4)) { onCloseRef.current(); return; }
       // 外壳的 scrollHeight 不含边框，也不含内层列表滚出可见区域的内容。
       const hiddenListHeight = list ? list.scrollHeight - list.clientHeight : 0;
       const contentHeight = panel ? panel.scrollHeight + panel.offsetHeight - panel.clientHeight + hiddenListHeight : 520;
@@ -831,6 +876,8 @@ export function Floating({
       if (!panel?.contains(event.target as Node)) place();
     };
     place();
+    const focusTarget = panel?.querySelector<HTMLElement>("[data-gw-popover-autofocus]");
+    const focusFrame = focusTarget ? window.requestAnimationFrame(() => focusTarget.focus({ preventScroll: true })) : undefined;
     // 展开供应商或筛选时，列表的内容会变化，即使它的可见高度没变。
     const observer = panel && new MutationObserver(place);
     if (panel) observer?.observe(panel, { childList: true, characterData: true, subtree: true });
@@ -838,6 +885,7 @@ export function Floating({
     window.addEventListener("scroll", followScroll, true);
     return () => {
       observer?.disconnect();
+      if (focusFrame !== undefined) window.cancelAnimationFrame(focusFrame);
       window.removeEventListener("resize", place);
       window.removeEventListener("scroll", followScroll, true);
     };
@@ -989,11 +1037,11 @@ export function ModelList({
 
   // 排版：搜索 + 一排横向筛选在上；列表每个模型两行（模型名 / 供应商）；「默认」「断开」这类操作在底部。
   return (
-    <div className="gw-mp">
+    <div aria-label={t("选择模型")} className="gw-mp" role="dialog">
       <div className="gw-mp-top">
         <label className="gw-mp-search">
           <Search className="h-4 w-4" />
-          <input autoFocus onChange={(event) => setQuery(event.currentTarget.value)} placeholder={t("筛选，或输入任意模型 ID…")} value={query} />
+          <input aria-label={t("筛选，或输入任意模型 ID…")} data-gw-popover-autofocus onChange={(event) => setQuery(event.currentTarget.value)} placeholder={t("筛选，或输入任意模型 ID…")} value={query} />
           <em>{customCount ? tf("{0} 个自定义候选", [customCount]) : tf("{0} 个", [total])}</em>
         </label>
         <div className="gw-mp-filters" onFocus={(event) => event.target.scrollIntoView({ block: "nearest", inline: "nearest" })}>
@@ -1051,39 +1099,37 @@ export function ModelList({
               ));
               return (
                 <div
-                  aria-selected={selected}
-                  aria-disabled={ambiguous || undefined}
                   className="gw-mp-item"
+                  data-ambiguous={ambiguous || undefined}
                   data-direct={item.direct ? true : undefined}
                   data-selected={selected}
                   key={item.model}
-                  onClick={() => { if (!ambiguous) choose(item); }}
-                  onKeyDown={(event) => { if (event.key === "Enter" && event.target === event.currentTarget && !ambiguous) choose(item); }}
-                  role="option"
-                  tabIndex={0}
                 >
-                  <span aria-hidden="true" className="gw-mp-model-icon">
-                    {section.key === "group" || section.key === "custom" ? <Waypoints /> : section.key === "auto" || section.key === "current" ? <Shuffle /> : <Avatar baseUrl={provider?.baseUrl} name={provider?.name ?? item.direct ?? section.title} size="sm" />}
-                  </span>
-                  <span className="gw-mp-text">
-                    <strong title={item.model.startsWith(GROUP_MODEL_PREFIX) ? item.sub : item.model}>{item.label}</strong>
-                    {ambiguous ? <small>{t("模型 ID 与已有模型名冲突，无法固定到此供应商")}</small> : item.custom ? <small>{item.sub} · {t("自定义模型 ID")}</small> : item.sub && item.sub !== section.title ? <small>{section.key === "current" ? t(item.sub) : item.sub}</small> : null}
-                  </span>
-                  {item.direct ? (
-                    <em className="gw-mp-direct" title={tf("{0} 用自己的登录或 Key 直接向 {1} 要这个模型，不经 RoseCode。选它会断开 RoseCode 并还原接入前的设置。", [ownAgent ?? "Agent", item.direct])}>
-                      {t("直连，不经 RoseCode")}
-                    </em>
-                  ) : null}
+                  <button aria-current={selected || undefined} className="gw-mp-pick" disabled={ambiguous} onClick={() => { if (!ambiguous) choose(item); }} type="button">
+                    <span aria-hidden="true" className="gw-mp-model-icon">
+                      {section.key === "group" || section.key === "custom" ? <Waypoints /> : section.key === "auto" || section.key === "current" ? <Shuffle /> : <Avatar baseUrl={provider?.baseUrl} name={provider?.name ?? item.direct ?? section.title} size="sm" />}
+                    </span>
+                    <span className="gw-mp-text">
+                      <strong title={item.model.startsWith(GROUP_MODEL_PREFIX) ? item.sub : item.model}>{item.label}</strong>
+                      {ambiguous ? <small>{t("模型 ID 与已有模型名冲突，无法固定到此供应商")}</small> : item.custom ? <small>{item.sub} · {t("自定义模型 ID")}</small> : item.sub && item.sub !== section.title ? <small>{section.key === "current" ? t(item.sub) : item.sub}</small> : null}
+                    </span>
+                    {item.direct ? (
+                      <em className="gw-mp-direct" title={tf("{0} 用自己的登录或 Key 直接向 {1} 要这个模型，不经 RoseCode。选它会断开 RoseCode 并还原接入前的设置。", [ownAgent ?? "Agent", item.direct])}>
+                        {t("直连，不经 RoseCode")}
+                      </em>
+                    ) : null}
+                  </button>
                   {item.direct ? null : <button
-                    aria-label={favorite ? t("取消收藏") : t("收藏")}
+                    aria-label={tf(favorite ? "取消收藏 {0}" : "收藏 {0}", [item.label])}
+                    aria-pressed={favorite}
                     className="gw-mp-star"
                     data-on={favorite}
-                    onClick={(event) => { event.stopPropagation(); toggleFavorite(item.model); }}
+                    onClick={() => toggleFavorite(item.model)}
                     type="button"
                   >
                     <Star className="h-3.5 w-3.5" />
                   </button>}
-                  {selected ? <Check className="gw-mp-check h-4 w-4" /> : null}
+                  {selected ? <Check aria-hidden="true" className="gw-mp-check h-4 w-4" /> : null}
                 </div>
               );
             }) : null}
@@ -1196,6 +1242,7 @@ function ModelPicker({
   payload,
   draft,
   connected,
+  disabled = false,
   open,
   onOpenChange,
   onPick,
@@ -1206,6 +1253,7 @@ function ModelPicker({
   payload: GatewayPayload | null;
   draft: BindingDraft;
   connected: boolean;
+  disabled?: boolean;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onPick: (item: PickerItem) => void;
@@ -1262,7 +1310,7 @@ function ModelPicker({
   );
   return (
     <div className="gw-picker">
-      <button aria-expanded={open} aria-haspopup="listbox" className="gw-picker-button" onClick={() => onOpenChange(!open)} ref={buttonRef} title={inactiveHint} type="button">
+      <button aria-expanded={open && !disabled} aria-haspopup="dialog" className="gw-picker-button" disabled={disabled} onClick={() => onOpenChange(!open)} ref={buttonRef} title={inactiveHint} type="button">
         <span className="gw-picker-label">{t("默认模型")}</span>
         {showDefault || own ? <AgentIcon agent={agent.agent} className="gw-picker-agent" /> : <ModelViewGlyph view={display} />}
         <span title={own ? tf("{0} 自带的模型，直连 {1}，不经 RoseCode", [agent.name, agent.ownModels?.vendor ?? ""]) : undefined}>
@@ -1272,7 +1320,7 @@ function ModelPicker({
         {inactiveHint ? <AlertTriangle aria-label={inactiveHint} className="h-3.5 w-3.5" role="img" /> : null}
         <ChevronDown className="h-3.5 w-3.5" />
       </button>
-      <Floating anchorRef={buttonRef} className="gw-model-popover" minHeight={180} onClose={() => onOpenChange(false)} open={open} width={560}>
+      <Floating anchorRef={buttonRef} className="gw-model-popover" minHeight={180} onClose={() => onOpenChange(false)} open={open && !disabled} width={560}>
         <ModelList
           exclude={draft.poolExclude}
           head={head}
@@ -1302,6 +1350,7 @@ export function ownCurrent(agent: GatewayAgentView): string | null {
 function TierPicker({
   label,
   value,
+  disabled,
   payload,
   exclude,
   onPick,
@@ -1310,6 +1359,7 @@ function TierPicker({
 }: {
   label: string;
   value: string;
+  disabled: boolean;
   payload: GatewayPayload | null;
   exclude: string[];
   onPick: (model: string) => void;
@@ -1320,6 +1370,9 @@ function TierPicker({
   const empty = emptyLabel ?? t("同默认模型");
   const [open, setOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (disabled) setOpen(false);
+  }, [disabled]);
   const display = value ? modelDisplay(payload, value, exclude) : null;
   const inactive = disabledGroup(payload, value);
   const head = (
@@ -1331,14 +1384,14 @@ function TierPicker({
   );
   return (
     <>
-      <button aria-expanded={open} className="gw-tier-button" onClick={() => setOpen(!open)} ref={buttonRef} title={inactive ? tf(inactiveBlocksRequest ? "模型组「{0}」已停用，请选择其他模型" : "模型组「{0}」已停用，当前使用默认模型", [inactive.name]) : undefined} type="button">
+      <button aria-expanded={open && !disabled} aria-haspopup="dialog" className="gw-tier-button" disabled={disabled} onClick={() => setOpen(!open)} ref={buttonRef} title={inactive ? tf(inactiveBlocksRequest ? "模型组「{0}」已停用，请选择其他模型" : "模型组「{0}」已停用，当前使用默认模型", [inactive.name]) : undefined} type="button">
         {label ? <em>{label}</em> : null}
         {display ? <ModelViewGlyph view={display} /> : null}
         <span>{display ? display.title : empty}{inactive ? ` · ${t("已停用")}` : ""}</span>
         {display ? <AutoTag view={display} /> : null}
         <ChevronDown className="h-3.5 w-3.5" />
       </button>
-      <Floating anchorRef={buttonRef} className="gw-model-popover" minHeight={180} onClose={() => setOpen(false)} open={open} width={520}>
+      <Floating anchorRef={buttonRef} className="gw-model-popover" minHeight={180} onClose={() => setOpen(false)} open={open && !disabled} width={520}>
         <ModelList
           exclude={exclude}
           head={head}

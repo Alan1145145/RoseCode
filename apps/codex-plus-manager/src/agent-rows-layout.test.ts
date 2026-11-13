@@ -22,7 +22,8 @@ test("Agent 默认模型标签属于选择按钮，配置路径使用当前 Agen
   assert.match(picker, /<button[^>]*className="gw-picker-button"[^>]*>[\s\S]*?<span className="gw-picker-label">\{t\("默认模型"\)\}<\/span>/);
   const revealButton = source.split("\n").find((line) => line.includes('aria-label={t("在文件管理器中显示配置文件")}')) ?? "";
   assert.match(revealButton, /"reveal_gateway_agent_config", \{ agent: agent\.agent \}/);
-  assert.match(source, /className="gw-detail-label gw-detail-file" title=\{agent\.configPath \?\? ""\}/);
+  assert.match(source, /\{agent\.configPath \? \(\s*<span className="gw-detail-label gw-detail-file" title=\{agent\.configPath\}/);
+  assert.match(source, /\{agent\.configPath \? \(\s*<button aria-label=\{t\("在文件管理器中显示配置文件"\)\}/);
   assert.match(readFileSync(new URL("./i18n-en.ts", import.meta.url), "utf8"), /"在文件管理器中显示配置文件": "Show configuration file in file manager"/);
 });
 
@@ -47,7 +48,7 @@ test("Codex 行有启动 / 停止键：只有主窗口传了 codexRun 才显示�
   assert.match(source, /disabled=\{codexRun\.busy \|\| \(!codexRun\.running && Boolean\(codexRun\.unavailableReason\)\)\}/);
   assert.match(source, /title=\{codexRun\.busy \? t\("处理中…"\) : codexRun\.running \? t\("停止 Codex"\) : codexRun\.unavailableReason \?\? t\("启动 Codex"\)\}/);
   assert.match(source, /\(codexRun\.running \? codexRun\.onStop : codexRun\.onStart\)\(\);/);
-  assert.match(source, /<Switch pending=\{busy !== null\} label=\{tf\("\{0\} 接入 RoseCode"/);
+  assert.match(source, /<Switch optimistic=\{false\} pending=\{busy !== null\} label=\{tf\("\{0\} 接入 RoseCode"/);
   // 启停与默认模型在下方动作栏，接入开关独立放在名称旁。
   const controls = source.slice(source.indexOf('className="cx-row-controls rose-agent-connection-controls"'), source.indexOf("{expanded && connected"));
   assert.match(controls, /<ModelPicker/);

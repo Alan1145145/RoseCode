@@ -947,7 +947,7 @@ function PanelAgentRow({
     <div className="tp-agent">
       <AgentIcon agent={agent.agent} className="gw-agent-icon" />
       <strong>{agent.name}</strong>
-      <button aria-expanded={open} className="gw-picker-button tp-agent-picker" onClick={() => setOpen(!open)} ref={buttonRef} title={inactiveHint} type="button">
+      <button aria-expanded={open} aria-haspopup="dialog" className="gw-picker-button tp-agent-picker" onClick={() => setOpen(!open)} ref={buttonRef} title={inactiveHint} type="button">
         {!agent.enabled ? <AgentIcon agent={agent.agent} className="gw-picker-agent" /> : <ModelViewGlyph view={display} />}
         <span>{agent.enabled ? display.title || t("未设置") : own ?? t("默认")}</span>
         {agent.enabled ? <AutoTag view={display} /> : null}

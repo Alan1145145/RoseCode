@@ -157,12 +157,12 @@ export function Avatar({ name, baseUrl = "", size = "md", plain = false }: { nam
  * `pending`：页面上有保存在进行（#2973）。此时只拦点击、不变灰，避免整页开关一起闪；
  * 被点的那个先乐观显示新状态，保存结束后以最新数据为准（失败即回滚）。
  */
-export function Switch({ on, disabled, pending, label, onToggle }: { on: boolean; disabled?: boolean; pending?: boolean; label: string; onToggle: () => void }) {
-  const [optimistic, setOptimistic] = useState<boolean | null>(null);
+export function Switch({ on, disabled, pending, label, onToggle, optimistic = true }: { on: boolean; disabled?: boolean; pending?: boolean; label: string; onToggle: () => void; optimistic?: boolean }) {
+  const [preview, setPreview] = useState<boolean | null>(null);
   useEffect(() => {
-    if (!pending) setOptimistic(null);
+    if (!pending) setPreview(null);
   }, [pending, on]);
-  const shown = optimistic ?? on;
+  const shown = optimistic ? preview ?? on : on;
   return (
     <button
       aria-checked={shown}
@@ -173,7 +173,7 @@ export function Switch({ on, disabled, pending, label, onToggle }: { on: boolean
       disabled={disabled}
       onClick={() => {
         if (pending) return;
-        setOptimistic(!on);
+        if (optimistic) setPreview(!on);
         onToggle();
       }}
       role="switch"

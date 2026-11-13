@@ -746,6 +746,8 @@ export const EN_PLAIN: Record<string, string> = {
   "还没有收藏的模型，点模型右侧的星标收藏。": "No favorites yet. Click the star next to a model.",
   "经 RoseCode": "via RoseCode",
   "取消收藏": "Remove from favorites",
+  "取消收藏 {0}": "Remove {0} from favorites",
+  "收藏 {0}": "Add {0} to favorites",
   "不经 RoseCode": "not via RoseCode",
   "断开 RoseCode（还原配置）": "Disconnect RoseCode (restore config)",
   "同默认模型": "Same as default",

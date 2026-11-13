@@ -73,6 +73,7 @@ function picker(
     avatarOf: () => "",
     loadFavorites: () => [],
     isFavoriteModel: () => false,
+    toggleFavoriteModel: (_models: string[], model: string) => [model],
     servingProviders: (_payload: unknown, model: string) => options.conflicts?.includes(model) ? [model] : [],
     persistFavorites: () => {},
     t: (value: string) => value,
@@ -178,16 +179,20 @@ test("筛选按钮向辅助技术暴露当前选择", () => {
   assert.equal(provider.props["aria-pressed"], true);
 });
 
-test("收藏按钮的 Enter 不会触发模型选择，模型行的 Enter 仍可选择", () => {
+test("模型选择与收藏是各自独立的原生按钮", () => {
   const picked: string[] = [];
   const view = picker((item) => picked.push(item.model));
   heading(view.render(), "provider:a").props.onClick();
-  const modelRow = elements(section(view.render(), "provider:a")).find((element) => element.props.role === "option");
-  assert.ok(modelRow);
-  const row = {};
-  modelRow.props.onKeyDown({ key: "Enter", currentTarget: row, target: {} });
+  const row = elements(section(view.render(), "provider:a")).find((element) => element.props.className === "gw-mp-item");
+  assert.ok(row);
+  const select = elements(row).find((element) => element.props.className === "gw-mp-pick");
+  const star = elements(row).find((element) => element.props.className === "gw-mp-star");
+  assert.equal(select?.type, "button");
+  assert.equal(star?.type, "button");
+  assert.equal(elements(select).includes(star!), false);
+  star?.props.onClick();
   assert.deepEqual(picked, []);
-  modelRow.props.onKeyDown({ key: "Enter", currentTarget: row, target: row });
+  select?.props.onClick();
   assert.deepEqual(picked, ["alpha"]);
 });
 
@@ -212,20 +217,19 @@ test("固定供应商时拒绝保留前缀、通配符和同名冲突，其他�
     ],
   });
   heading(view.render(), "provider:a").props.onClick();
-  const rows = elements(view.render()).filter((element) => element.props.role === "option");
+  const rows = elements(view.render()).filter((element) => element.props.className === "gw-mp-pick");
   const findRow = (label: string) => rows.find((row) => elements(row).some((element) => element.type === "strong" && element.props.children === label));
   for (const label of ["Reserved", "Wildcard", "Native", "Custom"]) {
     const row = findRow(label);
     assert.ok(row, label);
-    assert.equal(row.props["aria-disabled"], true, label);
+    assert.equal(row.props.disabled, true, label);
     row.props.onClick();
-    row.props.onKeyDown({ key: "Enter", currentTarget: row, target: row });
   }
   assert.deepEqual(picked, []);
   for (const label of ["Valid", "Auto", "Group", "Own"]) {
     const row = findRow(label);
     assert.ok(row, label);
-    assert.equal(row.props["aria-disabled"], undefined, label);
+    assert.equal(row.props.disabled, false, label);
     row.props.onClick();
   }
   assert.deepEqual(picked, ["valid", "shared", "group/fast", "own"]);

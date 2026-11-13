@@ -16,6 +16,8 @@ function harness(contentHeight: number, nestedList = false) {
   let previousDeps: unknown[] | undefined;
   let tree: any;
   const listeners = new Map<string, (event?: { target: unknown }) => void>();
+  let focusCount = 0;
+  let frame: (() => void) | undefined;
   let onContentChange: (() => void) | undefined;
   const rect = { left: 850, right: 930, width: 80, top: 630, bottom: 664, height: 34 };
   const chromeHeight = nestedList ? 120 : 0;
@@ -30,7 +32,9 @@ function harness(contentHeight: number, nestedList = false) {
     get offsetHeight() { return clientHeight() + 2; },
     get scrollHeight() { return clientHeight(); },
     children: [nestedList ? content : list],
-    querySelector: () => list,
+    querySelector: (selector: string) => selector === "[data-gw-popover-scroll]" ? list : {
+      focus: () => { if (position) focusCount++; },
+    },
     contains: (target: unknown) => target === list,
   };
   const panelRef = { current: null as typeof panel | null };
@@ -45,7 +49,13 @@ function harness(contentHeight: number, nestedList = false) {
     },
     useEffect: () => {}, useEscapeLayer: () => {},
     createPortal: (child: unknown) => child,
-    window: { innerWidth: 1000, innerHeight: 720, addEventListener: (name: string, fn: (event?: { target: unknown }) => void) => listeners.set(name, fn), removeEventListener: () => {} },
+    window: {
+      innerWidth: 1000, innerHeight: 720,
+      addEventListener: (name: string, fn: (event?: { target: unknown }) => void) => listeners.set(name, fn),
+      removeEventListener: () => {},
+      requestAnimationFrame: (callback: () => void) => { frame = callback; return 1; },
+      cancelAnimationFrame: () => { frame = undefined; },
+    },
     MutationObserver: class {
       constructor(callback: () => void) { onContentChange = callback; }
       observe() {}
@@ -63,8 +73,21 @@ function harness(contentHeight: number, nestedList = false) {
   return {
     render, style: () => position, rect, listeners, context, list,
     changeContent: (height: number) => { contentHeight = height; onContentChange?.(); },
+    focusCount: () => focusCount,
+    paint: () => { const callback = frame; frame = undefined; callback?.(); },
   };
 }
+
+test("搜索框在浮层定位可见后获得焦点，滚动时不抢焦点", () => {
+  const h = harness(320, true);
+  h.render();
+  assert.equal(h.focusCount(), 0);
+  h.paint();
+  assert.equal(h.focusCount(), 1);
+  h.listeners.get("scroll")!({ target: h.list });
+  h.paint();
+  assert.equal(h.focusCount(), 1);
+});
 
 test("供应商浮层初次挂载即测量完整内容，靠下时向上展开", () => {
   const h = harness(260);

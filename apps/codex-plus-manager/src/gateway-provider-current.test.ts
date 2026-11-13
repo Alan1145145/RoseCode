@@ -62,8 +62,8 @@ test("自带同名模型不遮住按供应商池路由的当前选择", () => {
   assert.ok(elements(tree).find((element) => element.props?.["data-section"] === "own"));
   const current = elements(tree).find((element) => element.props?.["data-section"] === "current");
   assert.ok(current);
-  const selected = elements(current).find((element) => element.props?.role === "option");
-  assert.equal(selected?.props["aria-selected"], true);
+  const selected = elements(current).find((element) => element.props?.className === "gw-mp-pick");
+  assert.equal(selected?.props["aria-current"], true);
   assert.equal(elements(selected).find((element) => element.type === "strong")?.props.title, "example-model");
 });
 
@@ -114,7 +114,7 @@ test("默认模型带窗口后缀时仍勾选对应供应商，而非同名供�
   const selected = (model: string, upstreamModel?: string, providerRemoved = false, data = payload, ownModels?: OwnModels) =>
     elements(render(model, upstreamModel, providerRemoved, data, ownModels))
       .filter((element) => element.type === "section")
-      .flatMap((section) => elements(section).filter((element) => element.props?.role === "option" && element.props["aria-selected"])
+      .flatMap((section) => elements(section).filter((element) => element.props?.className === "gw-mp-pick" && element.props["aria-current"])
         .map(() => section.props["data-section"]));
 
   assert.deepEqual(selected("a/example-model[1M]", "example-model"), ["provider:a"]);

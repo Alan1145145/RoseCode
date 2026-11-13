@@ -760,7 +760,7 @@
 /* 下拉、模型选择、输入框统一 240 宽，右对齐成一列。 */
 :root .shell .gw-agent .gw-set-line-control > .app-select,
 :root .shell .gw-agent .gw-set-line-control > .gw-tier-button,
-:root .shell .gw-agent .gw-set-line-control > .gw-inline-input {
+:root .shell .gw-agent .gw-context-window-field > .gw-inline-input {
   box-sizing: border-box;
   width: 240px;
   height: 32px;
