@@ -73,6 +73,10 @@ node scripts/release.mjs X.Y.Z
 
 The release workflow builds assets and creates `latest.json` using the current GitHub repository. Asset filenames retain the compatible `CodexPlusPlus-*` identifiers; release URLs and the update source belong to RoseCode. Publishing the source repository alone does not create a release tag or installer.
 
+Windows setup and portable ZIP packages are required. Linux DEB is included when its build succeeds. macOS publishing is opt-in: configure this repository's own Apple Developer ID signing and notarization secrets, then set the repository variable `RELEASE_MACOS_ENABLED` to `true`. The workflow does not reuse upstream certificates or publish unsigned macOS packages.
+
+To finalize a draft whose installers are already uploaded, manually run `Release assets` with `platform=publish-existing` and `publish=true`. It validates the assets and regenerates checksums and update metadata without recompiling.
+
 ## Copyright and attribution
 
 - Upstream: [CodexPlusPlus](https://github.com/BigPizzaV3/CodexPlusPlus).

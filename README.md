@@ -82,6 +82,10 @@ node scripts/release.mjs X.Y.Z
 
 脚本会统一版本号、提交、打 `vX.Y.Z` 标签并推送到 `origin`。本仓库的 `Release assets` 工作流使用 `github.repository` 构建附件并生成 `latest.json`，附件齐备后发布。安装包文件名沿用兼容标识 `CodexPlusPlus-*`，发布地址和更新来源属于 RoseCode。
 
+默认发布 Windows 安装版与便携版，Linux DEB 构建成功时一并提供。macOS 需维护者配置本仓库自己的 Apple Developer ID 签名与公证凭据，并将仓库变量 `RELEASE_MACOS_ENABLED` 设为 `true` 后才启用；不会借用上游证书或发布未签名的 macOS 包。
+
+已有附件的草稿可以通过 `Release assets` 手动选择 `platform=publish-existing`、`publish=true` 重新校验附件、生成校验和与更新元数据后公开，无需重复编译。
+
 首次创建源码仓库不会自动打版本标签或生成安装包。发布状态与各平台支持以本仓库 Releases 和 Actions 的实际结果为准。
 
 ## 项目结构

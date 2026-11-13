@@ -26,6 +26,7 @@ on:
           - windows
           - macos
           - linux
+          - publish-existing
       publish:
         description: "Release 还是草稿时，附件与更新元数据齐备后公开发布"
         default: false
@@ -208,7 +209,8 @@ jobs:
   # 现在各占一台 runner 并行编，产物交给 macos-dmg 合并、签名、公证。
   macos-build:
     needs: prepare
-    if: github.event_name == 'push' || inputs.platform == 'all' || inputs.platform == 'macos'
+    # 新仓库必须先配置自己的 Apple 签名/公证凭据，再显式启用 macOS 发布。
+    if: vars.RELEASE_MACOS_ENABLED == 'true' && (github.event_name == 'push' || inputs.platform == 'all' || inputs.platform == 'macos')
     name: macOS build (${{ matrix.target }})
     runs-on: macos-15
     strategy:
@@ -264,7 +266,8 @@ jobs:
 
   macos-dmg:
     needs: [prepare, macos-build]
-    if: github.event_name == 'push' || inputs.platform == 'all' || inputs.platform == 'macos'
+    # 新仓库必须先配置自己的 Apple 签名/公证凭据，再显式启用 macOS 发布。
+    if: vars.RELEASE_MACOS_ENABLED == 'true' && (github.event_name == 'push' || inputs.platform == 'all' || inputs.platform == 'macos')
     # 单个通用包（universal）同时支持 Intel 与 Apple Silicon，
     # 用户不必再自己判断架构，Release 也只多一个而不是两个产物。
     name: macOS DMG (universal)
@@ -550,6 +553,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
           TAG: ${{ env.RELEASE_TAG }}
+          INCLUDE_MACOS: ${{ vars.RELEASE_MACOS_ENABLED == 'true' }}
         shell: bash
         run: |
           set -euo pipefail
@@ -562,9 +566,11 @@ jobs:
           const version = tag.replace(/^v/i, "");
           const required = [
             "CodexPlusPlus-" + version + "-windows-x64-setup.exe",
-            "CodexPlusPlus-" + version + "-windows-x64.zip",
-            "CodexPlusPlus-" + version + "-macos-universal.dmg"
+            "CodexPlusPlus-" + version + "-windows-x64.zip"
           ];
+          if (process.env.INCLUDE_MACOS === "true") {
+            required.push("CodexPlusPlus-" + version + "-macos-universal.dmg");
+          }
           for (const name of required) {
             if (!(release.assets || []).some((asset) => asset.name === name && asset.size > 0)) {
               throw new Error("发布附件缺失或为空：" + name);
@@ -595,8 +601,9 @@ jobs:
         run: gh release upload "$TAG" latest.json --clobber --repo "$REPO"
 
       - name: Publish Release
-        # 推 tag 的发版自动发布；补跑只在勾了 publish 时发布。两个平台都得在这一轮成功。
-        if: needs.prepare.outputs.is_draft == 'true' && (github.event_name == 'push' || inputs.publish) && needs.windows-installer.result == 'success' && needs.macos-dmg.result == 'success'
+        # 上一步已验证附件齐备；允许单平台补跑或 publish-existing 收尾，不重复编译已有安装包。
+        # 未启用 macOS 时只要求 Windows；启用后仍必须有非空的已签名 macOS DMG。
+        if: needs.prepare.outputs.is_draft == 'true' && (github.event_name == 'push' || inputs.publish)
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG: ${{ env.RELEASE_TAG }}
