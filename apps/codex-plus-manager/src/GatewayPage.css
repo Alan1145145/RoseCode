@@ -2260,6 +2260,7 @@ span.gw-avatar[data-size] {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+  overscroll-behavior-y: contain;
   padding: 4px 0 8px;
 }
 

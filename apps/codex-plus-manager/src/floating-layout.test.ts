@@ -10,16 +10,28 @@ const component = file.statements.find((node): node is ts.FunctionDeclaration =>
 assert.ok(component);
 const source = ts.transpileModule(component.getText(file).replace(/^export /, ""), { compilerOptions: { jsx: ts.JsxEmit.React, target: ts.ScriptTarget.ES2022 } }).outputText;
 
-function harness(contentHeight: number) {
+function harness(contentHeight: number, nestedList = false) {
   let position: any = null;
   let effect: (() => void) | undefined;
   let previousDeps: unknown[] | undefined;
   let tree: any;
-  const listeners = new Map<string, () => void>();
+  const listeners = new Map<string, (event?: { target: unknown }) => void>();
+  let onContentChange: (() => void) | undefined;
   const rect = { left: 850, right: 930, width: 80, top: 630, bottom: 664, height: 34 };
+  const chromeHeight = nestedList ? 120 : 0;
+  const clientHeight = () => Math.min(contentHeight + chromeHeight, (position?.maxHeight ?? 520) - 2);
+  const list = {
+    get clientHeight() { return Math.max(0, clientHeight() - chromeHeight); },
+    get scrollHeight() { return contentHeight; },
+  };
+  const content = { get scrollHeight() { return clientHeight(); } };
   const panel = {
-    get scrollHeight() { return Math.min(contentHeight, position?.maxHeight ?? 520); },
-    children: [{ scrollHeight: contentHeight }],
+    get clientHeight() { return clientHeight(); },
+    get offsetHeight() { return clientHeight() + 2; },
+    get scrollHeight() { return clientHeight(); },
+    children: [nestedList ? content : list],
+    querySelector: () => list,
+    contains: (target: unknown) => target === list,
   };
   const panelRef = { current: null as typeof panel | null };
   const anchorRef = { current: { getBoundingClientRect: () => rect } };
@@ -33,7 +45,12 @@ function harness(contentHeight: number) {
     },
     useEffect: () => {}, useEscapeLayer: () => {},
     createPortal: (child: unknown) => child,
-    window: { innerWidth: 1000, innerHeight: 720, addEventListener: (name: string, fn: () => void) => listeners.set(name, fn), removeEventListener: () => {} },
+    window: { innerWidth: 1000, innerHeight: 720, addEventListener: (name: string, fn: (event?: { target: unknown }) => void) => listeners.set(name, fn), removeEventListener: () => {} },
+    MutationObserver: class {
+      constructor(callback: () => void) { onContentChange = callback; }
+      observe() {}
+      disconnect() {}
+    },
     document: { body: {} }, isTriggerVisible, resolvePopoverLayout,
   });
   vm.runInContext(`${source}\nglobalThis.render = Floating;`, context);
@@ -43,7 +60,10 @@ function harness(contentHeight: number) {
     if (effect) { const run = effect; effect = undefined; run(); }
     return tree;
   };
-  return { render, style: () => position, rect, listeners, context };
+  return {
+    render, style: () => position, rect, listeners, context, list,
+    changeContent: (height: number) => { contentHeight = height; onContentChange?.(); },
+  };
 }
 
 test("供应商浮层初次挂载即测量完整内容，靠下时向上展开", () => {
@@ -56,17 +76,27 @@ test("供应商浮层初次挂载即测量完整内容，靠下时向上展开",
   assert.ok(style.left + style.width <= 988);
 });
 
-test("多次滚动定位读取子节点完整高度，不会沿用已压扁的外壳高度", () => {
-  const h = harness(320);
+test("展开供应商后按完整模型列表定位，连续滚动不会压缩弹层", () => {
+  const h = harness(60, true);
+  h.rect.top = 350;
+  h.rect.bottom = 384;
   h.render();
-  // 模拟上一轮曾被窗口边界压成细条；内部滚动节点仍有完整内容。
-  Object.assign(h.style(), { maxHeight: 14 });
-  for (let i = 0; i < 5; i++) {
-    h.listeners.get("scroll")!();
-    h.render();
-    assert.ok(h.style().maxHeight >= 180);
-    assert.ok(h.style().top + 320 <= h.rect.top);
+  assert.equal(h.style().top, 390, "收起的供应商列表可在下方显示");
+
+  h.changeContent(900);
+  assert.equal(h.style().top, 12, "展开后使用空间更大的一侧");
+  assert.equal(h.style().maxHeight, 332);
+  for (let i = 0; i < 20; i++) {
+    const expanded = h.style();
+    h.listeners.get("scroll")!({ target: h.list });
+    assert.equal(h.style(), expanded, "列表内部滚动不应重新定位");
+    h.listeners.get("scroll")!({ target: {} });
+    assert.equal(h.style().maxHeight, 332, "外部滚动也不能用已裁短的高度");
   }
+
+  h.changeContent(60);
+  assert.equal(h.style().top, 390, "搜索结果减少后可回到下方");
+  assert.equal(h.style().maxHeight, 182, "高度包含上下边框");
 });
 
 test("小菜单贴近下沿时也保留可用区域，不变成空白细条", () => {

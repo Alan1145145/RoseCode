@@ -574,7 +574,7 @@ function AgentDetail({
           <ChevronDown className="h-3.5 w-3.5" />
         </button>
         <Floating anchorRef={selectRef} minHeight={180} onClose={() => setSelecting(false)} open={selecting} width={300}>
-          <div className="gw-select-list">
+          <div className="gw-select-list" data-gw-popover-scroll>
             <div className="gw-popover-heading">{t("给这个 Agent 用的供应商")}</div>
             {providers.map((entry) => {
               const on = !draft.poolExclude.includes(entry.id);
@@ -810,14 +810,16 @@ export function Floating({
   const [position, setPosition] = useState<CSSProperties | null>(null);
   useLayoutEffect(() => {
     if (!open) return;
+    const panel = panelRef.current;
+    const list = panel?.querySelector<HTMLElement>("[data-gw-popover-scroll]");
     const place = () => {
       const rect = anchorRef.current?.getBoundingClientRect();
       if (!rect) return;
       const viewport = { width: window.innerWidth, height: window.innerHeight };
       if (!isTriggerVisible(rect, viewport, 4)) { onClose(); return; }
-      const panel = panelRef.current;
-      // 外壳被 maxHeight 压缩后，滚动内容的完整高度仍在子节点上；不能用外壳高度反复定位，越算越小。
-      const contentHeight = panel ? Math.max(panel.scrollHeight, ...Array.from(panel.children, (child) => child.scrollHeight)) : 520;
+      // 外壳的 scrollHeight 不含边框，也不含内层列表滚出可见区域的内容。
+      const hiddenListHeight = list ? list.scrollHeight - list.clientHeight : 0;
+      const contentHeight = panel ? panel.scrollHeight + panel.offsetHeight - panel.clientHeight + hiddenListHeight : 520;
       const layout = resolvePopoverLayout({ trigger: rect, viewport, menuWidth: width, menuHeight: Math.max(minHeight, contentHeight), maxHeight: 520, edge: 12 });
       if (layout.maxHeight < minHeight) {
         setPosition({ left: layout.left, width: layout.width, top: 12, maxHeight: Math.max(0, Math.min(520, window.innerHeight - 24)) });
@@ -825,12 +827,19 @@ export function Floating({
       }
       setPosition({ left: layout.left, width: layout.width, top: layout.top, maxHeight: layout.maxHeight });
     };
+    const followScroll = (event: Event) => {
+      if (!panel?.contains(event.target as Node)) place();
+    };
     place();
+    // 展开供应商或筛选时，列表的内容会变化，即使它的可见高度没变。
+    const observer = panel && new MutationObserver(place);
+    if (panel) observer?.observe(panel, { childList: true, characterData: true, subtree: true });
     window.addEventListener("resize", place);
-    window.addEventListener("scroll", place, true);
+    window.addEventListener("scroll", followScroll, true);
     return () => {
+      observer?.disconnect();
       window.removeEventListener("resize", place);
-      window.removeEventListener("scroll", place, true);
+      window.removeEventListener("scroll", followScroll, true);
     };
   }, [open, anchorRef, width, minHeight]);
   useEffect(() => {
@@ -998,7 +1007,7 @@ export function ModelList({
           ))}
         </div>
       </div>
-      <div className="gw-mp-list" ref={listRef}>
+      <div className="gw-mp-list" data-gw-popover-scroll ref={listRef}>
         {displaySections.length === 0 ? (
           <div className="gw-empty">
             {favoritesOnly ? t("还没有收藏的模型，点模型右侧的星标收藏。") : payload?.pool.length ? t("没有匹配的模型") : t("供应商池是空的，先到「供应商」里添加。")}
