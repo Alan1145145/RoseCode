@@ -163,15 +163,15 @@ jobs:
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force dist/windows/app | Out-Null
-          Copy-Item target/release/codex-plus-plus.exe dist/windows/app/
-          if ((Get-ChildItem dist/windows/app -Filter *.exe).Count -ne 1) { throw "Windows 安装包必须只有一个应用程序。" }
+          Copy-Item target/release/rosecode.exe dist/windows/app/RoseCode.exe
+          if (-not (Test-Path dist/windows/app/RoseCode.exe) -or (Get-ChildItem dist/windows/app -Filter *.exe).Count -ne 1) { throw "Windows 安装包必须只有一个应用程序。" }
 
       - name: Build Windows zip asset
         shell: pwsh
         run: |
           $version = ($env:RELEASE_TAG).TrimStart("v", "V")
           New-Item -ItemType Directory -Force dist/windows | Out-Null
-          Compress-Archive -Path dist/windows/app/* -DestinationPath "dist/windows/CodexPlusPlus-$version-windows-x64.zip" -Force
+          Compress-Archive -Path dist/windows/app/* -DestinationPath "dist/windows/RoseCode-$version-windows-x64.zip" -Force
 
       - name: Build Windows installer
         shell: pwsh
@@ -192,11 +192,30 @@ jobs:
           }
           Push-Location scripts/installer/windows
           try {
-            & $makensis "/INPUTCHARSET" "UTF8" "/DVERSION=$version" CodexPlusPlus.nsi
+            & $makensis "/INPUTCHARSET" "UTF8" "/DVERSION=$version" "/DVERSION_NUMERIC=$($version.Split('-')[0])" RoseCode.nsi
             if ($LASTEXITCODE -ne 0) { throw "NSIS 打包失败，退出码 $LASTEXITCODE" }
           } finally {
             Pop-Location
           }
+
+      - name: Verify Windows installer
+        shell: pwsh
+        run: |
+          $version = ($env:RELEASE_TAG).TrimStart("v", "V")
+          $installer = Get-Item -LiteralPath "dist/windows/RoseCode-$version-windows-x64-setup.exe"
+          if ($installer.VersionInfo.ProductName -cne 'RoseCode') { throw 'Unexpected installer product name' }
+          $installRoot = Join-Path $env:RUNNER_TEMP 'RoseCode-install-check'
+          $setup = Start-Process -FilePath $installer.FullName -ArgumentList "/S /D=$installRoot" -WindowStyle Hidden -Wait -PassThru
+          if ($setup.ExitCode -ne 0) { throw "Installer exited with $($setup.ExitCode)" }
+          $app = Get-Item -LiteralPath (Join-Path $installRoot 'RoseCode.exe')
+          if ($app.VersionInfo.ProductName -cne 'RoseCode' -or $app.VersionInfo.ProductVersion -ne $version) {
+            throw 'Unexpected installed application identity or version'
+          }
+          $registration = Get-ItemProperty -LiteralPath 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\RoseCode'
+          if ($registration.DisplayName -cne 'RoseCode' -or $registration.InstallLocation -ne $installRoot) {
+            throw 'Unexpected uninstall registration'
+          }
+          if (-not (Test-Path -LiteralPath (Join-Path $installRoot 'uninstall.exe'))) { throw 'Missing uninstaller' }
 
       - name: Upload Windows installer
         # Release（含草稿）已由 prepare 建好，这里只按 tag 上传。
@@ -259,7 +278,7 @@ jobs:
         with:
           name: macos-bin-${{ matrix.target }}
           path: |
-            target/${{ matrix.target }}/release/codex-plus-plus
+            target/${{ matrix.target }}/release/rosecode
             target/${{ matrix.target }}/release/codex-plus-legacy-shim
           if-no-files-found: error
           retention-days: 1
@@ -329,7 +348,7 @@ jobs:
           echo "$APPLE_API_KEY_P8" | base64 --decode > "$KEY_PATH"
           chmod 600 "$KEY_PATH"
 
-          xcrun notarytool store-credentials "codexplusplus-notary" \
+          xcrun notarytool store-credentials "rosecode-notary" \
             --key "$KEY_PATH" \
             --key-id "$APPLE_API_KEY_ID" \
             --issuer "$APPLE_API_ISSUER_ID"
@@ -350,12 +369,12 @@ jobs:
 
       - name: Restore executable bits
         # artifact 打包会丢掉可执行位，build-universal.sh 会检查 -x。
-        run: chmod +x target/*-apple-darwin/release/codex-plus-plus target/*-apple-darwin/release/codex-plus-legacy-shim
+        run: chmod +x target/*-apple-darwin/release/rosecode target/*-apple-darwin/release/codex-plus-legacy-shim
 
       - name: Build universal macOS DMG
         env:
           MACOS_SIGNING_IDENTITY: ${{ secrets.MACOS_SIGNING_IDENTITY }}
-          MACOS_NOTARY_PROFILE: codexplusplus-notary
+          MACOS_NOTARY_PROFILE: rosecode-notary
           # 两个架构已由 macos-build 并行编好，这里只 lipo 合并、签名、公证、打 DMG。
           UNIVERSAL_SKIP_BUILD: "1"
         run: |
@@ -380,17 +399,17 @@ jobs:
           apps=(dist/macos/stage/*.app)
           test "${#apps[@]}" = "2"
           test -f "dist/macos/stage/.hidden"
-          grep -qx "Codex++ 管理工具.app" "dist/macos/stage/.hidden"
-          for app in "dist/macos/stage/Codex++.app" "dist/macos/stage/Codex++ 管理工具.app"; do
+          grep -qx "RoseCode 管理工具.app" "dist/macos/stage/.hidden"
+          for app in "dist/macos/stage/RoseCode.app" "dist/macos/stage/RoseCode 管理工具.app"; do
             test -f "$app/Contents/Info.plist"
             test -f "$app/Contents/PkgInfo"
             test -x "$app/Contents/MacOS/$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$app/Contents/Info.plist")"
             if [[ "$app" == *"管理工具.app" ]]; then
-              test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$app/Contents/Info.plist")" = "com.bigpizzav3.codexplusplus.manager"
-              test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$app/Contents/Info.plist")" = "CodexPlusPlusManager"
+              test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$app/Contents/Info.plist")" = "com.alan1145145.rosecode.manager"
+              test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$app/Contents/Info.plist")" = "RoseCodeManager"
             else
-              test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$app/Contents/Info.plist")" = "com.bigpizzav3.codexplusplus"
-              test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$app/Contents/Info.plist")" = "CodexPlusPlus"
+              test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$app/Contents/Info.plist")" = "com.alan1145145.rosecode"
+              test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$app/Contents/Info.plist")" = "RoseCode"
             fi
             test "$(/usr/libexec/PlistBuddy -c 'Print :CodexPlusUnifiedApp' "$app/Contents/Info.plist")" = "true"
             plutil -lint "$app/Contents/Info.plist" >/dev/null
@@ -502,17 +521,17 @@ jobs:
           deb_file="$(find dist/linux -maxdepth 1 -name "*.deb" -print -quit)"
           test -n "$deb_file"
           version="${RELEASE_TAG#[vV]}"
-          test "$(dpkg-deb -f "$deb_file" Package)" = "codex-plus-plus"
+          test "$(dpkg-deb -f "$deb_file" Package)" = "rosecode"
           test "$(dpkg-deb -f "$deb_file" Version)" = "$version"
-          dpkg-deb -c "$deb_file" | grep -F "./usr/bin/codex-plus-plus"
+          dpkg-deb -c "$deb_file" | grep -F "./usr/bin/rosecode"
           sudo apt-get install -y "./$deb_file"
-          test -x /usr/bin/codex-plus-plus
-          dpkg -V codex-plus-plus
-          ldd /usr/bin/codex-plus-plus | tee /tmp/codex-plus-plus-ldd.log
-          ! grep -q "not found" /tmp/codex-plus-plus-ldd.log
-          # 统一成 CodexPlusPlus-<版本>-linux-amd64.deb：SHA256SUMS 按 CodexPlusPlus-* 收录，应用内更新按 .deb + amd64 识别。
+          test -x /usr/bin/rosecode
+          dpkg -V rosecode
+          ldd /usr/bin/rosecode | tee /tmp/rosecode-ldd.log
+          ! grep -q "not found" /tmp/rosecode-ldd.log
+          # 统一成 RoseCode-<版本>-linux-amd64.deb：SHA256SUMS 按 RoseCode-* 收录，应用内更新按 .deb + amd64 识别。
           mkdir -p dist/release
-          cp "$deb_file" "dist/release/CodexPlusPlus-${version}-linux-amd64.deb"
+          cp "$deb_file" "dist/release/RoseCode-${version}-linux-amd64.deb"
 
       - name: Upload Linux DEB
         shell: bash
@@ -543,8 +562,8 @@ jobs:
         run: |
           set -euo pipefail
           # 按 Release 上现有的全部安装包重算，单平台补跑后也是完整清单。
-          gh release download "$TAG" --repo "$REPO" --pattern 'CodexPlusPlus-*' --dir assets --clobber
-          (cd assets && sha256sum CodexPlusPlus-* | sort -k2 > ../SHA256SUMS.txt)
+          gh release download "$TAG" --repo "$REPO" --pattern 'RoseCode-*' --dir assets --clobber
+          (cd assets && sha256sum RoseCode-* | sort -k2 > ../SHA256SUMS.txt)
           cat SHA256SUMS.txt
           gh release upload "$TAG" SHA256SUMS.txt --clobber --repo "$REPO"
 
@@ -565,11 +584,11 @@ jobs:
           const tag = release.tagName || process.env.TAG;
           const version = tag.replace(/^v/i, "");
           const required = [
-            "CodexPlusPlus-" + version + "-windows-x64-setup.exe",
-            "CodexPlusPlus-" + version + "-windows-x64.zip"
+            "RoseCode-" + version + "-windows-x64-setup.exe",
+            "RoseCode-" + version + "-windows-x64.zip"
           ];
           if (process.env.INCLUDE_MACOS === "true") {
-            required.push("CodexPlusPlus-" + version + "-macos-universal.dmg");
+            required.push("RoseCode-" + version + "-macos-universal.dmg");
           }
           for (const name of required) {
             if (!(release.assets || []).some((asset) => asset.name === name && asset.size > 0)) {

@@ -17,7 +17,7 @@
 //! 压缩结果，不去掉对话就无法继续。去掉 compaction 会丢掉压缩前的对话内容，调用方要在请求日志里
 //! 用 [`COMPACTION_DROPPED_REASON`] 标出来并记诊断日志，不能悄悄发生。
 //!
-//! 另一类同源的拒收（#2917）：DeepSeek / GLM 等经 Codex++ 转换回来的 reasoning 项带着明文
+//! 另一类同源的拒收（#2917）：DeepSeek / GLM 等经 RoseCode 转换回来的 reasoning 项带着明文
 //! `content`（`reasoning_text` 片段）和一个占位的 `encrypted_content`。同一对话换到 OpenAI 风格的
 //! Responses 上游后，它要求 reasoning 的 `content` 必须为空，整条请求 400：
 //! 「Invalid 'input[26].content': array too long. Expected an array with maximum length 0 …」
@@ -150,7 +150,7 @@ fn memory() -> &'static Mutex<Memory> {
 
 /// 带不透明加密内容的项返回它属于哪一批与内容；其它项（含空内容）返回 `None`。
 ///
-/// Codex++ 自己的本地压缩摘要在进入代理时已经展开成普通 user 消息（见
+/// RoseCode 自己的本地压缩摘要在进入代理时已经展开成普通 user 消息（见
 /// `protocol_proxy::expand_local_compaction_history`），到这里不会再是 compaction 项。
 fn encrypted_item(item: &Value) -> Option<(Batch, &str)> {
     let batch = match item.get("type").and_then(Value::as_str)? {
@@ -799,7 +799,7 @@ mod tests {
         }
     }
 
-    /// DeepSeek / GLM 经 Codex++ 转换回来的推理项：明文 content + 占位 encrypted_content。
+    /// DeepSeek / GLM 经 RoseCode 转换回来的推理项：明文 content + 占位 encrypted_content。
     fn plain_reasoning(text: &str) -> Value {
         json!({"type": "reasoning", "summary": [{"type": "summary_text", "text": "s"}],
                "content": [{"type": "reasoning_text", "text": text}],

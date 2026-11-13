@@ -238,7 +238,7 @@ function AgentRow({
         unavailableReason: !result.supported
           ? t("未检测到支持的 Claude Desktop")
           : result.claudeRunning && !attached
-            ? t("Claude 正在运行，请先完全退出，再从 Codex++ 启动")
+            ? t("Claude 正在运行，请先完全退出，再从 RoseCode 启动")
             : result.config?.enabled && !result.nodeAvailable
               ? t("缺少 Node.js，无法启动本地服务")
               : null,
@@ -365,7 +365,7 @@ function AgentRow({
             </span>
           </span>
         </div>
-        <div className="rose-agent-access-toggle"><span data-connected={connected}>{connected ? t("已接入") : t("未接入")}</span><Switch pending={busy !== null} label={tf("{0} 接入 Codex++", [agent.name])} on={connected} onToggle={toggle} /></div>
+        <div className="rose-agent-access-toggle"><span data-connected={connected}>{connected ? t("已接入") : t("未接入")}</span><Switch pending={busy !== null} label={tf("{0} 接入 RoseCode", [agent.name])} on={connected} onToggle={toggle} /></div>
         <div className="cx-row-controls rose-agent-connection-controls">
           <div className="rose-agent-default-model">
           <ModelPicker
@@ -856,8 +856,8 @@ export function Floating({
   );
 }
 
-/** 模型列表：左侧全部 / 收藏 / 按供应商跳转，右侧分组列出模型；顶部是「默认（不经 Codex++）」与「断开」。
- * 传了 `own` 与 `onPickOwn` 时，池里的模型后面再列一组 Agent 自带的模型（直连，不经 Codex++）。 */
+/** 模型列表：左侧全部 / 收藏 / 按供应商跳转，右侧分组列出模型；顶部是「默认（不经 RoseCode）」与「断开」。
+ * 传了 `own` 与 `onPickOwn` 时，池里的模型后面再列一组 Agent 自带的模型（直连，不经 RoseCode）。 */
 export function ModelList({
   payload,
   exclude,
@@ -1061,8 +1061,8 @@ export function ModelList({
                     {ambiguous ? <small>{t("模型 ID 与已有模型名冲突，无法固定到此供应商")}</small> : item.custom ? <small>{item.sub} · {t("自定义模型 ID")}</small> : item.sub && item.sub !== section.title ? <small>{section.key === "current" ? t(item.sub) : item.sub}</small> : null}
                   </span>
                   {item.direct ? (
-                    <em className="gw-mp-direct" title={tf("{0} 用自己的登录或 Key 直接向 {1} 要这个模型，不经 Codex++。选它会断开 Codex++ 并还原接入前的设置。", [ownAgent ?? "Agent", item.direct])}>
-                      {t("直连，不经 Codex++")}
+                    <em className="gw-mp-direct" title={tf("{0} 用自己的登录或 Key 直接向 {1} 要这个模型，不经 RoseCode。选它会断开 RoseCode 并还原接入前的设置。", [ownAgent ?? "Agent", item.direct])}>
+                      {t("直连，不经 RoseCode")}
                     </em>
                   ) : null}
                   {item.direct ? null : <button
@@ -1150,16 +1150,16 @@ function ImageModelRow({ agent, payload, busy, run }: { agent: string; payload: 
   );
 }
 
-/** Agent 详情里的「自带模型」：模型下拉里列不列 Agent 自己的模型（直连，不经 Codex++）。 */
+/** Agent 详情里的「自带模型」：模型下拉里列不列 Agent 自己的模型（直连，不经 RoseCode）。 */
 function OwnModelsRow({ agent, payload, busy, run }: { agent: GatewayAgentView; payload: GatewayPayload | null; busy: string | null; run: Run }) {
   const own = agent.ownModels;
   if (!own) return null;
   const shown = !(payload?.gateway.hideOwnModels ?? []).includes(agent.agent);
   return (
     <SetLine
-      hint={tf("直连 {0} · {1} 个，不经 Codex++", [own.vendor, String(own.models.length)])}
+      hint={tf("直连 {0} · {1} 个，不经 RoseCode", [own.vendor, String(own.models.length)])}
       title={tf("显示 {0} 自带的模型", [agent.name])}
-      tooltip={tf("{0} 用自己的登录或 Key 直接向 {1} 要的模型，不经 Codex++。关掉后模型下拉只列网关的模型；{0} 现在用着的那个照样显示。", [agent.name, own.vendor])}
+      tooltip={tf("{0} 用自己的登录或 Key 直接向 {1} 要的模型，不经 RoseCode。关掉后模型下拉只列网关的模型；{0} 现在用着的那个照样显示。", [agent.name, own.vendor])}
     >
       <Switch
         pending={busy !== null}
@@ -1242,11 +1242,11 @@ function ModelPicker({
         className="gw-mp-action"
         data-active={!connected && !own}
         onClick={onDisconnect}
-        title={connected ? tf("断开 Codex++，还原 {0} 接入之前的设置", [agent.name]) : tf("{0} 自带的默认值", [agent.name])}
+        title={connected ? tf("断开 RoseCode，还原 {0} 接入之前的设置", [agent.name]) : tf("{0} 自带的默认值", [agent.name])}
         type="button"
       >
         <AgentIcon agent={agent.agent} className="gw-popover-agent" />
-        {t("用默认（不经 Codex++）")}
+        {t("用默认（不经 RoseCode）")}
         {!connected && !own ? <Check className="h-3.5 w-3.5" /> : null}
       </button>
     </>
@@ -1256,7 +1256,7 @@ function ModelPicker({
       <button aria-expanded={open} aria-haspopup="listbox" className="gw-picker-button" onClick={() => onOpenChange(!open)} ref={buttonRef} title={inactiveHint} type="button">
         <span className="gw-picker-label">{t("默认模型")}</span>
         {showDefault || own ? <AgentIcon agent={agent.agent} className="gw-picker-agent" /> : <ModelViewGlyph view={display} />}
-        <span title={own ? tf("{0} 自带的模型，直连 {1}，不经 Codex++", [agent.name, agent.ownModels?.vendor ?? ""]) : undefined}>
+        <span title={own ? tf("{0} 自带的模型，直连 {1}，不经 RoseCode", [agent.name, agent.ownModels?.vendor ?? ""]) : undefined}>
           {own ?? (showDefault ? t("默认") : display.title || t("选择模型"))}
         </span>
         {showDefault || own ? null : <AutoTag view={display} />}

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Codex++ Linux .deb 打包脚本
+# RoseCode Linux .deb 打包脚本
 # Usage: bash scripts/installer/linux/build-deb.sh [--package-only|--frontend-only|--rust-only|--deps-only] [VERSION]
 #       或分步执行下面的各个函数
 
@@ -10,7 +10,7 @@ REPO_DIR="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 PROJECT_DIR="$REPO_DIR/apps/codex-plus-manager"
 BUILD_DIR="$REPO_DIR/.linux-build"
 DEB_DIR="$BUILD_DIR/deb"
-PACKAGE_NAME="codex-plus-plus"
+PACKAGE_NAME="rosecode"
 ACTION="all"
 VERSION=""
 for arg in "$@"; do
@@ -49,7 +49,7 @@ ARCH="$(dpkg --print-architecture)"
 NODE_BIN="${NODE_BIN:-$(command -v node || true)}"
 PNPM_BIN="${PNPM_BIN:-$(command -v pnpm || true)}"
 
-echo "=== Codex++ Linux .deb 构建 ==="
+echo "=== RoseCode Linux .deb 构建 ==="
 echo "版本: $VERSION"
 echo "架构: $ARCH"
 echo "仓库: $REPO_DIR"
@@ -128,8 +128,8 @@ package_deb() {
     mkdir -p "$stage/lib/${PACKAGE_NAME}"
 
     # ── 复制二进制 ──
-    cp "$REPO_DIR/target/release/codex-plus-plus" "$stage/bin/"
-    chmod 755 "$stage/bin/codex-plus-plus"
+    cp "$REPO_DIR/target/release/rosecode" "$stage/bin/"
+    chmod 755 "$stage/bin/rosecode"
 
     # ── 复制前端资源 ──
     if [ -d "$PROJECT_DIR/dist" ]; then
@@ -145,10 +145,10 @@ package_deb() {
     # ── Desktop 文件 ──
     cat > "$stage/share/applications/${PACKAGE_NAME}.desktop" <<'EOF'
 [Desktop Entry]
-Name=Codex++
+Name=RoseCode
 Comment=Configure and launch the official Codex desktop app
-Exec=codex-plus-plus %u
-Icon=codex-plus-plus
+Exec=rosecode %u
+Icon=rosecode
 Type=Application
 Categories=Development;Utility;
 Terminal=false
@@ -159,6 +159,7 @@ EOF
     # ── 复制文档 ──
     cp "$REPO_DIR/README.md"      "$stage/share/doc/${PACKAGE_NAME}/"
     cp "$REPO_DIR/CHANGELOG.md"   "$stage/share/doc/${PACKAGE_NAME}/"
+    cp "$REPO_DIR/NOTICE.md" "$REPO_DIR/THIRD_PARTY_NOTICES.md" "$stage/share/doc/${PACKAGE_NAME}/"
     cp "$REPO_DIR/LICENSE"        "$stage/share/doc/${PACKAGE_NAME}/"
 
     # ── control 文件 ──
@@ -170,16 +171,16 @@ Version: ${VERSION}
 Section: misc
 Priority: optional
 Architecture: ${ARCH}
-Maintainer: BigPizzaV3 <1727732@qq.com>
+Maintainer: Alan1145145 <87422467+Alan1145145@users.noreply.github.com>
 Installed-Size: ${installed_size}
 Depends: libc6 (>= 2.34), libgcc-s1 (>= 4.2), libstdc++6 (>= 13), libdbus-1-3, libglib2.0-0t64, libgtk-3-0t64, libwebkit2gtk-4.1-0, libsoup-3.0-0, libjavascriptcoregtk-4.1-0, libssl3t64 (>= 3.0.0), libz3-4, libatspi2.0-0t64, libasound2t64
 Recommends: codex
-Description: Codex++ configures and launches OpenAI Codex / ChatGPT desktop apps.
+Description: RoseCode configures and launches OpenAI Codex / ChatGPT desktop apps.
  It provides provider switching, protocol conversion, session management and UI enhancements
  via Chromium DevTools Protocol and a local helper service, without modifying the official
  app.asar or writing patches to the installation directory.
  .
- Includes one application, codex-plus-plus, for provider and model configuration,
+ Includes one application, rosecode, for provider and model configuration,
  sessions, enhancements and launching the official desktop app from its window.
 EOF
 

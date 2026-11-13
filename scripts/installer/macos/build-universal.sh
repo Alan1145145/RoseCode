@@ -9,7 +9,7 @@ set -euo pipefail
 VERSION="${1:-0.0.0}"
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 UNIVERSAL_DIR="$ROOT/target/universal/release"
-BINARIES=(codex-plus-plus codex-plus-legacy-shim)
+BINARIES=(rosecode codex-plus-legacy-shim)
 
 cd "$ROOT"
 

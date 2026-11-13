@@ -14,12 +14,12 @@ pub fn build_desktop_entry_content(exec_path: &Path) -> String {
          Name={name}\n\
          Comment=Configure and launch the official Codex desktop app\n\
          Exec={exec_str} %u\n\
-         Icon=codex-plus-plus\n\
+         Icon=rosecode\n\
          Type=Application\n\
          Categories=Development;Utility;\n\
          Terminal=false\n\
          StartupNotify=true\n\
-         StartupWMClass=codex-plus-plus\n\
+         StartupWMClass=rosecode\n\
          MimeType=x-scheme-handler/codexplusplus;x-scheme-handler/dreamskin;\n",
         name = APP_NAME,
         exec_str = exec_str
@@ -43,7 +43,7 @@ pub fn install_shortcuts(options: &InstallOptions) -> anyhow::Result<()> {
     if let Some(base_dirs) = directories::BaseDirs::new() {
         let app_dir = base_dirs.data_local_dir().join("applications");
         if fs::create_dir_all(&app_dir).is_ok() {
-            let app_entry = app_dir.join("codex-plus-plus.desktop");
+            let app_entry = app_dir.join("rosecode.desktop");
             let _ = fs::write(&app_entry, &content);
             #[cfg(unix)]
             let _ = fs::set_permissions(&app_entry, fs::Permissions::from_mode(0o755));
@@ -55,11 +55,11 @@ pub fn install_shortcuts(options: &InstallOptions) -> anyhow::Result<()> {
                 .status();
             #[cfg(target_os = "linux")]
             let _ = std::process::Command::new("xdg-mime")
-                .args(["default", "codex-plus-plus.desktop", "x-scheme-handler/codexplusplus"])
+                .args(["default", "rosecode.desktop", "x-scheme-handler/codexplusplus"])
                 .status();
             #[cfg(target_os = "linux")]
             let _ = std::process::Command::new("xdg-mime")
-                .args(["default", "codex-plus-plus.desktop", "x-scheme-handler/dreamskin"])
+                .args(["default", "rosecode.desktop", "x-scheme-handler/dreamskin"])
                 .status();
         }
     }
@@ -71,7 +71,7 @@ pub fn uninstall_shortcuts(options: &InstallOptions) -> anyhow::Result<()> {
     let install_root = install_root_or_default(options);
     let candidates = [
         install_root.join(format!("{APP_NAME}.desktop")),
-        install_root.join("codex-plus-plus.desktop"),
+        install_root.join("rosecode.desktop"),
     ];
 
     for path in &candidates {
@@ -81,7 +81,7 @@ pub fn uninstall_shortcuts(options: &InstallOptions) -> anyhow::Result<()> {
     }
 
     if let Some(base_dirs) = directories::BaseDirs::new() {
-        let app_entry = base_dirs.data_local_dir().join("applications/codex-plus-plus.desktop");
+        let app_entry = base_dirs.data_local_dir().join("applications/rosecode.desktop");
         if app_entry.is_file() {
             let _ = fs::remove_file(&app_entry);
             #[cfg(target_os = "linux")]

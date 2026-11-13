@@ -1,4 +1,4 @@
-//! ClaudeMom 的命令：管理多组上游（Base URL + Key）、从 cc-switch / Magpie / Codex++ 导入、拉模型列表。
+//! ClaudeMom 的命令：管理多组上游（Base URL + Key）、从 cc-switch / Magpie / RoseCode 导入、拉模型列表。
 //!
 //! Claude 本身的状态、启动、停止、开关仍走 `claude_local_*` 三个命令（commands.rs）。
 //! 每次改了上游都立刻交给 Claude 本地服务（`claude_mom::apply_active`），状态里的「需要重启」随之更新。
@@ -208,7 +208,7 @@ mod host_tests {
     }
 }
 
-/// 从其他工具导入：`ccswitch` / `magpie` / `codexpp`。网关类来源（Magpie、Codex++）没有模型时顺手拉一次。
+/// 从其他工具导入：`ccswitch` / `magpie` / `codexpp`。网关类来源（Magpie、RoseCode）没有模型时顺手拉一次。
 #[tauri::command]
 pub async fn claude_mom_import(source: String) -> CommandResult<BookPayload> {
     let imported = match source.as_str() {
@@ -279,7 +279,7 @@ pub async fn claude_mom_fetch_models(base_url: String, api_key: String) -> Comma
 }
 
 /// 原生听写一键开关：Claude 的「原生听写」、听写总开关、本地 SenseVoice 一起改。
-/// ClaudeMom 只用本地 SenseVoice（模型和 Codex++ 共用 `~/.codex/speech-to-text`），没有远程转写的配置界面。
+/// ClaudeMom 只用本地 SenseVoice（模型和 RoseCode 共用 `~/.codex/speech-to-text`），没有远程转写的配置界面。
 /// 返回最新的 Claude 状态（`dictationReady` 等）。
 #[tauri::command]
 pub async fn claude_mom_set_voice(enabled: bool) -> CommandResult<serde_json::Value> {

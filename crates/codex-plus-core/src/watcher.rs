@@ -23,9 +23,9 @@ pub(crate) const RESTART_STOP_WAIT_INTERVAL_MS: u64 = 100;
 const LAUNCHER_WAIT_BACKOFF_MAX_MS: u64 = 1_000;
 /// 强制结束后，再等多久确认残留实例已经消失。
 const LAUNCHER_FORCE_KILL_GRACE_MS: u64 = 2_000;
-pub const WATCHER_RUN_NAME: &str = "CodexPlusPlusWatcher";
+pub const WATCHER_RUN_NAME: &str = "RoseCodeWatcher";
 pub const WATCHER_RUN_KEY: &str = r"Software\Microsoft\Windows\CurrentVersion\Run";
-pub const WATCHER_STARTUP_SHORTCUT_NAME: &str = "CodexPlusPlusWatcher.lnk";
+pub const WATCHER_STARTUP_SHORTCUT_NAME: &str = "RoseCodeWatcher.lnk";
 /// macOS 开机启动用的 LaunchAgent 标签；plist 文件名即 `<标签>.plist`。
 pub const MACOS_WATCHER_LABEL: &str = "com.bigpizzav3.codexplusplus.watcher";
 
@@ -304,7 +304,7 @@ pub fn watcher_is_installed() -> bool {
 
 pub fn linux_autostart_path() -> Option<PathBuf> {
     directories::BaseDirs::new().map(|dirs| {
-        dirs.config_dir().join("autostart").join("codex-plus-plus.desktop")
+        dirs.config_dir().join("autostart").join("rosecode.desktop")
     })
 }
 
@@ -378,7 +378,7 @@ pub fn filter_killable_launcher_processes<'a>(
     processes
         .into_iter()
         .filter(|(process_id, _, exe_file)| {
-            !protected.contains(process_id) && exe_file.eq_ignore_ascii_case("codex-plus-plus.exe")
+            !protected.contains(process_id) && exe_file.eq_ignore_ascii_case("RoseCode.exe")
         })
         .map(|(process_id, _, _)| process_id)
         .collect()
@@ -408,7 +408,7 @@ pub fn macos_launcher_process_names() -> [&'static str; 2] {
 
 pub fn linux_launcher_process_names() -> [&'static str; 3] {
     [
-        "codex-plus-plus",
+        "rosecode",
         "codex-plus-launcher",
         "codex-plus-manager",
     ]
@@ -549,7 +549,7 @@ mod process_identity_tests {
             "  42 /Applications/ChatGPT.app/Contents/MacOS/ChatGPT --remote-debugging-port=9229",
             "  11 /Applications/Codex Dev.app/Contents/MacOS/Codex Dev --remote-debugging-port=9229",
             "  43 /Applications/ChatGPT.app/Contents/Frameworks/Codex Framework.framework/Helpers/Codex (Renderer).app/Contents/MacOS/Codex (Renderer)",
-            "  44 /Applications/Codex++.app/Contents/MacOS/CodexPlusPlus",
+            "  44 /Applications/RoseCode.app/Contents/MacOS/RoseCode",
             "  45 /bin/zsh -lc '/Applications/ChatGPT.app/Contents/MacOS/ChatGPT'",
             "  46 /usr/bin/open -W -a /Applications/ChatGPT.app",
         ];
@@ -601,7 +601,7 @@ mod process_identity_tests {
             "  62 /Applications/ChatGPT.app/Contents/MacOS/ChatGPT --remote-debugging-port=9229",
             "  63 /Applications/ChatGPT.app/Contents/MacOS/ChatGPT --remote-debugging-port 9301",
             "  64 /Applications/ChatGPT.app/Contents/Frameworks/Codex Framework.framework/Helpers/Codex (Renderer).app/Contents/MacOS/Codex (Renderer) --type=renderer",
-            "  65 /Applications/Codex++.app/Contents/MacOS/CodexPlusPlus",
+            "  65 /Applications/RoseCode.app/Contents/MacOS/RoseCode",
             // 包内 CLI 的 bundle id 也在 com.openai.codex.* 下，但它不是桌面主进程。
             "  66 /Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex app-server --listen stdio://",
         ];
@@ -918,7 +918,7 @@ pub fn is_linux_codex_desktop_process(
     }
 
     // 1. 过滤 Electron 子进程（如 --type=renderer, --type=gpu-process 等）
-    // 以及 Crashpad 崩溃收集进程、内置 CLI 和 Codex++ 自身
+    // 以及 Crashpad 崩溃收集进程、内置 CLI 和 RoseCode 自身
     for token in argv {
         if token.starts_with("--type=") {
             return false;
@@ -929,7 +929,8 @@ pub fn is_linux_codex_desktop_process(
         if token.contains("/resources/codex") || token.contains("codex-cli") {
             return false;
         }
-        if token.contains("codex-plus-plus")
+        if token.contains("rosecode")
+            || token.contains("codex-plus-plus")
             || token.contains("codex-plus-launcher")
             || token.contains("codex-plus-manager")
         {
@@ -1274,7 +1275,7 @@ pub fn install_watcher(launcher_path: &Path, debug_port: u16) -> anyhow::Result<
 #[cfg(target_os = "macos")]
 pub fn install_watcher(launcher_path: &Path, _debug_port: u16) -> anyhow::Result<()> {
     if !launcher_path.is_file() {
-        anyhow::bail!("找不到 Codex++ 可执行文件：{}", launcher_path.display());
+        anyhow::bail!("找不到 RoseCode 可执行文件：{}", launcher_path.display());
     }
     let home = directories::BaseDirs::new()
         .map(|dirs| dirs.home_dir().to_path_buf())
@@ -2403,7 +2404,7 @@ pub fn find_macos_codex_processes_without_debug_port() -> Vec<u32> {
     )
 }
 
-/// 外部启动的判据：主进程参数里没有调试端口。Codex++ 拉起的主实例和多开实例
+/// 外部启动的判据：主进程参数里没有调试端口。RoseCode 拉起的主实例和多开实例
 /// 都带各自的端口，不会落进这个集合，按它结束不会误杀多开。
 #[cfg(any(target_os = "macos", test))]
 fn macos_codex_process_ids_without_debug_port_with<'a>(
@@ -2587,7 +2588,7 @@ fn create_startup_shortcut(launcher_path: &Path, arguments: &str) -> anyhow::Res
         target: launcher_path.to_path_buf(),
         arguments: arguments.to_string(),
         working_directory: launcher_path.parent().map(Path::to_path_buf),
-        description: "打开 Codex++ 界面".to_string(),
+        description: "打开 RoseCode 界面".to_string(),
         icon: None,
         show_minimized: false,
     })

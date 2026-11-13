@@ -368,7 +368,7 @@ export function ConfigDoctorPanel() {
       {privacyOpen ? (
         <div className="config-doctor-privacy">
           <ShieldCheck aria-hidden />
-          <span>{t("AI 深度体检只发送脱敏后的配置摘要（不含 API Key），可随时停用。「复用当前供应商」会用你自己的供应商额度跑一次（约几千 token）；本机模型与自定义不占 Codex++ 的额度。")}</span>
+          <span>{t("AI 深度体检只发送脱敏后的配置摘要（不含 API Key），可随时停用。「复用当前供应商」会用你自己的供应商额度跑一次（约几千 token）；本机模型与自定义不占 RoseCode 的额度。")}</span>
           <button aria-label={t("关闭隐私说明")} className="config-doctor-privacy-close" onClick={() => setPrivacyOpen(false)} type="button">
             <X aria-hidden />
           </button>

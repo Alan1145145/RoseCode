@@ -69,7 +69,7 @@ fn build_client_with_proxy_choice(
     options: ClientOptions,
 ) -> anyhow::Result<reqwest::Client> {
     let ua = if user_agent.trim().is_empty() {
-        format!("CodexPlusPlus/{}", env!("CARGO_PKG_VERSION"))
+        format!("RoseCode/{}", env!("CARGO_PKG_VERSION"))
     } else {
         user_agent.trim().to_string()
     };
@@ -384,7 +384,7 @@ pub(crate) fn vlm_http_client_with_timeout(
     total: std::time::Duration,
 ) -> anyhow::Result<reqwest::Client> {
     Ok(apply_configured_ca_certificate(reqwest::Client::builder()
-        .user_agent(format!("CodexPlusPlus-VLM/{}", env!("CARGO_PKG_VERSION")))
+        .user_agent(format!("RoseCode-VLM/{}", env!("CARGO_PKG_VERSION")))
         .connect_timeout(connect)
         .timeout(total))?
         .build()?)

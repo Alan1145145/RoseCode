@@ -16,7 +16,7 @@ function metadata(suffixes, includeMacos = false, size = 123) {
     tagName: `v${version}`,
     url: "https://github.com/Alan1145145/RoseCode/releases/untagged-test",
     body: "RoseCode release",
-    assets: suffixes.map((suffix) => ({ name: `CodexPlusPlus-${version}-${suffix}`, size })),
+    assets: suffixes.map((suffix) => ({ name: `RoseCode-${version}-${suffix}`, size })),
   };
   const fs = {
     readFileSync: () => JSON.stringify(release),

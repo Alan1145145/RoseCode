@@ -14,7 +14,7 @@ use super::{
 };
 
 #[cfg(target_os = "macos")]
-const LEGACY_MANAGER_BUNDLE_NAME: &str = "Codex++ 管理工具.app";
+const LEGACY_MANAGER_BUNDLE_NAME: &str = "RoseCode 管理工具.app";
 
 pub fn build_app_bundle(options: &InstallOptions, _manager: bool) -> MacosAppBundle {
     // 保留 manager 参数供已有调用方使用；安装计划始终只有同一个原生界面 app。
@@ -47,7 +47,7 @@ pub fn install_app_bundles(options: &InstallOptions) -> anyhow::Result<()> {
     let source_bundle = native_application_bundle_from_executable(source)?;
     if plan.app_path.exists() {
         anyhow::bail!(
-            "目标 app 已存在，请重新安装完整 Codex++.app；不会改写包内签名文件：{}",
+            "目标 app 已存在，请重新安装完整 RoseCode.app；不会改写包内签名文件：{}",
             plan.app_path.display()
         );
     }
@@ -60,7 +60,7 @@ pub fn install_app_bundles(options: &InstallOptions) -> anyhow::Result<()> {
         .output()?;
     if !result.status.success() {
         anyhow::bail!(
-            "复制 Codex++.app 失败：{}",
+            "复制 RoseCode.app 失败：{}",
             String::from_utf8_lossy(&result.stderr).trim()
         );
     }
@@ -145,7 +145,7 @@ pub fn uninstall_app_bundles(_options: &InstallOptions) -> anyhow::Result<()> {
 pub fn native_application_bundle_from_executable(executable: &Path) -> anyhow::Result<PathBuf> {
     let canonical = fs::canonicalize(executable).map_err(|error| {
         anyhow::anyhow!(
-            "请从完整的 Codex++.app 安装；可执行文件不可用：{}：{error}",
+            "请从完整的 RoseCode.app 安装；可执行文件不可用：{}：{error}",
             executable.display()
         )
     })?;
@@ -157,7 +157,7 @@ pub fn native_application_bundle_from_executable(executable: &Path) -> anyhow::R
         .and_then(Path::parent)
         .filter(|app| app.extension().is_some_and(|extension| extension == "app"))
         .ok_or_else(|| {
-            anyhow::anyhow!("请从完整的 Codex++.app 安装；不再从裸二进制重建 macOS app。")
+            anyhow::anyhow!("请从完整的 RoseCode.app 安装；不再从裸二进制重建 macOS app。")
         })?;
     validate_native_bundle(app)?;
     if !paths_refer_to_same_file(
@@ -165,7 +165,7 @@ pub fn native_application_bundle_from_executable(executable: &Path) -> anyhow::R
         &app.join("Contents/MacOS").join(MACOS_APP_EXECUTABLE),
     ) {
         anyhow::bail!(
-            "当前可执行文件不是 Codex++ 原生界面的主程序：{}",
+            "当前可执行文件不是 RoseCode 原生界面的主程序：{}",
             executable.display()
         );
     }
@@ -194,18 +194,18 @@ pub(super) fn validate_native_bundle(app: &Path) -> anyhow::Result<()> {
         || !plist_true_value(&plist, "CodexPlusUnifiedApp")
     {
         anyhow::bail!(
-            "macOS app 不是完整的 Codex++ 原生界面包，请重新安装：{}",
+            "macOS app 不是完整的 RoseCode 原生界面包，请重新安装：{}",
             app.display()
         );
     }
     let executable = app.join("Contents/MacOS").join(MACOS_APP_EXECUTABLE);
     let metadata = fs::metadata(&executable)?;
     if !metadata.is_file() || metadata.len() < 1024 {
-        anyhow::bail!("Codex++ 可执行文件缺失或无效：{}", executable.display());
+        anyhow::bail!("RoseCode 可执行文件缺失或无效：{}", executable.display());
     }
     if !fs::canonicalize(&executable)?.starts_with(fs::canonicalize(app)?) {
         anyhow::bail!(
-            "Codex++ 可执行文件越出 app 包目录：{}",
+            "RoseCode 可执行文件越出 app 包目录：{}",
             executable.display()
         );
     }
@@ -224,7 +224,7 @@ pub(super) fn validate_native_bundle(app: &Path) -> anyhow::Result<()> {
             | 0xbfbafeca
     ) {
         anyhow::bail!(
-            "Codex++ 可执行文件不是 Mach-O；不会生成脚本入口：{}",
+            "RoseCode 可执行文件不是 Mach-O；不会生成脚本入口：{}",
             executable.display()
         );
     }
@@ -258,7 +258,7 @@ mod migration_tests {
         let legacy = root.join(LEGACY_MANAGER_BUNDLE_NAME);
         fs::create_dir_all(legacy.join("Contents/MacOS")).unwrap();
         fs::write(
-            legacy.join("Contents/MacOS/CodexPlusPlusManager"),
+            legacy.join("Contents/MacOS/RoseCodeManager"),
             b"legacy",
         )
         .unwrap();
@@ -268,7 +268,7 @@ mod migration_tests {
             .expect("legacy manager should be migrated");
         assert!(!legacy.exists());
         assert_eq!(
-            fs::read(moved.join("Contents/MacOS/CodexPlusPlusManager")).unwrap(),
+            fs::read(moved.join("Contents/MacOS/RoseCodeManager")).unwrap(),
             b"legacy"
         );
         assert!(moved.starts_with(&archive));
@@ -304,12 +304,12 @@ fn info_plist() -> String {
   <key>CFBundleExecutable</key>
   <string>{MACOS_APP_EXECUTABLE}</string>
   <key>CFBundleIconFile</key>
-  <string>codex-plus-plus.png</string>
+  <string>rosecode.png</string>
   <key>CFBundleURLTypes</key>
   <array>
     <dict>
       <key>CFBundleURLName</key>
-      <string>Codex++ Links</string>
+      <string>RoseCode Links</string>
       <key>CFBundleURLSchemes</key>
       <array>
         <string>codexplusplus</string>

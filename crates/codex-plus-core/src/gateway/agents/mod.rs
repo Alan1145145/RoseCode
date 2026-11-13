@@ -30,7 +30,7 @@ pub use files::{FileFormat, FileSet, YamlDoc, object_entry};
 
 /// 写进各 Agent 配置里的供应商 id / 名字。
 pub const PROVIDER_ID: &str = "codexplus";
-pub const PROVIDER_NAME: &str = "Codex++";
+pub const PROVIDER_NAME: &str = "RoseCode";
 
 /// Agent 发给网关用的协议（写配置时选用）。
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]

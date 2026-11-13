@@ -417,7 +417,7 @@ pub async fn prepare_local_model() -> Result<Value, DictationError> {
     let result = async {
         let client = reqwest::Client::builder()
             .timeout(Duration::from_secs(3_600))
-            .user_agent("CodexPlusPlus SenseVoice/1.0")
+            .user_agent("RoseCode SenseVoice/1.0")
             .build()
             .map_err(|_| DictationError::new(502, "无法创建本地语音模型连接"))?;
         let mut completed = 0;
@@ -1090,7 +1090,7 @@ fn bridge_request_id(payload: &Value) -> Result<uuid::Uuid, DictationError> {
     if !valid_helper_token(payload.get("helperToken").and_then(Value::as_str)) {
         return Err(DictationError::new(
             403,
-            "语音请求未授权，请从 Codex++ 重新发起",
+            "语音请求未授权，请从 RoseCode 重新发起",
         ));
     }
     let value = payload

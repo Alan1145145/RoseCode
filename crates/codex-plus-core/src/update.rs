@@ -644,8 +644,7 @@ fn is_macos_native_arch_asset(name: &str) -> bool {
 
 fn is_linux_installer_asset(name: &str) -> bool {
     let lower = name.to_ascii_lowercase();
-    lower.contains("codex")
-        && lower.contains("plus")
+    is_project_asset(&lower)
         && (lower.ends_with(".deb")
             || lower.ends_with(".appimage")
             || lower.ends_with(".tar.gz"))
@@ -662,8 +661,7 @@ fn is_linux_native_arch_asset(name: &str) -> bool {
 }
 
 fn is_windows_installer_asset(name: &str) -> bool {
-    name.contains("codex")
-        && name.contains("plus")
+    is_project_asset(name)
         && (name.ends_with(".msi")
             || name.ends_with("-setup.exe")
             || name.ends_with("_setup.exe")
@@ -674,7 +672,13 @@ fn is_windows_installer_asset(name: &str) -> bool {
 fn is_macos_installer_asset(name: &str) -> bool {
     // Loose shape check; arch preference is handled by platform_asset_rank
     // via is_macos_native_arch_asset.
-    name.contains("codex") && name.contains("plus") && name.ends_with(".dmg")
+    is_project_asset(name) && name.ends_with(".dmg")
+}
+
+fn is_project_asset(name: &str) -> bool {
+    name.starts_with("rosecode-")
+        || name.starts_with("rosecode_")
+        || (name.contains("codex") && name.contains("plus"))
 }
 
 pub fn launch_installer(path: &Path) -> anyhow::Result<()> {
@@ -757,7 +761,7 @@ mod tests {
     #[test]
     fn prune_old_installers_keeps_only_recent_installers() {
         let directory = tempfile::tempdir().unwrap();
-        let current = directory.path().join("CodexPlusPlus-9.9.9.exe");
+        let current = directory.path().join("RoseCode-9.9.9.exe");
         std::fs::write(&current, b"current").unwrap();
         for (index, name) in [
             "old-1.exe",
@@ -823,7 +827,7 @@ mod tests {
             version: "v9.9.9".to_string(),
             url: String::new(),
             body: String::new(),
-            asset_name: Some("CodexPlusPlus-9.9.9-windows-x64-setup.exe".to_string()),
+            asset_name: Some("RoseCode-9.9.9-windows-x64-setup.exe".to_string()),
             asset_url: Some(format!("http://{address}/installer.exe")),
         };
         let directory = tempfile::tempdir().unwrap();

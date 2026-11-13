@@ -42,7 +42,7 @@ fn windows_pac_proxy(url: &str) -> Option<String> {
             if !pointer.is_null() { let _ = GlobalFree(HGLOBAL(pointer.0.cast())); }
         }
         if pac.is_empty() && !auto_detect { return None; }
-        let session = WinHttpOpen(w!("CodexPlusPlus"), WINHTTP_ACCESS_TYPE_NO_PROXY,
+        let session = WinHttpOpen(w!("RoseCode"), WINHTTP_ACCESS_TYPE_NO_PROXY,
             PCWSTR::null(), PCWSTR::null(), 0);
         if session.is_null() { return None; }
         let _ = WinHttpSetTimeouts(session, 5000, 5000, 5000, 5000);

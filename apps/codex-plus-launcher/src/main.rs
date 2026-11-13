@@ -37,7 +37,7 @@ fn show_gui(payload: Value) -> Result<()> {
         .lock()
         .unwrap_or_else(|error| error.into_inner())
         .clone()
-        .context("Codex++ 界面尚未初始化")?;
+        .context("RoseCode 界面尚未初始化")?;
     handler(payload)
 }
 
@@ -277,7 +277,7 @@ impl RuntimeWorker {
                 tokio::task::LocalSet::new()
                     .block_on(&runtime, runtime_commands(receiver, runner, activate));
             })?;
-        if let Err(error) = initialized.recv().context("Codex++ 后台运行时初始化失败")? {
+        if let Err(error) = initialized.recv().context("RoseCode 后台运行时初始化失败")? {
             let _ = thread.join();
             return Err(error);
         }
@@ -297,7 +297,7 @@ impl RuntimeState {
         create: impl FnOnce() -> Result<RuntimeWorker>,
     ) -> Result<tokio::sync::mpsc::UnboundedSender<RuntimeCommand>> {
         if matches!(self, Self::ShuttingDown) {
-            anyhow::bail!("Codex++ 正在退出，无法启动新的运行时");
+            anyhow::bail!("RoseCode 正在退出，无法启动新的运行时");
         }
         if matches!(self, Self::Idle) {
             *self = Self::Running(create()?);
@@ -324,7 +324,7 @@ fn runtime_commands_sender() -> Result<tokio::sync::mpsc::UnboundedSender<Runtim
     let mut worker = RUNTIME_WORKER
         .get_or_init(|| Mutex::new(RuntimeState::Idle))
         .lock()
-        .map_err(|_| anyhow::anyhow!("Codex++ 后台运行时锁已损坏"))?;
+        .map_err(|_| anyhow::anyhow!("RoseCode 后台运行时锁已损坏"))?;
     worker.commands_or_start(|| {
         RuntimeWorker::spawn(
             Arc::new(|options, stop, ready| Box::pin(run_embedded_session(options, stop, ready))),
@@ -341,8 +341,8 @@ fn send_runtime_command(command: impl FnOnce(SessionReply) -> RuntimeCommand) ->
     let (reply, result) = mpsc::channel();
     runtime_commands_sender()?
         .send(command(reply))
-        .map_err(|_| anyhow::anyhow!("Codex++ 后台运行时已退出"))?;
-    result.recv().context("Codex++ 后台运行时未返回结果")?
+        .map_err(|_| anyhow::anyhow!("RoseCode 后台运行时已退出"))?;
+    result.recv().context("RoseCode 后台运行时未返回结果")?
 }
 
 /// 启动官方 Codex 并等待增强初始化完成；宿主应从 blocking 工作线程调用。
@@ -399,12 +399,12 @@ pub fn stop() -> Result<()> {
     send_runtime_command(RuntimeCommand::Stop)
 }
 
-/// 退出 Codex++ 时清理所有自有服务并等待专用线程退出，保留官方 Codex。
+/// 退出 RoseCode 时清理所有自有服务并等待专用线程退出，保留官方 Codex。
 pub fn shutdown() -> Result<()> {
     let mut worker = RUNTIME_WORKER
         .get_or_init(|| Mutex::new(RuntimeState::Idle))
         .lock()
-        .map_err(|_| anyhow::anyhow!("Codex++ 后台运行时锁已损坏"))?;
+        .map_err(|_| anyhow::anyhow!("RoseCode 后台运行时锁已损坏"))?;
     let Some(current) = worker.begin_shutdown() else {
         return Ok(());
     };
@@ -451,14 +451,14 @@ fn shutdown_worker(current: RuntimeWorker) -> Result<()> {
         .send(RuntimeCommand::Shutdown(reply))
         .is_ok();
     let cleanup = if sent {
-        result.recv().context("Codex++ 后台运行时未返回退出结果")?
+        result.recv().context("RoseCode 后台运行时未返回退出结果")?
     } else {
         Ok(())
     };
     current
         .thread
         .join()
-        .map_err(|_| anyhow::anyhow!("Codex++ 后台运行时异常退出"))?;
+        .map_err(|_| anyhow::anyhow!("RoseCode 后台运行时异常退出"))?;
     cleanup
 }
 
@@ -709,7 +709,7 @@ fn save_stopped_service_status_if_current(
         return Ok(false);
     }
     latest.status = "stopped".to_string();
-    latest.message = "Codex++ 后台增强服务已停止，未关闭官方 Codex。".to_string();
+    latest.message = "RoseCode 后台增强服务已停止，未关闭官方 Codex。".to_string();
     latest.phase = None;
     latest.progress = None;
     store.save_latest(&latest)?;
@@ -725,7 +725,7 @@ async fn launcher_session(
     if !owns_guard {
         anyhow::ensure!(
             !hooks.attach_only,
-            "已有 Codex++ 后台服务正在运行，不能重复恢复"
+            "已有 RoseCode 后台服务正在运行，不能重复恢复"
         );
         // 多开实例必须是一个独立进程：每个实例有自己的 `--user-data-dir` 和调试端口，
         // 复用主实例只会让目标端口永远无人监听（issue #2684）。走到这里说明本实例
@@ -742,7 +742,7 @@ async fn launcher_session(
         if codex_plus_core::watcher::find_codex_processes().is_empty()
             && !codex_plus_core::watcher::cdp_listening(options.debug_port)
         {
-            anyhow::bail!("已有 Codex++ 启动服务正在运行，请退出旧版本后再启动 Codex");
+            anyhow::bail!("已有 RoseCode 启动服务正在运行，请退出旧版本后再启动 Codex");
         }
         let started_at_ms = ready
             .as_ref()
@@ -963,7 +963,7 @@ fn acquire_single_instance_guard(
             ) =>
         {
             log_launcher_already_running(debug_port);
-            // 锁可能属于另一个 Codex++ 主进程；绝不能按旧 launcher 名称终止它。
+            // 锁可能属于另一个 RoseCode 主进程；绝不能按旧 launcher 名称终止它。
             Ok(None)
         }
         Err(error) => Err(error)
@@ -1861,7 +1861,7 @@ impl BridgeRuntimeService for LauncherRuntimeService {
                 &payload,
             )?;
         show_gui(payload)
-            .map_err(|error| anyhow::anyhow!("打开 Codex++ 界面失败：{error}"))
+            .map_err(|error| anyhow::anyhow!("打开 RoseCode 界面失败：{error}"))
             .map_err(|error| {
                 codex_plus_core::manager_navigation::rollback_pending_manager_navigation_after_launch_failure(
                     navigation.as_ref(),

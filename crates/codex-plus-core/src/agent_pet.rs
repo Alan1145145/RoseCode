@@ -775,7 +775,7 @@ fn redirect_policy() -> reqwest::redirect::Policy {
 
 fn http_client(url: &str) -> anyhow::Result<reqwest::Client> {
     crate::http_client::proxied_client_for_url_with_redirect(
-        &format!("CodexPlusPlus/{} AgentPet", env!("CARGO_PKG_VERSION")),
+        &format!("RoseCode/{} AgentPet", env!("CARGO_PKG_VERSION")),
         url,
         CONNECT_TIMEOUT,
         FETCH_TIMEOUT,

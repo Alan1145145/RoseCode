@@ -353,7 +353,7 @@ async fn fetch_index(source: Source) -> anyhow::Result<Vec<u8>> {
     // 插件索引走 GitHub raw，和更新检查一样必须尊重系统代理，否则在需要代理的
     // 网络里会一直超时、表现为插件市场空白或加载失败（#1329 / #2442）。
     let client = crate::http_client::proxied_client_with_timeouts(
-        "CodexPlusPlus/plugin-market",
+        "RoseCode/plugin-market",
         INDEX_TIMEOUT,
         INDEX_TIMEOUT,
     )
@@ -1632,7 +1632,7 @@ fn configured_plugin_enabled(home: &Path) -> anyhow::Result<BTreeMap<String, boo
         .unwrap_or_default())
 }
 
-/// 仅返回 Codex++ 插件市场托管的本地安装记录，不枚举其他来源的 Codex 插件。
+/// 仅返回 RoseCode 插件市场托管的本地安装记录，不枚举其他来源的 Codex 插件。
 /// 不检查包目录、不拉取索引、不创建缓存；source 仅为 public/full，不包含仓库或路径。
 pub fn installed_summary(home: &Path) -> anyhow::Result<Value> {
     let state = read_state(home)?;

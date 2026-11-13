@@ -131,8 +131,8 @@ jobs:
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force dist/windows/app | Out-Null
-          Copy-Item target/release/codex-plus-plus.exe dist/windows/app/
-          if ((Get-ChildItem dist/windows/app -Filter *.exe).Count -ne 1) { throw "Windows 安装包必须只有一个应用程序。" }
+          Copy-Item target/release/rosecode.exe dist/windows/app/RoseCode.exe
+          if (-not (Test-Path dist/windows/app/RoseCode.exe) -or (Get-ChildItem dist/windows/app -Filter *.exe).Count -ne 1) { throw "Windows 安装包必须只有一个应用程序。" }
 
       - name: Build Windows installer
         if: github.event_name == 'workflow_dispatch'
@@ -158,7 +158,7 @@ jobs:
           }
           Push-Location scripts/installer/windows
           try {
-            & $makensis "/INPUTCHARSET" "UTF8" "/DVERSION=$version" CodexPlusPlus.nsi
+            & $makensis "/INPUTCHARSET" "UTF8" "/DVERSION=$version" "/DVERSION_NUMERIC=$($version.Split('-')[0])" RoseCode.nsi
             if ($LASTEXITCODE -ne 0) { throw "NSIS 打包失败，退出码 $LASTEXITCODE" }
           } finally {
             Pop-Location
@@ -168,7 +168,7 @@ jobs:
         if: github.event_name == 'workflow_dispatch'
         uses: actions/upload-artifact@v4
         with:
-          name: codex-plus-plus-windows-binaries
+          name: rosecode-windows-binaries
           path: dist/windows/app/*
           if-no-files-found: error
 
@@ -176,7 +176,7 @@ jobs:
         if: github.event_name == 'workflow_dispatch'
         uses: actions/upload-artifact@v4
         with:
-          name: codex-plus-plus-windows-installer
+          name: rosecode-windows-installer
           path: dist/windows/*.exe
           if-no-files-found: error
 
@@ -258,17 +258,17 @@ jobs:
           apps=(dist/macos/stage/*.app)
           test "${#apps[@]}" = "2"
           test -f "dist/macos/stage/.hidden"
-          grep -qx "Codex++ 管理工具.app" "dist/macos/stage/.hidden"
-          for app in "dist/macos/stage/Codex++.app" "dist/macos/stage/Codex++ 管理工具.app"; do
+          grep -qx "RoseCode 管理工具.app" "dist/macos/stage/.hidden"
+          for app in "dist/macos/stage/RoseCode.app" "dist/macos/stage/RoseCode 管理工具.app"; do
             test -f "$app/Contents/Info.plist"
             test -f "$app/Contents/PkgInfo"
             test -x "$app/Contents/MacOS/$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$app/Contents/Info.plist")"
             if [[ "$app" == *"管理工具.app" ]]; then
-              test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$app/Contents/Info.plist")" = "com.bigpizzav3.codexplusplus.manager"
-              test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$app/Contents/Info.plist")" = "CodexPlusPlusManager"
+              test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$app/Contents/Info.plist")" = "com.alan1145145.rosecode.manager"
+              test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$app/Contents/Info.plist")" = "RoseCodeManager"
             else
-              test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$app/Contents/Info.plist")" = "com.bigpizzav3.codexplusplus"
-              test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$app/Contents/Info.plist")" = "CodexPlusPlus"
+              test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$app/Contents/Info.plist")" = "com.alan1145145.rosecode"
+              test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$app/Contents/Info.plist")" = "RoseCode"
             fi
             test "$(/usr/libexec/PlistBuddy -c 'Print :CodexPlusUnifiedApp' "$app/Contents/Info.plist")" = "true"
             plutil -lint "$app/Contents/Info.plist" >/dev/null
@@ -280,7 +280,7 @@ jobs:
         if: github.event_name == 'workflow_dispatch'
         uses: actions/upload-artifact@v4
         with:
-          name: codex-plus-plus-macos-universal-dmg
+          name: rosecode-macos-universal-dmg
           path: dist/macos/*.dmg
           if-no-files-found: error
 
@@ -396,19 +396,19 @@ jobs:
           set -euo pipefail
           deb_file="$(find dist/linux -maxdepth 1 -name "*.deb" -print -quit)"
           test -n "$deb_file"
-          test "$(dpkg-deb -f "$deb_file" Package)" = "codex-plus-plus"
+          test "$(dpkg-deb -f "$deb_file" Package)" = "rosecode"
           test "$(dpkg-deb -f "$deb_file" Version)" = "$(node -p 'require("./apps/codex-plus-manager/package.json").version')"
-          dpkg-deb -c "$deb_file" | grep -F "./usr/bin/codex-plus-plus"
+          dpkg-deb -c "$deb_file" | grep -F "./usr/bin/rosecode"
           if dpkg-deb -c "$deb_file" | grep -Fq "./usr/bin/codex-plus-plus-manager"; then exit 1; fi
           sudo apt-get install -y "./$deb_file"
-          test -x /usr/bin/codex-plus-plus
-          dpkg -V codex-plus-plus
-          ldd /usr/bin/codex-plus-plus | tee /tmp/codex-plus-plus-ldd.log
-          ! grep -q "not found" /tmp/codex-plus-plus-ldd.log
+          test -x /usr/bin/rosecode
+          dpkg -V rosecode
+          ldd /usr/bin/rosecode | tee /tmp/rosecode-ldd.log
+          ! grep -q "not found" /tmp/rosecode-ldd.log
       - name: Upload DEB
         if: github.event_name == 'workflow_dispatch'
         uses: actions/upload-artifact@v4
         with:
-          name: codex-plus-plus-linux-amd64-deb
+          name: rosecode-linux-amd64-deb
           path: dist/linux/*.deb
           if-no-files-found: error

@@ -43,7 +43,7 @@ const localReady = {
   config: { enabled: false, model: "claude-test", localization: true, voiceInput: true, computerUse: false, backgroundMode: false },
   models: ["claude-test", "gpt-test"], warning: null, needsRestart: false,
 };
-/** memo 对应模块级的 claudeLocalizationMemo：传同一个对象模拟「Codex++ 运行期间再次进入页面」。 */
+/** memo 对应模块级的 claudeLocalizationMemo：传同一个对象模拟「RoseCode 运行期间再次进入页面」。 */
 function harness(
   memo: Memo = { status: null, autoDetected: false },
   cuStatus: unknown = {},
@@ -205,7 +205,7 @@ test("首次进入自动检测一次，再次进入沿用上次结果；手动�
   assert.equal(buttons(page).find((button) => text(button) === "制作补丁版")!.props.disabled, true);
   screen.unmount();
 
-  // Codex++ 没退出，再次进入：直接显示上次结果，不再自动探测。
+  // RoseCode 没退出，再次进入：直接显示上次结果，不再自动探测。
   const again = harness(memo, {}, { mode: "patch" });
   page = again.render();
   assert.equal(again.calls.length, 0, "同一次运行内只自动检测一次");

@@ -47,9 +47,8 @@ test("中英文翻译统一展示品牌，同时保留模板参数中的用户�
   const { t, tf, setLanguage } = await import(`data:text/javascript;base64,${Buffer.from(outputText).toString("base64")}`);
   for (const language of ["zh", "en"]) {
     setLanguage(language);
-    assert.ok(t("打开 Codex++").includes("RoseCode"));
-    assert.ok(!t("打开 Codex++").includes("Codex++"));
-    const text = tf("{0} 接入 Codex++", ["Codex++ user project"]);
+    assert.equal(t("打开 RoseCode"), language === "en" ? "Open RoseCode" : "打开 RoseCode");
+    const text = tf("{0} 接入 RoseCode", ["Codex++ user project"]);
     assert.ok(text.includes("RoseCode"));
     assert.ok(text.includes("Codex++ user project"));
   }

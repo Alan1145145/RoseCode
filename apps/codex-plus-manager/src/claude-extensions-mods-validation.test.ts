@@ -127,8 +127,8 @@ test("Claude Code 原生分析和测试引擎验证按钮、工具及会话闭�
   writeFileSync(path.join(plugin, ".claude-plugin/plugin.json"), JSON.stringify({
     name: "codexpp-extension-host",
     version: "0.1.0",
-    description: "CodexPlusPlus extension adapter for Claude Desktop",
-    author: { name: "CodexPlusPlus" },
+    description: "RoseCode extension adapter for Claude Desktop",
+    author: { name: "RoseCode" },
   }));
   writeFileSync(path.join(plugin, "hooks/hooks.json"), JSON.stringify({ modules: ["./register.js"] }));
   writeFileSync(path.join(plugin, ".mcp.json"), JSON.stringify({

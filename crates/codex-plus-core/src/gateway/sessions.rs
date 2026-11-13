@@ -669,7 +669,7 @@ pub(crate) fn move_to_trash(path: &Path, trash_dir: &Path) -> anyhow::Result<Pat
     Ok(target)
 }
 
-/// 删除会话用的废纸篓：macOS 是用户的 `~/.Trash`，其他系统放在 Codex++ 状态目录里。
+/// 删除会话用的废纸篓：macOS 是用户的 `~/.Trash`，其他系统放在 RoseCode 状态目录里。
 pub fn default_trash_dir() -> PathBuf {
     #[cfg(target_os = "macos")]
     if let Some(home) = std::env::var_os("HOME") {

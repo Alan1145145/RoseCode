@@ -26,7 +26,7 @@ pub async fn dsh_plugins_request(action: String, payload: Option<Value>) -> Resu
 fn handle(action: &str, payload: Value) -> anyhow::Result<Value> {
     let state_dir = codex_plus_core::paths::default_app_state_dir();
     let plugins = DshPlugins::new(&state_dir);
-    let executable = std::env::current_exe().context("无法定位 Codex++ 程序")?;
+    let executable = std::env::current_exe().context("无法定位 RoseCode 程序")?;
     let home = codex_plus_core::codex_home::default_codex_home_dir();
     let manager = crate::commands::default_user_script_manager();
     let mut message = String::new();
@@ -173,7 +173,7 @@ fn flag(payload: &Value, key: &str) -> anyhow::Result<bool> {
         .with_context(|| format!("缺少参数 {key}"))
 }
 
-/// 把报告里的 skill 目录导入 Codex++ Skills（同名的旧目录会进 Skills 备份），并启用到 Codex。
+/// 把报告里的 skill 目录导入 RoseCode Skills（同名的旧目录会进 Skills 备份），并启用到 Codex。
 fn import_skills(plugins: &DshPlugins, id: &str, report: &Value) -> anyhow::Result<Vec<String>> {
     let manager = crate::commands::default_skills_manager();
     let mut imported = Vec::new();

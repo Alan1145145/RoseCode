@@ -1,13 +1,13 @@
 //! ClaudeMom 的上游配置：多组 Base URL + Key，直连给 Claude Desktop 完整功能模式用。
 //!
-//! 不经 Codex++ 网关：选中的那组通过 [`claude_local_backend::set_direct_upstream`] 交给本地兼容服务，
+//! 不经 RoseCode 网关：选中的那组通过 [`claude_local_backend::set_direct_upstream`] 交给本地兼容服务，
 //! 请求直接发到 `{base}/v1/messages`（与 `ANTHROPIC_BASE_URL` 同一语义）。
 //!
 //! 三种来源，导入后都只是普通的一组 Base URL + Key：
 //! - **cc-switch**：读 `~/.cc-switch/cc-switch.db` 里 `app_type = 'claude'` 的供应商（只收 Anthropic 格式）；
 //! - **Magpie**：把 Magpie 的本机网关当上游，地址读 `~/.config/magpie/gateway.json`，
 //!   token 用 `magpie-claude-desktop`（Magpie 只校验非本机请求，后缀用来归属用量）；
-//! - **Codex++**：把 Codex++ 的本机网关当上游，用它签给 Claude Desktop / Claude Code 的 token。
+//! - **RoseCode**：把 RoseCode 的本机网关当上游，用它签给 Claude Desktop / Claude Code 的 token。
 //!
 //! [`claude_local_backend::set_direct_upstream`]: crate::claude_local_backend::set_direct_upstream
 
@@ -320,15 +320,15 @@ fn loopback_addr(addr: &str) -> String {
     }
 }
 
-// ── Codex++ ────────────────────────────────────────────────────────────
+// ── RoseCode ────────────────────────────────────────────────────────────
 
-/// 把 Codex++ 的本机网关当上游：优先用它给 Claude Desktop 的接入，其次 Claude Code。
-/// 两个都没接入时报错，让用户先在 Codex++ 里接入。
+/// 把 RoseCode 的本机网关当上游：优先用它给 Claude Desktop 的接入，其次 Claude Code。
+/// 两个都没接入时报错，让用户先在 RoseCode 里接入。
 pub fn codex_plus_plus_profile(state_dir: &Path) -> Result<UpstreamProfile> {
     let store = crate::gateway::store::GatewayStore::at(state_dir.join("gateway.json"));
     let gateway = store
         .load()
-        .with_context(|| format!("读取 Codex++ 网关配置失败：{}", state_dir.display()))?;
+        .with_context(|| format!("读取 RoseCode 网关配置失败：{}", state_dir.display()))?;
     let port = crate::protocol_proxy::protocol_proxy_port_in(state_dir);
     for agent in ["claude-desktop", "claude"] {
         let tool = crate::tools::ToolId::parse(agent);
@@ -348,7 +348,7 @@ pub fn codex_plus_plus_profile(state_dir: &Path) -> Result<UpstreamProfile> {
             });
         }
     }
-    bail!("Codex++ 里还没有接入 Claude：先在 Codex++ 的「Agent 接入」里接入 Claude Code 或 Claude Desktop")
+    bail!("RoseCode 里还没有接入 Claude：先在 RoseCode 的「Agent 接入」里接入 Claude Code 或 Claude Desktop")
 }
 
 // ── 模型列表 ───────────────────────────────────────────────────────────
@@ -361,7 +361,7 @@ pub struct UpstreamModel {
     pub context_window: Option<u64>,
 }
 
-/// `GET {base}/v1/models`（Anthropic 格式，Magpie / Codex++ 网关都支持）。
+/// `GET {base}/v1/models`（Anthropic 格式，Magpie / RoseCode 网关都支持）。
 pub async fn fetch_models(base_url: &str, api_key: &str) -> Result<Vec<UpstreamModel>> {
     let base = base_url.trim().trim_end_matches('/');
     let url = reqwest::Url::parse(&format!("{base}/v1/models"))

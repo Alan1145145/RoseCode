@@ -1,13 +1,13 @@
-//! 产品变体：同一份代码构建出 Codex++ 与 ClaudeMom 两个程序。
+//! 产品变体：同一份代码构建出 RoseCode 与 ClaudeMom 两个程序。
 //!
 //! ClaudeMom 只做 Claude Desktop 完整功能模式，由单独的二进制 `claude-mom`
 //! （`src/claude_mom.rs`）在进程最开始调用 [`init_claude_mom`] 标记出来；
-//! Codex++ 的 `codex-plus-plus` 不调用任何初始化，行为与以前完全一致。
+//! RoseCode 的 `codex-plus-plus` 不调用任何初始化，行为与以前完全一致。
 //!
-//! ClaudeMom 与 Codex++ 完全独立，可以同时运行：
+//! ClaudeMom 与 RoseCode 完全独立，可以同时运行：
 //! - 状态目录默认 `~/.claude-mom`（设置、上游列表、Claude 本地服务都在里面）；
-//! - 界面是自己的一页（前端 `claude-mom.html`），不经 Codex++ 网关，直连用户配置的 Base URL + Key；
-//! - 单实例锁、启动器锁端口在 Codex++ 的基础上平移 [`PORT_SHIFT`]；
+//! - 界面是自己的一页（前端 `claude-mom.html`），不经 RoseCode 网关，直连用户配置的 Base URL + Key；
+//! - 单实例锁、启动器锁端口在 RoseCode 的基础上平移 [`PORT_SHIFT`]；
 //! - 本地协议代理首次启动时定在 [`CLAUDE_MOM_PROTOCOL_PROXY_PORT`]，之后照常持久化与迁移。
 //!
 //! 已经显式设置的环境变量（本地开发 bundle 的 `LSEnvironment`、多开 worker 等）一律优先，不覆盖。
@@ -16,7 +16,7 @@ use std::sync::OnceLock;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Flavor {
-    CodexPlusPlus,
+    RoseCode,
     ClaudeMom,
 }
 
@@ -24,15 +24,15 @@ static FLAVOR: OnceLock<Flavor> = OnceLock::new();
 
 /// ClaudeMom 默认状态目录（相对家目录）。
 pub const CLAUDE_MOM_STATE_DIR: &str = ".claude-mom";
-/// ClaudeMom 的各个固定端口相对 Codex++ 的平移量。
+/// ClaudeMom 的各个固定端口相对 RoseCode 的平移量。
 pub const PORT_SHIFT: u16 = 100;
-/// ClaudeMom 首次启动时使用的本地协议代理端口（Codex++ 是 57321）。
+/// ClaudeMom 首次启动时使用的本地协议代理端口（RoseCode 是 57321）。
 pub const CLAUDE_MOM_PROTOCOL_PROXY_PORT: u16 =
     codex_plus_core::protocol_proxy::DEFAULT_PROTOCOL_PROXY_PORT + PORT_SHIFT;
 
-/// 当前进程的产品变体；没初始化过就是 Codex++。
+/// 当前进程的产品变体；没初始化过就是 RoseCode。
 pub fn current() -> Flavor {
-    FLAVOR.get().copied().unwrap_or(Flavor::CodexPlusPlus)
+    FLAVOR.get().copied().unwrap_or(Flavor::RoseCode)
 }
 
 pub fn is_claude_mom() -> bool {
@@ -42,7 +42,7 @@ pub fn is_claude_mom() -> bool {
 /// 窗口标题、托盘提示等处显示的程序名。
 pub fn app_name() -> &'static str {
     match current() {
-        Flavor::CodexPlusPlus => "RoseCode",
+        Flavor::RoseCode => "RoseCode",
         Flavor::ClaudeMom => "ClaudeMom",
     }
 }
@@ -50,7 +50,7 @@ pub fn app_name() -> &'static str {
 /// 两个产品均没有独立更新渠道，不能安装原项目的更新包。
 pub fn update_block_reason() -> Option<&'static str> {
     Some(match current() {
-        Flavor::CodexPlusPlus => "RoseCode 尚未配置独立更新渠道，请使用本地构建。",
+        Flavor::RoseCode => "RoseCode 尚未配置独立更新渠道，请使用本地构建。",
         Flavor::ClaudeMom => "ClaudeMom 暂不支持自动更新，请重新构建。",
     })
 }
@@ -64,7 +64,7 @@ pub struct MainWindowSpec {
 
 pub fn main_window() -> MainWindowSpec {
     match current() {
-        Flavor::CodexPlusPlus => MainWindowSpec {
+        Flavor::RoseCode => MainWindowSpec {
             url: "/index.html",
             size: (1180.0, 720.0),
             min_size: (960.0, 640.0),
@@ -147,7 +147,7 @@ mod tests {
             ]
         );
         assert_eq!(defaults[0].1, home.join(".claude-mom").into_os_string());
-        // 端口在 Codex++ 的基础上平移，不能和它撞上。
+        // 端口在 RoseCode 的基础上平移，不能和它撞上。
         let manager: u16 = defaults[1].1.to_str().unwrap().parse().unwrap();
         let launcher: u16 = defaults[2].1.to_str().unwrap().parse().unwrap();
         assert_ne!(manager, codex_plus_core::ports::MANAGER_GUARD_PORT_BASE);
@@ -175,7 +175,7 @@ mod tests {
     #[test]
     fn rosecode_is_the_default_flavor_with_its_compact_window() {
         // 测试进程里没人调用 init_claude_mom。
-        assert_eq!(current(), Flavor::CodexPlusPlus);
+        assert_eq!(current(), Flavor::RoseCode);
         assert_eq!(app_name(), "RoseCode");
         let window = main_window();
         assert_eq!(window.url, "/index.html");

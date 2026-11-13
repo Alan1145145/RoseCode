@@ -1,6 +1,6 @@
 import { flowProviderSlot } from "./flow-provider-colors";
 import "./flow-provider-colors.css";
-/** 网关总览：今日数字一排；任意 Agent → Codex++ → 任意供应商的三列拓扑；最近请求列表。 */
+/** 网关总览：今日数字一排；任意 Agent → RoseCode → 任意供应商的三列拓扑；最近请求列表。 */
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { APP_NAME } from "./app-brand";
@@ -113,7 +113,7 @@ export function HubOverview({
   const run: Run = makeRun(setBusy, publishGatewayPayload, notify);
   const poolState = hubPoolState(payload);
 
-  // 参照 Cursor 的 Customize：顶部一排今日数字，中间一张拓扑卡（Codex++ 的卖点：任意 Agent → 网关 → 多家供应商），
+  // 参照 Cursor 的 Customize：顶部一排今日数字，中间一张拓扑卡（RoseCode 的卖点：任意 Agent → 网关 → 多家供应商），
   // 下面「最近请求」一个列表。现状说明不再单独写一段，拓扑图自己就说明了。
   return (
     <div className="hub-page cx-page">
@@ -156,8 +156,8 @@ export function HubOverview({
               title={!payload
                 ? t("正在读取网关状态…")
                 : solo
-                  ? tf("{0} 通过 Codex++ 使用 {1} 个供应商。请求按模型名路由，Key 冷却或供应商熔断时自动换上游。", [agentName(solo), providers.length])
-                  : tf("{0} 个 Agent 通过 Codex++ 共用 {1} 个供应商。请求按模型名路由，Key 冷却或供应商熔断时自动换上游。", [connected, providers.length])}
+                  ? tf("{0} 通过 RoseCode 使用 {1} 个供应商。请求按模型名路由，Key 冷却或供应商熔断时自动换上游。", [agentName(solo), providers.length])
+                  : tf("{0} 个 Agent 通过 RoseCode 共用 {1} 个供应商。请求按模型名路由，Key 冷却或供应商熔断时自动换上游。", [connected, providers.length])}
             >
               {[
                 t("按模型名路由"),

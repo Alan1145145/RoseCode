@@ -14,7 +14,7 @@
 //! 的 `Stop` / `SubagentStop` 里挂一条命令，把「回合结束了」写进 spool 文件；
 //! 浏览器 MCP 进程轮询 spool，看到新事件就发 `turn_ended`。
 //!
-//! 钩子命令是 `CodexPlusPlus --codex-plus-browser-turn-end <spool>`，不依赖 shell、
+//! 钩子命令是 `RoseCode --codex-plus-browser-turn-end <spool>`，不依赖 shell、
 //! 不依赖脚本路径，也不受 GUI 与 MCP 进程工作目录不同的影响。
 //!
 //! # 边界
@@ -317,7 +317,7 @@ fn remove_hook(document: &mut Value, event: &str, command: &str) -> bool {
 
 /// 钩子入口：把一次回合结束追加进 spool。
 ///
-/// 由 `CodexPlusPlus --codex-plus-browser-turn-end` 调用。任何失败都只写 stderr：
+/// 由 `RoseCode --codex-plus-browser-turn-end` 调用。任何失败都只写 stderr：
 /// 钩子的退出码会显示给用户，不该因为磁盘问题打断对话。
 pub fn record_turn_end(state_dir: Option<&std::ffi::OsStr>) {
     // 钩子命令里带了 state 目录（见 `hook_command`）：开发实例与主实例各写各的 spool。

@@ -10,7 +10,7 @@ fn manager_binary_uses_windows_gui_subsystem_in_debug_and_release() {
     );
 }
 
-/// ClaudeMom 与 Codex++ 共用 main.rs：入口必须先标记变体再进共用 main，
+/// ClaudeMom 与 RoseCode 共用 main.rs：入口必须先标记变体再进共用 main，
 /// 自己也要声明 GUI 子系统（main.rs 作为子模块时那条 crate 属性不生效）。
 #[test]
 fn claude_mom_binary_marks_flavor_before_shared_main() {
@@ -25,7 +25,7 @@ fn claude_mom_binary_marks_flavor_before_shared_main() {
     let cargo_toml = std::fs::read_to_string(concat!(env!("CARGO_MANIFEST_DIR"), "/Cargo.toml"))
         .expect("read manager Cargo.toml");
     assert!(cargo_toml.contains("name = \"claude-mom\""));
-    assert!(cargo_toml.contains("default-run = \"codex-plus-plus\""));
+    assert!(cargo_toml.contains("default-run = \"rosecode\""));
 }
 
 #[test]
@@ -112,7 +112,7 @@ fn manager_lightweight_mode_destroys_and_rebuilds_the_main_window() {
     assert!(lib_rs.contains("lightweight::cancel_pending_release();"));
     // 打开入口统一走 show_main_window → ensure_main_window，窗口不在就按原配置重建。
     assert!(lib_rs.contains("fn ensure_main_window"));
-    // 重建时按产品变体加载各自的页面（Codex++ 的 index.html / ClaudeMom 的 claude-mom.html）。
+    // 重建时按产品变体加载各自的页面（RoseCode 的 index.html / ClaudeMom 的 claude-mom.html）。
     assert!(lib_rs.contains("build_main_window(app_handle, flavor::main_window().url, false)"));
     assert_eq!(
         lib_rs.matches("tauri::WebviewWindowBuilder::new(").count(),
@@ -153,13 +153,13 @@ fn manager_keeps_a_visible_brand_tray_and_click_menu_when_hiding_the_macos_dock_
     assert!(lib_rs.contains("set_manager_activation_policy(app_handle, true)"));
     assert!(lib_rs.contains("set_manager_activation_policy(&app_handle, false)"));
     assert!(lib_rs.contains(".icon_as_template(true)"));
-    assert!(lib_rs.contains("tauri::include_image!(\"icons/icon.png\")"));
+    assert!(lib_rs.contains("tauri::include_image!(\"icons/tray-template.png\")"));
     assert!(lib_rs.contains(".show_menu_on_left_click(true)"));
-    // 托盘提示随产品变体：Codex++ / ClaudeMom（见 flavor.rs）。
+    // 托盘提示随产品变体：RoseCode / ClaudeMom（见 flavor.rs）。
     assert!(lib_rs.contains(".tooltip(flavor::app_name())"));
     let flavor_rs = std::fs::read_to_string(concat!(env!("CARGO_MANIFEST_DIR"), "/src/flavor.rs"))
         .expect("read manager flavor.rs");
-    assert!(flavor_rs.contains("Flavor::CodexPlusPlus => \"RoseCode\""));
+    assert!(flavor_rs.contains("Flavor::RoseCode => \"RoseCode\""));
 }
 
 // 返回 needle 之前文本最近的 #[cfg(...)] 属性。前提是设置语句与其平台门控
@@ -250,7 +250,7 @@ fn only_the_gui_binary_is_built_with_the_codex_icon() {
     assert!(launcher.contains("autobins = false"));
     assert!(launcher.contains("build = false"));
     assert!(!launcher.contains("[[bin]]"));
-    assert!(manager.contains("name = \"codex-plus-plus\""));
+    assert!(manager.contains("name = \"rosecode\""));
     assert!(config.contains("icons/icon.ico"));
 }
 
@@ -272,7 +272,7 @@ fn windows_binaries_run_as_invoker_without_administrator_privileges() {
         .and_then(std::path::Path::parent)
         .and_then(std::path::Path::parent)
         .unwrap()
-        .join("scripts/installer/windows/CodexPlusPlus.nsi");
+        .join("scripts/installer/windows/RoseCode.nsi");
     let windows_installer =
         std::fs::read_to_string(&windows_installer).expect("read windows installer");
 
@@ -335,16 +335,16 @@ fn macos_packager_builds_one_visible_native_gui_with_legacy_update_shim() {
     assert!(script.contains("<key>LSUIElement</key>"));
     assert!(script.contains("ARCH=\"${2:-$(uname -m)}\""));
     assert!(script.contains("BINARY_DIR=\"${BINARY_DIR:-$ROOT/target/release}\""));
-    assert!(script.contains("CodexPlusPlus-${VERSION}-macos-${ARCH}.dmg"));
+    assert!(script.contains("RoseCode-${VERSION}-macos-${ARCH}.dmg"));
     assert!(script.contains(
-        "create_app \"Codex++\" \"CodexPlusPlus\" \"$BINARY_DIR/codex-plus-plus\" \"com.bigpizzav3.codexplusplus\" \"false\""
+        "create_app \"RoseCode\" \"RoseCode\" \"$BINARY_DIR/rosecode\" \"com.alan1145145.rosecode\" \"false\""
     ));
     assert!(script.contains(
-        "create_app \"Codex++ 管理工具\" \"CodexPlusPlusManager\" \"$BINARY_DIR/codex-plus-legacy-shim\" \"com.bigpizzav3.codexplusplus.manager\" \"true\""
+        "create_app \"RoseCode 管理工具\" \"RoseCodeManager\" \"$BINARY_DIR/codex-plus-legacy-shim\" \"com.alan1145145.rosecode.manager\" \"true\""
     ));
-    assert!(script.contains("printf '%s\\n' \"Codex++ 管理工具.app\" > \"$STAGE/.hidden\""));
-    assert!(script.contains("chflags hidden \"$STAGE/Codex++ 管理工具.app\""));
-    assert!(script.contains("set visible of item \"Codex++ 管理工具.app\" to false"));
+    assert!(script.contains("printf '%s\\n' \"RoseCode 管理工具.app\" > \"$STAGE/.hidden\""));
+    assert!(script.contains("chflags hidden \"$STAGE/RoseCode 管理工具.app\""));
+    assert!(script.contains("set visible of item \"RoseCode 管理工具.app\" to false"));
     assert!(script.contains("<key>CodexPlusUnifiedApp</key>"));
 }
 

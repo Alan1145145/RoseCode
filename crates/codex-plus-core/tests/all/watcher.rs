@@ -103,7 +103,7 @@ fn macos_launch_agent_registers_the_gui_at_login() {
     let home = tempfile::tempdir().unwrap();
     let launcher = home
         .path()
-        .join("Codex++.app/Contents/MacOS/CodexPlusPlus");
+        .join("RoseCode.app/Contents/MacOS/RoseCode");
     assert!(!macos_launch_agent_installed_at(home.path()));
 
     let path = write_macos_launch_agent_at(home.path(), &launcher).unwrap();
@@ -135,33 +135,33 @@ fn macos_launch_agent_registers_the_gui_at_login() {
 #[test]
 fn macos_launch_agent_plist_escapes_the_executable_path() {
     let plist = macos_launch_agent_plist(std::path::Path::new(
-        "/Applications/A&B <x>.app/Contents/MacOS/CodexPlusPlus",
+        "/Applications/A&B <x>.app/Contents/MacOS/RoseCode",
     ));
 
-    assert!(plist.contains("/Applications/A&amp;B &lt;x&gt;.app/Contents/MacOS/CodexPlusPlus"));
+    assert!(plist.contains("/Applications/A&amp;B &lt;x&gt;.app/Contents/MacOS/RoseCode"));
     assert!(!plist.contains("A&B <x>"));
 }
 
 #[test]
 fn watcher_install_plan_opens_the_gui_at_logon() {
-    let plan = build_watcher_install_plan("C:/Tools/codex-plus-plus.exe".into(), 9333);
+    let plan = build_watcher_install_plan("C:/Tools/RoseCode.exe".into(), 9333);
 
-    assert_eq!(plan.run_value_name, "CodexPlusPlusWatcher");
+    assert_eq!(plan.run_value_name, "RoseCodeWatcher");
     assert_eq!(
         plan.run_value,
-        "\"C:/Tools/codex-plus-plus.exe\" --autostart"
+        "\"C:/Tools/RoseCode.exe\" --autostart"
     );
-    assert_eq!(plan.shortcut_name, "CodexPlusPlusWatcher.lnk");
-    assert_eq!(plan.shortcut_target, "C:/Tools/codex-plus-plus.exe");
+    assert_eq!(plan.shortcut_name, "RoseCodeWatcher.lnk");
+    assert_eq!(plan.shortcut_target, "C:/Tools/RoseCode.exe");
     assert_eq!(plan.shortcut_arguments, "--autostart");
 }
 
 #[test]
 fn startup_command_opens_only_the_unified_gui() {
-    let command = build_spawn_launcher_command("C:/Tools/codex-plus-plus.exe", 9444);
+    let command = build_spawn_launcher_command("C:/Tools/RoseCode.exe", 9444);
 
-    assert_eq!(command[0], "C:/Tools/codex-plus-plus.exe");
-    assert_eq!(command, ["C:/Tools/codex-plus-plus.exe", "--autostart"]);
+    assert_eq!(command[0], "C:/Tools/RoseCode.exe");
+    assert_eq!(command, ["C:/Tools/RoseCode.exe", "--autostart"]);
     assert!(!command.iter().any(|part| part.contains("manager")));
 }
 
@@ -229,10 +229,10 @@ fn codex_process_filter_recognizes_beta_desktop_without_matching_cli_or_other_ap
 #[test]
 fn launcher_process_filter_protects_current_process_ancestry() {
     let processes = [
-        (10, 0, "codex-plus-plus.exe"),
-        (20, 10, "codex-plus-plus.exe"),
-        (30, 20, "codex-plus-plus.exe"),
-        (40, 10, "codex-plus-plus.exe"),
+        (10, 0, "RoseCode.exe"),
+        (20, 10, "RoseCode.exe"),
+        (30, 20, "RoseCode.exe"),
+        (40, 10, "RoseCode.exe"),
         (50, 10, "codex-plus-plus-manager.exe"),
     ];
 
@@ -243,7 +243,7 @@ fn launcher_process_filter_protects_current_process_ancestry() {
 fn macos_launcher_process_names_cover_development_and_packaged_binaries() {
     assert_eq!(
         macos_launcher_process_names(),
-        ["codex-plus-plus", "CodexPlusPlus"]
+        ["rosecode", "RoseCode"]
     );
 }
 
@@ -437,9 +437,9 @@ fn find_codex_processes_ignores_unrelated_processes() {
         WindowsProcessInfo {
             process_id: 20,
             parent_process_id: 0,
-            exe_file: "codex-plus-plus.exe".to_string(),
+            exe_file: "RoseCode.exe".to_string(),
             executable_path: Some(std::path::PathBuf::from(
-                r"D:\Programs\Codex++\codex-plus-plus.exe",
+                r"D:\Programs\RoseCode\RoseCode.exe",
             )),
         },
     ];

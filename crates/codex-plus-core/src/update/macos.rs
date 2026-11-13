@@ -14,12 +14,12 @@ struct BundleSpec {
 }
 
 const BUNDLES: [BundleSpec; 1] = [BundleSpec {
-    name: "Codex++.app",
-    id: "com.bigpizzav3.codexplusplus",
-    executable: "CodexPlusPlus",
+    name: "RoseCode.app",
+    id: "com.alan1145145.rosecode",
+    executable: "RoseCode",
 }];
 
-const LEGACY_MIGRATION_MESSAGE: &str = "旧双应用布局需手动迁移：下载新版安装包，将完整 Codex++.app 安装到 Applications 后打开；旧版自动更新器不支持单应用安装包，旧入口请确认后自行移除。";
+const LEGACY_MIGRATION_MESSAGE: &str = "旧双应用布局需手动迁移：下载新版安装包，将完整 RoseCode.app 安装到 Applications 后打开；旧版自动更新器不支持单应用安装包，旧入口请确认后自行移除。";
 
 fn installed_root_from_executable(executable: &Path) -> anyhow::Result<PathBuf> {
     let root = executable
@@ -27,7 +27,7 @@ fn installed_root_from_executable(executable: &Path) -> anyhow::Result<PathBuf> 
         .and_then(Path::parent)
         .and_then(Path::parent)
         .and_then(Path::parent)
-        .ok_or_else(|| anyhow::anyhow!("请从已安装的 Codex++.app 内更新。"))?;
+        .ok_or_else(|| anyhow::anyhow!("请从已安装的 RoseCode.app 内更新。"))?;
     let expected = root
         .join(BUNDLES[0].name)
         .join("Contents/MacOS")
@@ -46,11 +46,11 @@ fn installed_root_from_executable(executable: &Path) -> anyhow::Result<PathBuf> 
             .and_then(Path::parent)
             .and_then(Path::file_name)
             .and_then(|name| name.to_str());
-        if app_name.is_some_and(|name| name.eq_ignore_ascii_case("Codex++ 管理工具.app")) {
+        if app_name.is_some_and(|name| name.eq_ignore_ascii_case("RoseCode 管理工具.app")) {
             bail!("{LEGACY_MIGRATION_MESSAGE}");
         }
         bail!(
-            "当前应用目录名称不符合自动更新布局；请将完整新版 Codex++.app 手动安装到标准应用目录后更新。"
+            "当前应用目录名称不符合自动更新布局；请将完整新版 RoseCode.app 手动安装到标准应用目录后更新。"
         );
     }
     Ok(root.to_path_buf())
@@ -235,7 +235,7 @@ fn replace_bundles(ops: &impl BundleOps, plan: &UpdatePlan) -> anyhow::Result<()
                 backups.display()
             );
         }
-        bail!("更新失败，旧 Codex++ app 已恢复：{error}");
+        bail!("更新失败，旧 RoseCode app 已恢复：{error}");
     }
     Ok(())
 }
@@ -446,7 +446,7 @@ fn cleanup_stale_transactions(
     Ok(outcomes)
 }
 
-/// 记录本机更新建过的事务目录（JSON 字符串数组），放在 Codex++ 的 state 目录里（#2774 后续）。
+/// 记录本机更新建过的事务目录（JSON 字符串数组），放在 RoseCode 的 state 目录里（#2774 后续）。
 ///
 /// 启动 / 下次更新时只清理记下来的这些路径，不再列出 app 所在目录：app 放在「下载 / 桌面 /
 /// 文稿」等受保护目录时，每次启动列目录都可能触发隐私授权提示。
@@ -848,7 +848,7 @@ mod runtime {
                 return Ok(());
             }
             if Instant::now() >= deadline {
-                bail!("未收到 Codex++ 批准，旧 app 未替换。");
+                bail!("未收到 RoseCode 批准，旧 app 未替换。");
             }
             sleep(Duration::from_millis(100));
         }
@@ -877,10 +877,10 @@ mod runtime {
         let start = Instant::now();
         while let Some(path) = process_path(plan.manager_pid)? {
             if path != expected {
-                bail!("Codex++ 进程身份已变化，未替换 app。");
+                bail!("RoseCode 进程身份已变化，未替换 app。");
             }
             if start.elapsed() > Duration::from_secs(60) {
-                bail!("等待 Codex++ 正常退出超时，未替换 app。");
+                bail!("等待 RoseCode 正常退出超时，未替换 app。");
             }
             sleep(Duration::from_millis(100));
         }
@@ -920,7 +920,7 @@ mod runtime {
             bail!("更新计划的 DMG 不存在。");
         }
         if process_path(plan.manager_pid)?.as_deref() != Some(manager_executable(&root).as_path()) {
-            bail!("启动更新的 Codex++ 会话已失效或不属于本安装目录。");
+            bail!("启动更新的 RoseCode 会话已失效或不属于本安装目录。");
         }
         for (index, spec) in BUNDLES.iter().copied().enumerate() {
             let info = validate_bundle(&NativeOps, &root.join(spec.name), spec)?;
@@ -1069,7 +1069,7 @@ mod runtime {
         pending
     }
 
-    /// 启动时调用（后台线程）：只处理当前运行的 Codex++.app 所在目录；不是标准安装布局
+    /// 启动时调用（后台线程）：只处理当前运行的 RoseCode.app 所在目录；不是标准安装布局
     /// （如开发构建）就跳过。
     ///
     /// 旧版 helper 完成的更新（如 2.1.2 → 2.1.3）不删事务目录，新版启动时 helper 可能还没退出、
@@ -1102,7 +1102,7 @@ mod runtime {
             BUNDLES[0],
         )?];
         if !super::super::is_newer_version(version, &old_bundles[0].version)? {
-            bail!("更新版本未高于当前 Codex++ 版本。");
+            bail!("更新版本未高于当前 RoseCode 版本。");
         }
         // 先清掉以前失败 / 中断留下的事务目录，再建本次的。先置标记：等后台清理这一轮
         // 结束（放开更新锁）后，它不会再补跑，helper 拿锁不会撞上。
@@ -1220,7 +1220,7 @@ mod runtime {
             let detached = checked("/usr/bin/hdiutil", &["detach".as_ref(), mount.as_os_str()]);
             prepared?;
             detached?;
-            write_state(&plan, "ready", "Codex++.app 已校验并完整复制，等待程序退出")?;
+            write_state(&plan, "ready", "RoseCode.app 已校验并完整复制，等待程序退出")?;
             wait_approval(&plan)?;
             approved = true;
             wait_manager(&plan)?;
@@ -1241,7 +1241,7 @@ mod runtime {
     ) -> anyhow::Result<()> {
         match outcome {
             Ok(()) => {
-                write_state(plan, "installed", "Codex++.app 已安装")?;
+                write_state(plan, "installed", "RoseCode.app 已安装")?;
                 let restarted = open_bundle(&plan.install_root.join(BUNDLES[0].name));
                 if let Err(error) = &restarted {
                     let _ = write_state(
@@ -1263,7 +1263,7 @@ mod runtime {
             }
             Err(error) => {
                 let _ = write_state(&plan, "failed", &error.to_string());
-                // 只在原 Codex++ 已退出时重开；验证或签名拒绝不改变旧 app。
+                // 只在原 RoseCode 已退出时重开；验证或签名拒绝不改变旧 app。
                 if approved && wait_manager(&plan).is_ok() {
                     let _ = open_bundle(&plan.install_root.join(BUNDLES[0].name));
                 }
@@ -1357,7 +1357,7 @@ mod runtime {
         fs::write(
             path.join("Contents/Info.plist"),
             format!(
-                "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CodexPlusUnifiedApp</key><true/><key>CFBundleName</key><string>Codex++</string><key>CFBundleIdentifier</key><string>{}</string><key>CFBundleExecutable</key><string>{}</string><key>CFBundleShortVersionString</key><string>{version}</string><key>CFBundleVersion</key><string>{version}</string><key>CFBundlePackageType</key><string>APPL</string><key>LSMinimumSystemVersion</key><string>10.0.0</string></dict></plist>",
+                "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CodexPlusUnifiedApp</key><true/><key>CFBundleName</key><string>RoseCode</string><key>CFBundleIdentifier</key><string>{}</string><key>CFBundleExecutable</key><string>{}</string><key>CFBundleShortVersionString</key><string>{version}</string><key>CFBundleVersion</key><string>{version}</string><key>CFBundlePackageType</key><string>APPL</string><key>LSMinimumSystemVersion</key><string>10.0.0</string></dict></plist>",
                 spec.id, spec.executable,
             ),
         )?;
@@ -1498,7 +1498,7 @@ mod runtime {
                 bail!("测试 DMG 没有以只读方式挂载");
             }
             prepare_bundles(&NativeOps, &plan, &mount)
-                .context("从真实 DMG 校验/复制 Codex++.app 失败")
+                .context("从真实 DMG 校验/复制 RoseCode.app 失败")
         });
         let detached = checked("/usr/bin/hdiutil", &["detach".as_ref(), mount.as_os_str()])
             .context("卸载私有测试 DMG 失败");
@@ -1537,7 +1537,7 @@ mod runtime {
                 target: plan.install_root.join(BUNDLES[0].name),
             };
             let error = replace_bundles(&ops, &plan).unwrap_err();
-            if !error.to_string().contains("旧 Codex++ app 已恢复") {
+            if !error.to_string().contains("旧 RoseCode app 已恢复") {
                 return Err(error);
             }
         } else {
@@ -1605,7 +1605,7 @@ pub fn launch_update(installer: &Path, version: &str) -> anyhow::Result<()> {
 pub fn run_update_helper(path: &Path) -> anyhow::Result<()> {
     runtime::run(path)
 }
-/// 启动时清理当前 Codex++.app 同级目录里以前的更新残留（`.codex-plus-update-<uuid>`）。
+/// 启动时清理当前 RoseCode.app 同级目录里以前的更新残留（`.codex-plus-update-<uuid>`）。
 /// 失败只写诊断日志，不影响启动。
 #[cfg(target_os = "macos")]
 pub fn cleanup_stale_update_transactions() {
@@ -1794,7 +1794,7 @@ mod tests {
             replace_bundles(&ops, &plan)
                 .unwrap_err()
                 .to_string()
-                .contains("旧 Codex++ app 已恢复")
+                .contains("旧 RoseCode app 已恢复")
         );
         assert_old_apps(&ops, &plan);
         assert!(
@@ -1823,18 +1823,18 @@ mod tests {
             root.join(bundle).join("Contents/MacOS").join(executable)
         };
         assert_eq!(
-            installed_root_from_executable(&executable_path("Codex++.app", "CodexPlusPlus"))
+            installed_root_from_executable(&executable_path("RoseCode.app", "RoseCode"))
                 .unwrap(),
             root
         );
         assert_eq!(
-            installed_root_from_executable(&executable_path("codex++.app", "CodexPlusPlus"))
+            installed_root_from_executable(&executable_path("codex++.app", "RoseCode"))
                 .unwrap(),
             root
         );
         for executable in [executable_path(
-            "Codex++ 管理工具.app",
-            "CodexPlusPlusManager",
+            "RoseCode 管理工具.app",
+            "RoseCodeManager",
         )] {
             let error = installed_root_from_executable(&executable).unwrap_err();
             assert!(error.to_string().contains("手动迁移"));
@@ -1845,8 +1845,8 @@ mod tests {
             );
         }
         let renamed = installed_root_from_executable(&executable_path(
-            "Codex++ 2.app",
-            "CodexPlusPlus",
+            "RoseCode 2.app",
+            "RoseCode",
         ))
         .unwrap_err();
         assert!(renamed.to_string().contains("标准应用目录"));
@@ -1874,9 +1874,9 @@ mod tests {
     fn macos_update_leaves_legacy_manager_bundle_in_place() {
         let (_temp, plan, payload) = fixture(true);
         let legacy = BundleSpec {
-            name: "Codex++ 管理工具.app",
-            id: "com.bigpizzav3.codexplusplus.manager",
-            executable: "CodexPlusPlusManager",
+            name: "RoseCode 管理工具.app",
+            id: "com.alan1145145.rosecode.manager",
+            executable: "RoseCodeManager",
         };
         bundle(&plan.install_root, legacy, "1.0.0");
         let ops = FixtureOps::default();

@@ -900,7 +900,7 @@ async fn refresh_codex_tokens(
 ) -> anyhow::Result<RefreshedTokens> {
     let client = crate::http_client::build_with_relay_proxy(
         reqwest::Client::builder()
-            .user_agent(format!("CodexPlusPlus/{}", env!("CARGO_PKG_VERSION")))
+            .user_agent(format!("RoseCode/{}", env!("CARGO_PKG_VERSION")))
             .timeout(std::time::Duration::from_secs(30)),
         proxy,
     )?;

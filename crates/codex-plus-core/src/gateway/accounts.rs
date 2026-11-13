@@ -331,15 +331,15 @@ pub(crate) async fn wait_for_callback_params(
         if params.get("state").map(String::as_str) != Some(state) {
             respond_callback_page(
                 &mut stream,
-                "这个登录页已失效（state 不一致），请在 Codex++ 最新打开的登录页里完成登录。",
+                "这个登录页已失效（state 不一致），请在 RoseCode 最新打开的登录页里完成登录。",
             )
             .await;
             continue;
         }
         let result = callback_result(params);
         let page = match &result {
-            Ok(_) => "登录成功，可以回到 Codex++ 了。",
-            Err(_) => "登录没有完成，请回到 Codex++ 重新登录。",
+            Ok(_) => "登录成功，可以回到 RoseCode 了。",
+            Err(_) => "登录没有完成，请回到 RoseCode 重新登录。",
         };
         respond_callback_page(&mut stream, page).await;
         return result.map_err(|error| anyhow::anyhow!("登录失败：{error}"));
@@ -348,7 +348,7 @@ pub(crate) async fn wait_for_callback_params(
 
 async fn respond_callback_page(stream: &mut tokio::net::TcpStream, page: &str) {
     let body = format!(
-        "<!doctype html><meta charset=\"utf-8\"><title>Codex++</title><body style=\"font-family:system-ui;padding:48px;text-align:center\"><h2>{page}</h2></body>"
+        "<!doctype html><meta charset=\"utf-8\"><title>RoseCode</title><body style=\"font-family:system-ui;padding:48px;text-align:center\"><h2>{page}</h2></body>"
     );
     let response = format!(
         "HTTP/1.1 200 OK\r\ncontent-type: text/html; charset=utf-8\r\ncontent-length: {}\r\nconnection: close\r\n\r\n{body}",
@@ -364,7 +364,7 @@ async fn exchange_code(code: &str, verifier: &str) -> anyhow::Result<ChatGptAcco
         .filter(|value| !value.trim().is_empty())
         .unwrap_or_else(|| crate::official_login::OFFICIAL_OAUTH_TOKEN_URL.to_string());
     let client = reqwest::Client::builder()
-        .user_agent(format!("CodexPlusPlus/{}", env!("CARGO_PKG_VERSION")))
+        .user_agent(format!("RoseCode/{}", env!("CARGO_PKG_VERSION")))
         .timeout(Duration::from_secs(30))
         .build()?;
     let response = client
@@ -1309,7 +1309,7 @@ const SIWC_TOKEN_URL: &str = "https://auth.openai.com/api/accounts/oauth/token";
 pub const SIWC_API: &str = "https://api.openai.com/v1";
 const SIWC_DYNAMIC_CLIENT: &str = "dynamic_agent_client";
 /// 授权页上显示的应用名。
-const SIWC_AGENT_NAME: &str = "Codex++";
+const SIWC_AGENT_NAME: &str = "RoseCode";
 /// 允许 token 直接发给 api.openai.com 的授权范围；没批下来说明账号不符合条件。
 const SIWC_DIRECT_SCOPE: &str = "chatgpt.tokens.use.direct";
 const SIWC_SCOPES: &str =

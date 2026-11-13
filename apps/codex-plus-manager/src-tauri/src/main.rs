@@ -117,7 +117,7 @@ pub(crate) fn main() {
     #[cfg(target_os = "macos")]
     if launched_from_legacy_manager_compat_bundle() {
         // 旧版更新器要求 DMG 中有第二个 manager bundle，并会在替换后打开它。
-        // 兼容壳只满足身份校验；让真正的统一 Codex++ app 接管界面。
+        // 兼容壳只满足身份校验；让真正的统一 RoseCode app 接管界面。
         return;
     }
     // 开机启动也只打开界面；禁用开机项不影响用户主动双击。
@@ -173,7 +173,7 @@ pub(crate) fn main() {
 fn launched_from_legacy_manager_compat_bundle() -> bool {
     std::env::current_exe()
         .ok()
-        .map(|path| path.to_string_lossy().contains("Codex++ 管理工具.app"))
+        .map(|path| path.to_string_lossy().contains("RoseCode 管理工具.app"))
         .unwrap_or(false)
 }
 
@@ -248,9 +248,9 @@ mod tests {
     #[test]
     fn disabling_login_startup_still_allows_opening_the_gui() {
         for args in [
-            vec!["codex-plus-plus"],
-            vec!["codex-plus-plus", "--background"],
-            vec!["codex-plus-plus", "--helper-only"],
+            vec!["rosecode"],
+            vec!["rosecode", "--background"],
+            vec!["rosecode", "--helper-only"],
         ] {
             assert!(!should_skip_autostart(
                 args.into_iter().map(String::from),
@@ -258,11 +258,11 @@ mod tests {
             ));
         }
         assert!(should_skip_autostart(
-            ["codex-plus-plus", "--autostart"].map(String::from),
+            ["rosecode", "--autostart"].map(String::from),
             true
         ));
         assert!(!should_skip_autostart(
-            ["codex-plus-plus", "--autostart"].map(String::from),
+            ["rosecode", "--autostart"].map(String::from),
             false
         ));
     }

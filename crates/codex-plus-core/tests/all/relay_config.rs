@@ -854,7 +854,7 @@ args = ["--config", "/opt/tools/old/config.json"]
     );
 }
 
-/// #3016 例外：Codex++ 自己生成并按实例补全的 MCP 条目仍以目标（模板）为准，
+/// #3016 例外：RoseCode 自己生成并按实例补全的 MCP 条目仍以目标（模板）为准，
 /// 不能被 live 里的旧端口 / 旧路径盖回。
 #[test]
 fn preserved_apply_keeps_snapshot_for_owned_mcp_entries() {
@@ -1233,7 +1233,7 @@ fn pure_api_provider_name_falls_back_when_display_name_is_empty_or_openai() {
     }
 }
 
-/// 回填 live config 不能把 Codex++ 写进去的显示名固化进快照，否则改名后不再同步（issue #192）。
+/// 回填 live config 不能把 RoseCode 写进去的显示名固化进快照，否则改名后不再同步（issue #192）。
 #[test]
 fn backfill_does_not_freeze_synced_display_name_so_rename_still_syncs() {
     let temp = tempfile::tempdir().unwrap();
@@ -5983,7 +5983,7 @@ base_url = "https://relay.example/v1"
 #[test]
 fn provider_multi_agent_v1_gates_external_catalog_pointer() {
     let temp = tempfile::tempdir().unwrap();
-    // 外部目录必须放在 model-catalogs/ 之外：该目录下的指针一律视为 Codex++
+    // 外部目录必须放在 model-catalogs/ 之外：该目录下的指针一律视为 RoseCode
     // 托管并接管，走不到「外部指针原样保留」分支。
     std::fs::write(
         temp.path().join("vendor-external.json"),
@@ -8040,7 +8040,7 @@ base_url = "https://responses.example.test/v1"
 
 #[test]
 fn official_mix_profile_keeps_user_feature_flags_in_live_config() {
-    // #1010：混入模式下 Codex 直连中转 base_url，Codex++ 不经手请求、剥不掉生图工具
+    // #1010：混入模式下 Codex 直连中转 base_url，RoseCode 不经手请求、剥不掉生图工具
     // （#228 起可打开「移除托管生图工具」改走本地代理）；用户在供应商配置里写的
     // `[features] image_generation = false` 切换供应商时仍必须原样落到 live config.toml。
     let temp = tempfile::tempdir().unwrap();

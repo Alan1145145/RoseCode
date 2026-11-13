@@ -969,7 +969,7 @@ fn check_generated_config(settings: &BackendSettings, home: &Path, findings: &mu
         Err(error) => {
             findings.push(
                 finding(Level::Error, "catalog.missing", "模型目录文件不存在", format!("config.toml 指向 `{pointer}`，但读不出来：{error}"))
-                    .fix("重新保存供应商配置，让 Codex++ 重新生成目录文件。")
+                    .fix("重新保存供应商配置，让 RoseCode 重新生成目录文件。")
                     .scope("生成结果"),
             );
             return;
@@ -1218,14 +1218,14 @@ fn build_client(settings: &DoctorSettings, endpoint: &str) -> anyhow::Result<req
         .unwrap_or(false);
     if loopback {
         return Ok(reqwest::Client::builder()
-            .user_agent("CodexPlusPlus/config-doctor")
+            .user_agent("RoseCode/config-doctor")
             .connect_timeout(Duration::from_secs(5))
             .timeout(AI_TIMEOUT)
             .no_proxy()
             .build()?);
     }
     crate::http_client::proxied_client_for_url_with_timeouts(
-        "CodexPlusPlus/config-doctor",
+        "RoseCode/config-doctor",
         endpoint,
         Duration::from_secs(10),
         AI_TIMEOUT,
@@ -1322,7 +1322,7 @@ pub async fn detect_local_source() -> LocalSource {
     LocalSource { found: false, base_url: String::new(), model: String::new(), label: String::new() }
 }
 
-/// 复用当前供应商跑一次：走 Codex++ 自己的协议代理，和 Codex 用的路由/Key/模型完全一致，
+/// 复用当前供应商跑一次：走 RoseCode 自己的协议代理，和 Codex 用的路由/Key/模型完全一致，
 /// 不需要用户再填任何东西。
 async fn run_ai_current(settings: &DoctorSettings, snapshot: &Value) -> AiReport {
     let started = Instant::now();

@@ -154,7 +154,7 @@ pub struct ClaudeLocalResult {
     pub message: String,
 }
 
-/// 直连上游：不经 Codex++ 网关，本地兼容服务把请求直接发到这组 Base URL + Key
+/// 直连上游：不经 RoseCode 网关，本地兼容服务把请求直接发到这组 Base URL + Key
 /// （`{base}/v1/messages`，与 `ANTHROPIC_BASE_URL` 同一语义）。
 ///
 /// 只有 ClaudeMom 会设置；没设置时一切照旧走网关绑定。
@@ -376,7 +376,7 @@ fn private_dir(path: &Path) -> Result<()> {
 
 /// 完整功能模式里内置 Claude Code 的配置目录（`CLAUDE_CONFIG_DIR`，会话记录在它的 `projects/` 下）。
 ///
-/// Desktop 左侧的会话列表存在真实 Claude profile 里，Codex++ 与 ClaudeMom 共用同一份；会话记录也必须共用，
+/// Desktop 左侧的会话列表存在真实 Claude profile 里，RoseCode 与 ClaudeMom 共用同一份；会话记录也必须共用，
 /// 否则在一个程序里建的会话到另一个里打不开（一直显示「此页面加载时间比平时更长」）。
 /// 所以放在两个程序的状态目录之外；拿不到家目录时退回各自状态目录里的旧位置。
 fn full_code_dir(root: &Path) -> PathBuf {
@@ -1231,7 +1231,7 @@ fn untrust_ca(root: &Path) -> Result<()> {
             .status();
         ensure!(
             !ca_trusted(root),
-            "本地证书仍在信任列表中，请在“钥匙串访问”里删除 Codex++ Local CA"
+            "本地证书仍在信任列表中，请在“钥匙串访问”里删除 RoseCode Local CA"
         );
     }
     // certutil -delstore 同样会弹确认框，给足用户点确认的时间。
@@ -1462,7 +1462,7 @@ fn is_internal_review_model(model: &str) -> bool {
 /// Claude Code 的上下文窗口是一份**全局环境变量**（`CLAUDE_CODE_MAX_CONTEXT_TOKENS`），
 /// 启动时按默认模型算一次；在 Claude 里切到窗口更小的模型时它不会跟着变小，
 /// auto-compact 会一直等到大窗口才触发，请求先被上游顶回来。所以只暴露窗口
-/// 不小于默认模型的模型，其余的仍留在 Codex++ 的默认模型选择器里。
+/// 不小于默认模型的模型，其余的仍留在 RoseCode 的默认模型选择器里。
 fn exposed_models(
     gateway: &GatewaySettings,
     binding: &AgentBinding,
@@ -1618,7 +1618,7 @@ fn local_binding(gateway: &GatewaySettings, config: &ClaudeLocalSettings) -> Res
     Ok(binding)
 }
 
-/// Codex++ 重启后要不要在原端口恢复代理：runtime 不在、ready 有端口、
+/// RoseCode 重启后要不要在原端口恢复代理：runtime 不在、ready 有端口、
 /// Claude 还挂在这个端口上、且完整功能模式开着。
 fn resume_port(
     runtime_alive: bool,
@@ -1649,7 +1649,7 @@ pub fn resume_attached_proxy() -> Result<Option<u16>> {
         return Ok(None);
     };
     let node = node_runtime().context("未找到支持 fetch 和 WebSocket 的 Node.js")?;
-    // 升级 Codex++ 后恢复的代理也要用新版脚本，不能沿用状态目录里的旧副本。
+    // 升级 RoseCode 后恢复的代理也要用新版脚本，不能沿用状态目录里的旧副本。
     install_assets(&root)?;
     sync_model_compact_windows(&root, &config);
     start_backend(&root, &node, &config, Some(port)).map(Some)
@@ -2288,7 +2288,7 @@ fn launch_original(
         let code_dir = full_code_dir(root);
         private_dir(&code_dir)?;
         merge_legacy_full_code_dir(&root.join("claude-code"), &code_dir);
-        // 与 3p 路径一致：把 Codex++ 配置的每模型窗口/推理档传给内置 Claude Code。
+        // 与 3p 路径一致：把 RoseCode 配置的每模型窗口/推理档传给内置 Claude Code。
         let helper_port = crate::protocol_proxy::ensure_protocol_proxy_port_available();
         let wiring = wiring(&gateway, &binding, AGENT_ID, helper_port);
         let token = wiring.token.clone();
@@ -2372,7 +2372,7 @@ fn launch_three_p(source: &Path, root: &Path, config: &ClaudeLocalSettings) -> R
     Ok(())
 }
 
-/// 只停止 Codex++ 自己持有的代理进程，不关闭 Claude 或其它实例。
+/// 只停止 RoseCode 自己持有的代理进程，不关闭 Claude 或其它实例。
 pub fn stop_backend() {
     let runtime = runtime_slot()
         .lock()
@@ -2611,7 +2611,7 @@ pub fn perform(action: &str) -> Result<ClaudeLocalResult> {
             );
             ensure!(
                 claude_processes()?.is_empty(),
-                "Claude 正在运行，请先完全退出，再从 Codex++ 启动以应用本地模式"
+                "Claude 正在运行，请先完全退出，再从 RoseCode 启动以应用本地模式"
             );
             if config.session_sync {
                 let sets = profile_sets();
@@ -2663,7 +2663,7 @@ pub fn perform(action: &str) -> Result<ClaudeLocalResult> {
                 "已通过本地兼容服务启动原版 Claude Desktop。".to_string()
             } else {
                 launch_three_p(&source, &root, &config)?;
-                "已通过 Codex++ 网关启动原版 Claude Desktop 的 3p 模式。".to_string()
+                "已通过 RoseCode 网关启动原版 Claude Desktop 的 3p 模式。".to_string()
             }
         }
         _ => unreachable!(),

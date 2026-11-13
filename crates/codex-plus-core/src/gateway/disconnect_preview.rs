@@ -184,7 +184,7 @@ pub fn preview(
         files: Vec::new(),
         warnings: vec![
             "预览展示配置文件原文差异，密钥等敏感值也一并可见。".into(),
-            "断开还会更新 Codex++ 的绑定、供应商记录与恢复存档，这些内部状态不在配置 diff 中。"
+            "断开还会更新 RoseCode 的绑定、供应商记录与恢复存档，这些内部状态不在配置 diff 中。"
                 .into(),
         ],
         can_disconnect: true,

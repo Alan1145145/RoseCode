@@ -11,7 +11,7 @@ test("Agent 接入：状态用短标签、整行点击展开", () => {
   assert.doesNotMatch(source, /打开「接入」后|的模型列表里有 \{1\} 个模型|tf\("模型 \{0\}"/);
 });
 
-test("模型下拉底部只有一个「用默认（不经 Codex++）」：它就是断开并还原，不再重复放一个同效果的按钮", () => {
+test("模型下拉底部只有一个「用默认（不经 RoseCode）」：它就是断开并还原，不再重复放一个同效果的按钮", () => {
   const source = readFileSync(new URL("./GatewayAgents.tsx", import.meta.url), "utf8");
   assert.doesNotMatch(source, /t\("断开并还原配置"\)/);
   assert.equal(source.match(/onClick=\{onDisconnect\}/g)?.length, 2, "下拉里一个、展开详情里一个");
@@ -47,7 +47,7 @@ test("Codex 行有启动 / 停止键：只有主窗口传了 codexRun 才显示�
   assert.match(source, /disabled=\{codexRun\.busy \|\| \(!codexRun\.running && Boolean\(codexRun\.unavailableReason\)\)\}/);
   assert.match(source, /title=\{codexRun\.busy \? t\("处理中…"\) : codexRun\.running \? t\("停止 Codex"\) : codexRun\.unavailableReason \?\? t\("启动 Codex"\)\}/);
   assert.match(source, /\(codexRun\.running \? codexRun\.onStop : codexRun\.onStart\)\(\);/);
-  assert.match(source, /<Switch pending=\{busy !== null\} label=\{tf\("\{0\} 接入 Codex\+\+"/);
+  assert.match(source, /<Switch pending=\{busy !== null\} label=\{tf\("\{0\} 接入 RoseCode"/);
   // 启停与默认模型在下方动作栏，接入开关独立放在名称旁。
   const controls = source.slice(source.indexOf('className="cx-row-controls rose-agent-connection-controls"'), source.indexOf("{expanded && connected"));
   assert.match(controls, /<ModelPicker/);

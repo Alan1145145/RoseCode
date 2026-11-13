@@ -42,7 +42,7 @@
   const codexPlusModelPickerNativeLabelClass = "codex-plus-model-group-native-label";
   /** 我们自己插入的模型标签类名。 */
   const codexPlusModelPickerOwnLabelClass = "codex-plus-model-group-own-label";
-  /** 在 Codex++ 里收藏过的模型，行尾的星标。 */
+  /** 在 RoseCode 里收藏过的模型，行尾的星标。 */
   const codexPlusModelPickerFavoriteClass = "codex-plus-model-group-favorite";
   /** 行上的分组标记属性。 */
   const codexPlusModelPickerGroupAttr = "data-codex-plus-model-group";
@@ -123,7 +123,7 @@
           modelCount: (count) => `${count} 个模型`,
           groupAria: (name, count, current, isDefault) => `${name}${isDefault ? "（默认供应商）" : ""}，${count} 个模型${current ? "，当前使用" : ""}`,
           groupTitle: (name, count) => `${name} · ${count}`,
-          favorite: "已收藏（在 Codex++ 里收藏的模型）",
+          favorite: "已收藏（在 RoseCode 里收藏的模型）",
           listView: "切换为列表视图",
           iconsView: "切换为图标视图",
           expandAll: "全部展开",
@@ -144,7 +144,7 @@
           modelCount: (count) => `${count} models`,
           groupAria: (name, count, current, isDefault) => `${name}${isDefault ? " (default provider)" : ""}, ${count} models${current ? ", currently selected" : ""}`,
           groupTitle: (name, count) => `${name} · ${count}`,
-          favorite: "Favorite (starred in Codex++)",
+          favorite: "Favorite (starred in RoseCode)",
           listView: "Switch to list view",
           iconsView: "Switch to icon view",
           expandAll: "Expand all",
@@ -793,7 +793,7 @@
       const groupId =
         typeof entry.codex_plus_group_id === "string" ? entry.codex_plus_group_id.trim() : "";
       if (!provider || !groupId) return;
-      // 在 Codex++ 里收藏过的模型（网关写的 `codex_plus_favorite`）：行尾画星标。
+      // 在 RoseCode 里收藏过的模型（网关写的 `codex_plus_favorite`）：行尾画星标。
       // slug 留给图标识别：原生行会去掉 `GPT-` 前缀，只看行文本认不出 OpenAI。
       const value = {
         provider, groupId, favorite: entry.codex_plus_favorite === true, price: codexPlusModelPickerPrice(entry),

@@ -424,7 +424,7 @@ async fn rejected_compaction_items_are_stripped_and_remembered() {
 
 #[tokio::test]
 async fn local_compaction_summary_is_kept_when_foreign_reasoning_is_stripped() {
-    // Codex++ 自己生成的本地压缩摘要进代理时就展开成 user 消息，拒收重发时不会被当成别家内容去掉。
+    // RoseCode 自己生成的本地压缩摘要进代理时就展开成 user 消息，拒收重发时不会被当成别家内容去掉。
     let server = official_upstream().await;
     let relay = relay(&server, "local-summary");
     let local = json!({
@@ -731,7 +731,7 @@ async fn rejection_by_one_key_does_not_strip_for_another_key_of_same_relay() {
 
 // ---- #2917：推理项的明文 content ----
 //
-// 同一对话先用 DeepSeek / GLM（经 Codex++ 转换），再换到 OpenAI 风格的 Responses 上游：历史里的 reasoning 项
+// 同一对话先用 DeepSeek / GLM（经 RoseCode 转换），再换到 OpenAI 风格的 Responses 上游：历史里的 reasoning 项
 // 带着明文 content（reasoning_text）和占位 encrypted_content，上游要求 content 为空，整条请求 400。
 
 /// DeepSeek 转换回来的占位加密内容。

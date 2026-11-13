@@ -201,7 +201,7 @@ pub struct UserScriptManager {
     config_lock: Arc<Mutex<()>>,
     /// 后台设置文件。内置拓展里有对应设置字段的，启停就读写这里（见 [`Self::with_settings_path`]）。
     settings_path: Option<PathBuf>,
-    /// 随 Codex++ 发布的官方拓展包所在目录（来源 `bundled`），见 [`crate::bundled_extensions`]。
+    /// 随 RoseCode 发布的官方拓展包所在目录（来源 `bundled`），见 [`crate::bundled_extensions`]。
     bundled_dir: Option<PathBuf>,
 }
 
@@ -1854,7 +1854,7 @@ fn resolve_extension_config(schema: &[ExtensionConfigField], stored: Option<&Map
     Value::Object(resolved)
 }
 
-/// 拓展声明的一个模型工具（codexpp.json 的 `tools[]`），由 Codex++ 拓展 MCP 对外提供。
+/// 拓展声明的一个模型工具（codexpp.json 的 `tools[]`），由 RoseCode 拓展 MCP 对外提供。
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct ExtensionTool {
     /// 拓展内的工具名：字母、数字、_、-。对外名为 `<拓展 id>__<name>`。
@@ -1885,8 +1885,8 @@ pub struct ExtensionGatewayMiddleware {
     pub timeout_secs: u64,
     /// 所属拓展的生效配置，作为 context.config 交给脚本。
     pub config: Value,
-    /// 请求中间件跑在哪一段：`request`（默认，Codex++ 自己的转换之前，改原始 Responses 请求）、
-    /// `upstream`（Codex++ 的压缩、路由、协议转换之后，改真正发给上游的请求体）或
+    /// 请求中间件跑在哪一段：`request`（默认，RoseCode 自己的转换之前，改原始 Responses 请求）、
+    /// `upstream`（RoseCode 的压缩、路由、协议转换之后，改真正发给上游的请求体）或
     /// `route`（轮换选好候选供应商之后，按拓展给的顺序重排 / 筛选候选）。
     #[serde(default)]
     pub stage: String,
@@ -1895,8 +1895,8 @@ pub struct ExtensionGatewayMiddleware {
     pub order: i64,
 }
 
-/// 拓展能用 `gateway.replaces` 关掉的 Codex++ 内置网关环节（关掉后拓展自己在 request / route / upstream /
-/// error / response 段里实现）。内置环节都能关；仍由 Codex++ 做的只有响应方向的协议转换（响应流中间件拿到的是
+/// 拓展能用 `gateway.replaces` 关掉的 RoseCode 内置网关环节（关掉后拓展自己在 request / route / upstream /
+/// error / response 段里实现）。内置环节都能关；仍由 RoseCode 做的只有响应方向的协议转换（响应流中间件拿到的是
 /// 转好的 Responses 事件）和官方登录凭据本身，原因见 EXTENSIONS.md「网关中间件」一节。
 pub const BUILTIN_GATEWAY_SEGMENTS: &[&str] = &[
     "builtin:local-compaction",
@@ -1923,8 +1923,8 @@ pub const BUILTIN_GATEWAY_SEGMENTS: &[&str] = &[
 /// 网关请求中间件的超时上限（秒）：它挡在每一次模型请求前面，不能太久。
 pub const EXTENSION_GATEWAY_MAX_TIMEOUT_SECS: u64 = 10;
 
-/// Codex++ 的用户脚本配置目录：Windows 为 `%APPDATA%\\Codex++`，其余为 `$XDG_CONFIG_HOME/Codex++`
-/// 或 `~/.config/Codex++`。管理器、启动器、本地代理、钩子分发共用这一份，不各自再算。
+/// RoseCode 的用户脚本配置目录：Windows 为 `%APPDATA%\\RoseCode`，其余为 `$XDG_CONFIG_HOME/RoseCode`
+/// 或 `~/.config/RoseCode`。管理器、启动器、本地代理、钩子分发共用这一份，不各自再算。
 pub fn default_user_scripts_config_dir() -> PathBuf {
     if cfg!(windows) {
         if let Some(roaming) = std::env::var_os("APPDATA") {
@@ -2268,7 +2268,7 @@ pub struct ExtensionWrite {
     /// `files` 里从本机文件复制来的文本（打包产物等，不经模型逐字转写）：单个上限放宽到
     /// [`EXTENSION_COPIED_TEXT_MAX_BYTES`]，合计另算。
     pub copied_text: BTreeSet<String>,
-    /// 单个文本文件的上限，默认（None）是对话造拓展的 256 KiB。Codex++ 自己生成的包（dsh 配套拓展包里
+    /// 单个文本文件的上限，默认（None）是对话造拓展的 256 KiB。RoseCode 自己生成的包（dsh 配套拓展包里
     /// 夹着前端插件的打包产物）可以放宽；文本文件总量上限随之放宽到它的 2 倍（至少 1 MiB）。
     pub max_file_bytes: Option<usize>,
 }
@@ -2371,7 +2371,7 @@ static ASSET_CACHE: std::sync::LazyLock<Mutex<std::collections::HashMap<PathBuf,
 const EXTENSION_READ_MAX_TOTAL_BYTES: usize = 512 * 1024;
 
 /// 拓展包对应的脚本 key。
-/// 卸载拓展包用的废纸篓：macOS 是用户的 `~/.Trash`，其他系统放在 Codex++ 状态目录里（可找回）。
+/// 卸载拓展包用的废纸篓：macOS 是用户的 `~/.Trash`，其他系统放在 RoseCode 状态目录里（可找回）。
 pub fn default_extension_trash_dir() -> PathBuf {
     #[cfg(target_os = "macos")]
     if let Some(home) = std::env::var_os("HOME") {
@@ -2649,7 +2649,7 @@ fn parse_extension_manifest(
     {
         anyhow::bail!("清单的 id 必填，且只能包含字母、数字、- 和 _");
     }
-    // engines.codexpp：整数是拓展 API 版本；字符串是对 Codex++ 版本的 semver 范围（如 "^2.1"、">=2.1.0 <3"）。
+    // engines.codexpp：整数是拓展 API 版本；字符串是对 RoseCode 版本的 semver 范围（如 "^2.1"、">=2.1.0 <3"）。
     let mut engine_range = None;
     match raw.get("engines").and_then(|engines| engines.get("codexpp")) {
         None => {}
@@ -2778,12 +2778,12 @@ fn parse_extension_manifest(
         let ok = crate::extension_semver::satisfies(current, &range)
             .with_context(|| format!("engines.codexpp 的版本范围写法不对：{range}"))?;
         if !ok {
-            anyhow::bail!("需要 Codex++ {range}，当前是 {current}，请升级 Codex++ 或换用兼容的拓展版本");
+            anyhow::bail!("需要 RoseCode {range}，当前是 {current}，请升级 RoseCode 或换用兼容的拓展版本");
         }
     }
     if package.engine > EXTENSION_API_VERSION {
         anyhow::bail!(
-            "需要拓展 API v{}，当前 Codex++ 提供 v{}，请升级 Codex++",
+            "需要拓展 API v{}，当前 RoseCode 提供 v{}，请升级 Codex++",
             package.engine,
             EXTENSION_API_VERSION
         );

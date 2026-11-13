@@ -197,7 +197,7 @@ fn replace_ours(
 
 // ---------------------------------------------------------------- Claude Desktop
 
-/// Codex++ 在 Claude Desktop `configLibrary` 里的档案 id：与 Desktop 自己生成的 UUID 同形，
+/// RoseCode 在 Claude Desktop `configLibrary` 里的档案 id：与 Desktop 自己生成的 UUID 同形，
 /// 最后一段是 "cdxpls" 的十六进制。
 const DESKTOP_PROFILE_ID: &str = "00000000-0000-4000-8000-636478706c73";
 
@@ -444,7 +444,7 @@ pub static CLAUDE_DESKTOP_LOCAL: AgentSpec = AgentSpec {
     detect: |env| env.os == Os::Mac && desktop_detect(env),
     config_path: desktop_local_path,
     write: desktop_local_write,
-    hint: "从 Codex++ 启动原版 Claude Desktop 后生效；本地兼容服务通过进程环境连接网关，不修改官方应用或部署模式",
+    hint: "从 RoseCode 启动原版 Claude Desktop 后生效；本地兼容服务通过进程环境连接网关，不修改官方应用或部署模式",
 };
 
 // ---------------------------------------------------------------- Zed
@@ -664,7 +664,7 @@ fn copilot_chat_vendor(extensions: &Path) -> &'static str {
     }
 }
 
-/// Codex++ 在 chatLanguageModels.json 里的分组。密钥 VS Code 只从密钥存储里读，
+/// RoseCode 在 chatLanguageModels.json 里的分组。密钥 VS Code 只从密钥存储里读，
 /// 所以 token 放在每个模型的请求头里（自定义端点用 Authorization，OpenAI 兼容的会丢掉它，改用 x-api-key）。
 fn vscode_group(wiring: &Wiring, vendor: &str) -> Value {
     let url = chat_url(wiring);
@@ -750,8 +750,8 @@ pub(super) fn restore_vscode_models(
     Ok(Some(text))
 }
 
-/// 改写 chatLanguageModels.json（JSONC 数组）：去掉旧的 Codex++ 分组，追加新的；
-/// VS Code 自己写进分组的键（如模型的推理强度设置）保留。断开只还原 Codex++ 分组。
+/// 改写 chatLanguageModels.json（JSONC 数组）：去掉旧的 RoseCode 分组，追加新的；
+/// VS Code 自己写进分组的键（如模型的推理强度设置）保留。断开只还原 RoseCode 分组。
 fn vscode_write_models(path: &Path, group: Value, set: &mut FileSet) -> anyhow::Result<()> {
     let text = set.raw(path)?;
     let mut list = vscode_model_groups(text.as_deref())
@@ -909,7 +909,7 @@ pub const ZOO_CODE: AgentSpec = AgentSpec {
     detect: zoo_installed,
     config_path: zoo_import_path,
     write: zoo_write,
-    hint: "在 VS Code 里执行 Developer: Reload Window，Zoo Code 启动时导入并切到 Codex++ 档案；断开后该档案仍留在 Zoo Code 里，需手动切走",
+    hint: "在 VS Code 里执行 Developer: Reload Window，Zoo Code 启动时导入并切到 RoseCode 档案；断开后该档案仍留在 Zoo Code 里，需手动切走",
 };
 
 // ---------------------------------------------------------------- JetBrains Air
@@ -924,7 +924,7 @@ fn air_opencode_config(env: &AgentEnv) -> PathBuf {
 }
 
 /// Air 自己的 Agent 没有可改的地址，但它接受任何 ACP Agent（`acp.json` 的 `agent_servers`）。
-/// 这里加一个跑 `opencode acp` 的「Codex++」Agent，用 `OPENCODE_CONFIG` 指向一份只开 Codex++
+/// 这里加一个跑 `opencode acp` 的「RoseCode」Agent，用 `OPENCODE_CONFIG` 指向一份只开 RoseCode
 /// 供应商的 OpenCode 配置，Air 的模型菜单里就是网关的模型。
 fn air_write(env: &AgentEnv, wiring: &Wiring, set: &mut FileSet) -> anyhow::Result<()> {
     let config = air_opencode_config(env);
@@ -966,7 +966,7 @@ pub const JETBRAINS_AIR: AgentSpec = AgentSpec {
     detect: |env| air_dir(env).is_dir(),
     config_path: |env| air_dir(env).join("acp.json"),
     write: air_write,
-    hint: "在 Air 新建任务时从 Agent 菜单选 Codex++，模型菜单里是网关的模型；需要本机装有 OpenCode",
+    hint: "在 Air 新建任务时从 Agent 菜单选 RoseCode，模型菜单里是网关的模型；需要本机装有 OpenCode",
 };
 
 // ---------------------------------------------------------------- Copilot (JetBrains)
@@ -1109,7 +1109,7 @@ pub const PENCIL: AgentSpec = AgentSpec {
     detect: |env| env.home_path(".pencil").is_dir() || mac_app(env, &["Pencil.app", "pen.dev.app"]),
     config_path: pencil_path,
     write: pencil_write,
-    hint: "重启 Pencil 后在 Agent 输入框的模型选择器里选 Codex++ 下的模型",
+    hint: "重启 Pencil 后在 Agent 输入框的模型选择器里选 RoseCode 下的模型",
 };
 
 // ---------------------------------------------------------------- OpenPencil
@@ -1180,7 +1180,7 @@ pub const OPENPENCIL: AgentSpec = AgentSpec {
     },
     config_path: openpencil_path,
     write: openpencil_write,
-    hint: "接入和断开前先退出 OpenPencil（它退出时会写回设置）；打开后在对话的模型选择器里选 Codex++ 下的模型",
+    hint: "接入和断开前先退出 OpenPencil（它退出时会写回设置）；打开后在对话的模型选择器里选 RoseCode 下的模型",
 };
 
 // ---------------------------------------------------------------- Raycast
@@ -1246,7 +1246,7 @@ fn yaml_unquote(value: &str) -> &str {
     value
 }
 
-/// 列表里的一项是不是 Codex++ 的（这一项自己那一层的 `id: codexplus`，不看模型的 id）。
+/// 列表里的一项是不是 RoseCode 的（这一项自己那一层的 `id: codexplus`，不看模型的 id）。
 fn raycast_item_is_ours(item: &str) -> bool {
     let mut lines = item.lines();
     let Some(first) = lines.next() else {
@@ -1284,7 +1284,7 @@ fn split_trailing_comments(lines: &[&str]) -> usize {
     end
 }
 
-/// 新的 `providers` 块：用户的条目（连同注释）原样保留，换掉或追加 Codex++ 那一项，缩进跟用户的列表一致。
+/// 新的 `providers` 块：用户的条目（连同注释）原样保留，换掉或追加 RoseCode 那一项，缩进跟用户的列表一致。
 fn raycast_providers_block(existing: Option<&str>, entry: &Value) -> anyhow::Result<String> {
     let generated = yaml_block("providers", &json!([entry]));
     let Some(block) = existing else {
@@ -1362,7 +1362,7 @@ pub const RAYCAST: AgentSpec = AgentSpec {
     },
     config_path: raycast_path,
     write: raycast_write,
-    hint: "Raycast 会自动读取改动，在 AI Chat / Quick AI 的模型选择器里选 Codex++ 下的模型（需 Raycast Pro）",
+    hint: "Raycast 会自动读取改动，在 AI Chat / Quick AI 的模型选择器里选 RoseCode 下的模型（需 Raycast Pro）",
 };
 
 // ---------------------------------------------------------------- T3 Code
@@ -1373,10 +1373,10 @@ fn t3_path(env: &AgentEnv) -> PathBuf {
         .join("settings.json")
 }
 
-/// 写在 Codex++ 实例上、归网关管的环境变量。
+/// 写在 RoseCode 实例上、归网关管的环境变量。
 const T3_ENV: &[&str] = &["ANTHROPIC_BASE_URL", "ANTHROPIC_AUTH_TOKEN"];
 
-/// T3 Code 的 Codex++ 供应商实例：用 Claude Code 驱动（claudeAgent），环境变量指向网关，
+/// T3 Code 的 RoseCode 供应商实例：用 Claude Code 驱动（claudeAgent），环境变量指向网关，
 /// 网关的模型作为它的自定义模型。用户给这个实例改的名字、开关、额外环境变量和其它键保留。
 fn t3_write(env: &AgentEnv, wiring: &Wiring, set: &mut FileSet) -> anyhow::Result<()> {
     let root = set.json(&t3_path(env))?;
@@ -1457,7 +1457,7 @@ pub const T3_CODE: AgentSpec = AgentSpec {
     },
     config_path: t3_path,
     write: t3_write,
-    hint: "在 T3 Code 的模型选择器里选 Codex++ 供应商下的模型（由本机的 Claude Code 运行）",
+    hint: "在 T3 Code 的模型选择器里选 RoseCode 供应商下的模型（由本机的 Claude Code 运行）",
 };
 
 // ---------------------------------------------------------------- AstrBot
@@ -1563,7 +1563,7 @@ pub const ASTRBOT: AgentSpec = AgentSpec {
     },
     config_path: astrbot_path,
     write: astrbot_write,
-    hint: "重启 AstrBot 后生效，默认聊天模型切到 Codex++ 的主模型；重启前别在 WebUI 里保存设置（会整份写回）",
+    hint: "重启 AstrBot 后生效，默认聊天模型切到 RoseCode 的主模型；重启前别在 WebUI 里保存设置（会整份写回）",
 };
 
 // ---------------------------------------------------------------- OpenClaw
@@ -1661,7 +1661,7 @@ fn openclaw_write(env: &AgentEnv, wiring: &Wiring, set: &mut FileSet) -> anyhow:
         });
         models.entry(reference.clone()).or_insert(json!({}));
     }
-    // 非空的 modelPolicy.allow 是白名单：没放行 Codex++ 的模型时加上 codexplus/*。
+    // 非空的 modelPolicy.allow 是白名单：没放行 RoseCode 的模型时加上 codexplus/*。
     let all = format!("{PROVIDER_ID}/*");
     if let Some(Value::Object(policy)) = defaults.get_mut("modelPolicy")
         && let Some(Value::Array(allow)) = policy.get_mut("allow")
@@ -1686,7 +1686,7 @@ pub const OPENCLAW: AgentSpec = AgentSpec {
     },
     config_path: openclaw_path,
     write: openclaw_write,
-    hint: "OpenClaw 会自动重新加载；已经选过模型的会话发 /model default 切到 Codex++ 的主模型",
+    hint: "OpenClaw 会自动重新加载；已经选过模型的会话发 /model default 切到 RoseCode 的主模型",
 };
 
 #[cfg(test)]

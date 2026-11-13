@@ -39,10 +39,10 @@ npm run check
 npm test
 npm run vite:build
 cd ../..
-cargo build --release -p codex-plus-manager --bin codex-plus-plus
+cargo build --release -p codex-plus-manager --bin rosecode
 ```
 
-The executable is `target/release/codex-plus-plus.exe` on Windows or `target/release/codex-plus-plus` on other platforms. The Claude workspace is embedded in the main application.
+The executable is `target/release/rosecode.exe` on Windows or `target/release/rosecode` on other platforms. The Claude workspace is embedded in the main application.
 
 ```bash
 cargo test -p codex-plus-core --test all updater::
@@ -71,7 +71,7 @@ node scripts/release.mjs X.Y.Z --dry-run
 node scripts/release.mjs X.Y.Z
 ```
 
-The release workflow builds assets and creates `latest.json` using the current GitHub repository. Asset filenames retain the compatible `CodexPlusPlus-*` identifiers; release URLs and the update source belong to RoseCode. Publishing the source repository alone does not create a release tag or installer.
+The release workflow builds assets and creates `latest.json` using the current GitHub repository. Release assets use the `RoseCode-*` prefix; release URLs and the update source belong to RoseCode. Publishing the source repository alone does not create a release tag or installer.
 
 Windows setup and portable ZIP packages are required. Linux DEB is included when its build succeeds. macOS publishing is opt-in: configure this repository's own Apple Developer ID signing and notarization secrets, then set the repository variable `RELEASE_MACOS_ENABLED` to `true`. The workflow does not reuse upstream certificates or publish unsigned macOS packages.
 

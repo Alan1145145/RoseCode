@@ -70,7 +70,7 @@ pub async fn read_codex_model_catalog() -> Value {
             Some((name, value.to_string_lossy().into_owned()))
         })
         .collect::<HashMap<_, _>>();
-    let client = match crate::http_client::proxied_client("CodexPlusPlus/1.0") {
+    let client = match crate::http_client::proxied_client("RoseCode/1.0") {
         Ok(client) => client,
         Err(error) => {
             return model_catalog_with_prices(json!({
@@ -457,7 +457,7 @@ fn relay_profile_model_ids(profile: &RelayProfile) -> Vec<String> {
 /// 当前活动供应商在 Codex 模型列表里公布的模型 ID 集合，用于清理历史残留引用
 /// （例如换目录后模型选择器里还留着的 `ccs-xxx/model`）。
 ///
-/// - 模型聚合：目录里的全部 `cpx-*`——目录由 Codex++ 生成，这份集合是权威的；
+/// - 模型聚合：目录里的全部 `cpx-*`——目录由 RoseCode 生成，这份集合是权威的；
 ///   成员未就绪导致目录算不出来时返回空集，调用方据此跳过清理，绝不误删。
 /// - 官方登录且没混用 API Key：模型列表由 Codex 自己决定，返回空集表示「不要清理」。
 /// - 普通 API 供应商：它的 model_list + 当前 model + 模型路由的源模型名，

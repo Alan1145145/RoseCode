@@ -162,7 +162,7 @@ export function sourceHint(source: DoctorSource, sources?: DoctorSources | null)
     case "local":
       return sources?.local?.found ? sources.local.label : LOCAL_SOURCE_MISSING;
     case "custom":
-      return "自己填地址、模型和 Key（不占 Codex++ 的额度）。";
+      return "自己填地址、模型和 Key（不占 RoseCode 的额度）。";
     default:
       return sources?.current?.label || "用你现在 Codex 用的供应商和模型，不用再填任何字段。";
   }

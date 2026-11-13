@@ -43,7 +43,7 @@
   }
 
   /**
-   * 供应商相关的公开事件，比较前后两份设置里 Codex++ 下发的 activeRelayProfilePublic / modelCatalogFingerprint：
+   * 供应商相关的公开事件，比较前后两份设置里 RoseCode 下发的 activeRelayProfilePublic / modelCatalogFingerprint：
    *   - `relayProfile/switched`：({ previous, profile })，当前供应商换了
    *   - `modelCatalog/changed`：({ profile })，决定模型目录的字段变了（模型列表、每模型窗口 / 压缩 / 元数据、换供应商……），
    *     新目录用 /model-catalog/public 取
@@ -66,7 +66,7 @@
 
   /**
    * 在 Codex 页面里改了一项设置后发公开事件 `settings/changed`，参数 `{ key, value, persisted }`：
-   * key 是改动的设置字段（存在 Codex++ 后端的用后端字段名，如 codexAppCapacityAutoRetry；只存页面本地的用页面键名）；
+   * key 是改动的设置字段（存在 RoseCode 后端的用后端字段名，如 codexAppCapacityAutoRetry；只存页面本地的用页面键名）；
    * 先按新值发一次 persisted: false（这时读设置已是新值），写进后端后再发一次 persisted: true。
    * 跟着设置走的内置拓展订阅它，内核不再逐个点名功能。
    */
@@ -251,7 +251,7 @@
     if (codexPlusBackendStatus.version) {
       codexPlusVersion = codexPlusBackendStatus.version;
       document.querySelectorAll("[data-codex-plus-version]").forEach((node) => {
-        node.textContent = `Codex++ ${codexPlusVersion}`;
+        node.textContent = `RoseCode ${codexPlusVersion}`;
       });
     }
     const labelFallback = status === "ok" ? "后端已连接" : status === "degraded" ? "桥接降级，自动修复中" : status === "checking" ? "正在检查后端…" : "未连接";
@@ -577,7 +577,7 @@
     `;
   }
 
-  /** 来源标签：内置 / 官方（随 Codex++ 发布的拓展包）/ 市场 / 用户。 */
+  /** 来源标签：内置 / 官方（随 RoseCode 发布的拓展包）/ 市场 / 用户。 */
   function codexPlusScriptSourceLabel(script) {
     if (script?.source === "builtin") return "内置";
     if (script?.source === "bundled") return "官方";
@@ -666,7 +666,7 @@
     await loadUserScripts("/user-scripts/list", {}, result?.status === "unknown");
   }
 
-  /** 左面板的导航项。Codex++ 页面切分组，「拓展」页面列脚本。 */
+  /** 左面板的导航项。RoseCode 页面切分组，「拓展」页面列脚本。 */
   function renderCodexPlusPageNavItems(tab) {
     if (tab === codexPlusExtensionsTab) return renderCodexPlusExtensionsNav();
     return [
@@ -717,19 +717,19 @@
   function codexPlusPageTitle(tab) {
     if (tab === codexPlusExtensionsTab) return "拓展";
     if (tab === codexPlusSponsorTab) return "推荐内容";
-    return "Codex++";
+    return "RoseCode";
   }
 
   /**
    * 左面板内容随当前分组刷新（切 tab 后调用）。
    * 不传 tab 时按页面当前分组重画：拓展注册 / 撤销后的统一刷新（codexPlusRefreshExtensionHostsNow）不带参数，
-   * 落到 home 会把「拓展」页的左面板换成 Codex++ 主页的导航，启停一个拓展就回不到列表。
+   * 落到 home 会把「拓展」页的左面板换成 RoseCode 主页的导航，启停一个拓展就回不到列表。
    */
   function refreshCodexPlusPageNav(tab = codexPlusModalTab(document.querySelector(".codex-plus-modal-content")?.dataset.codexPlusActiveTab)) {
     const body = document.querySelector("[data-codex-plus-page-nav-body]");
     if (!body) return;
     const title = document.querySelector(".codex-plus-page-nav-title");
-    if (title) title.textContent = tab === codexPlusExtensionsTab ? "拓展" : "Codex++";
+    if (title) title.textContent = tab === codexPlusExtensionsTab ? "拓展" : "RoseCode";
     body.innerHTML = renderCodexPlusPageNavItems(tab);
   }
 
@@ -1333,7 +1333,7 @@
   /**
    * 规范化页面/tab 名。
    *
-   * 用户脚本从 Codex++ 弹窗里拆出来成了独立的「拓展」页面，
+   * 用户脚本从 RoseCode 弹窗里拆出来成了独立的「拓展」页面，
    * 这里把旧名 userScripts 也映射过去，避免存量调用点失效。
    */
   function codexPlusModalTab(tab) {
@@ -1601,12 +1601,12 @@
       const state = failed
         ? `
                 <div class="codex-plus-row" data-codex-plus-settings-catalog-state="failed" role="alert">
-                  <div><div class="codex-plus-row-title">设置项读取失败</div><div class="codex-plus-row-description">无法从 Codex++ 后端读取设置项清单${message ? `：${escapeHtml(message)}` : ""}。确认后端已连接后重试。</div></div>
+                  <div><div class="codex-plus-row-title">设置项读取失败</div><div class="codex-plus-row-description">无法从 RoseCode 后端读取设置项清单${message ? `：${escapeHtml(message)}` : ""}。确认后端已连接后重试。</div></div>
                   <button type="button" class="codex-plus-action-button" data-codex-plus-settings-catalog-retry="true">重试</button>
                 </div>`
         : `
                 <div class="codex-plus-row" data-codex-plus-settings-catalog-state="loading" role="status">
-                  <div><div class="codex-plus-row-title">正在读取设置项…</div><div class="codex-plus-row-description">设置项清单由 Codex++ 后端提供，读取完成后显示。</div></div>
+                  <div><div class="codex-plus-row-title">正在读取设置项…</div><div class="codex-plus-row-description">设置项清单由 RoseCode 后端提供，读取完成后显示。</div></div>
                 </div>`;
       return renderCodexPlusSettingsSection("设置", renderCodexPlusBackendStatusRow() + state);
     }
@@ -1660,9 +1660,9 @@
     applyCodexPlusZoom(overlay);
     // 下拉箭头与勾选图标使用已安装的 Lucide ChevronDown / Check（ISC）路径。
     overlay.innerHTML = `
-      <div class="codex-plus-modal-content" role="dialog" aria-modal="true" aria-label="Codex++">
+      <div class="codex-plus-modal-content" role="dialog" aria-modal="true" aria-label="RoseCode">
         <div class="codex-plus-modal-header">
-          <div class="codex-plus-modal-title"><span class="codex-plus-backend-indicator" data-codex-backend-indicator="true" data-status="checking"></span><span data-codex-plus-version="true">Codex++ ${codexPlusVersion}</span></div>
+          <div class="codex-plus-modal-title"><span class="codex-plus-backend-indicator" data-codex-backend-indicator="true" data-status="checking"></span><span data-codex-plus-version="true">RoseCode ${codexPlusVersion}</span></div>
           ${pageMode ? "" : `<button type="button" class="codex-plus-modal-close" aria-label="关闭">×</button>`}
         </div>
         <div class="codex-plus-modal-body">
@@ -1684,15 +1684,7 @@
                   <button type="button" class="codex-plus-action-button" data-codex-open-devtools="true">打开 DevTools</button>
                 </div>
                 <div class="codex-plus-row">
-                  <div><div class="codex-plus-row-title">关于 Codex++</div><div class="codex-plus-about">Codex++ 是通过外部 launcher 注入的增强菜单，不修改 Codex App 原始安装文件。<br>Build: <span data-codex-plus-build="true">${codexPlusBuild}</span><br>GitHub: <a href="https://github.com/BigPizzaV3/CodexPlusPlus" target="_blank" rel="noreferrer">https://github.com/BigPizzaV3/CodexPlusPlus</a><br>Discord: <a href="https://discord.gg/y96kX7A76v" target="_blank" rel="noreferrer">https://discord.gg/y96kX7A76v</a><br>Telegram: <a href="https://t.me/CodexPlusPlus" target="_blank" rel="noreferrer">https://t.me/CodexPlusPlus</a></div></div>
-                </div>
-                <div class="codex-plus-row">
-                  <div><div class="codex-plus-row-title">Discord 社区</div><div class="codex-plus-row-description">加入 Discord 获取更新消息、反馈问题或交流使用体验。</div></div>
-                  <button type="button" class="codex-plus-action-button" data-codex-plus-discord="true">打开 Discord</button>
-                </div>
-                <div class="codex-plus-row">
-                  <div><div class="codex-plus-row-title">Telegram 频道</div><div class="codex-plus-row-description">加入 Telegram 获取更新消息和交流使用体验。</div></div>
-                  <button type="button" class="codex-plus-action-button" data-codex-plus-telegram="true">打开 Telegram</button>
+                  <div><div class="codex-plus-row-title">关于 RoseCode</div><div class="codex-plus-about">RoseCode 是通过外部 launcher 注入的增强菜单，不修改 Codex App 原始安装文件。<br>Build: <span data-codex-plus-build="true">${codexPlusBuild}</span><br>GitHub: <a href="https://github.com/Alan1145145/RoseCode" target="_blank" rel="noreferrer">Alan1145145/RoseCode</a><br>基于 <a href="https://github.com/BigPizzaV3/CodexPlusPlus" target="_blank" rel="noreferrer">BigPizzaV3/CodexPlusPlus</a><br>QQ 群：473502913</div></div>
                 </div>
                 <div class="codex-plus-row">
                   <div><div class="codex-plus-row-title">提出问题</div><div class="codex-plus-row-description">打开 GitHub Issues 反馈问题或建议。</div></div>
@@ -1717,7 +1709,7 @@
           <div class="codex-plus-panel" data-codex-plus-panel="sponsor" hidden>
             <div class="codex-plus-discovery codex-plus-sponsor-page">
               <div class="codex-plus-discovery-header">
-                <div><h1 class="codex-plus-discovery-title">推荐内容</h1><p class="codex-plus-discovery-description codex-plus-sponsor-text">以下推荐来自支持 Codex++ 继续维护的合作方。</p></div>
+                <div><h1 class="codex-plus-discovery-title">推荐内容</h1><p class="codex-plus-discovery-description codex-plus-sponsor-text">以下推荐来自支持 RoseCode 继续维护的合作方。</p></div>
               </div>
               <h2 class="codex-plus-discovery-section-title">合作伙伴</h2>
               <div class="codex-plus-ad-remote">${renderCodexPlusAds()}</div>
@@ -1849,17 +1841,9 @@
         }
         return;
       }
-      if (target?.closest("[data-codex-plus-discord]")) {
-        window.open("https://discord.gg/y96kX7A76v", "_blank");
-        return;
-      }
-      if (target?.closest("[data-codex-plus-telegram]")) {
-        window.open("https://t.me/CodexPlusPlus", "_blank");
-        return;
-      }
       const issueButton = target?.closest("[data-codex-plus-issue]");
       if (issueButton) {
-        const issueUrl = "https://github.com/BigPizzaV3/CodexPlusPlus/issues";
+        const issueUrl = "https://github.com/Alan1145145/RoseCode/issues";
         window.open(issueUrl, "_blank");
         return;
       }
@@ -1937,7 +1921,7 @@
     if (!codexPlusAdsLoaded) fetchCodexPlusAds();
     selectCodexPlusTab(initialTab);
     // 必须在 selectCodexPlusTab 之后：激活态要靠 data-codex-plus-active-tab
-    // 判断当前是 Codex++ 还是「拓展」，提前调用会永远落到 home 上。
+    // 判断当前是 RoseCode 还是「拓展」，提前调用会永远落到 home 上。
     if (pageMode) setCodexPlusSidebarNavActive(true, codexPlusActiveEntry() || "home");
     renderCodexPlusMenu();
     refreshCodexPlusBackendToggles();
@@ -2103,9 +2087,9 @@
       button.removeAttribute("aria-current");
       button.removeAttribute("disabled");
       button.removeAttribute("aria-disabled");
-      button.setAttribute("aria-label", "Codex++");
+      button.setAttribute("aria-label", "RoseCode");
       button.textContent = "";
-      button.innerHTML = `<span class="codex-plus-sidebar-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M3 12h18M5.5 5.5l13 13M18.5 5.5l-13 13"/></svg></span><span class="truncate">Codex++</span><span class="codex-plus-sidebar-nav-status" data-status="${codexPlusBackendStatus.status || "checking"}" aria-hidden="true"></span>`;
+      button.innerHTML = `<span class="codex-plus-sidebar-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M3 12h18M5.5 5.5l13 13M18.5 5.5l-13 13"/></svg></span><span class="truncate">RoseCode</span><span class="codex-plus-sidebar-nav-status" data-status="${codexPlusBackendStatus.status || "checking"}" aria-hidden="true"></span>`;
       button.addEventListener("click", (event) => {
         event.preventDefault();
         event.stopPropagation();
@@ -2165,7 +2149,7 @@
   /**
    * 入口按钮能否沿用。
    *
-   * 同页重复注入（Codex++ 重启 / 升级而 Codex 没重启）时，上一次注入建的入口按钮还在，
+   * 同页重复注入（RoseCode 重启 / 升级而 Codex 没重启）时，上一次注入建的入口按钮还在，
    * 按钮上绑的是旧闭包：点「拓展」打开的仍是旧版页面，里面的开关也走旧逻辑。
    * 按钮记下建它的注入代次；最新一代遇到别代的按钮就重建。旧代即便还在跑也不重建，
    * 免得两代来回抢同一个 id。
@@ -2347,7 +2331,7 @@
   }
 
   /**
-   * 把 Codex++ / 拓展两个入口挂到新版图标栏。
+   * 把 RoseCode / 拓展两个入口挂到新版图标栏。
    *
    * Codex 的 rail 渲染晚于注入，所以这里每次 scan 都会被调用；靠 id 判存避免重复插入。
    */
@@ -2359,7 +2343,7 @@
     // 那只是暂时状态，不能因此判定"没有 rail"而回退旧模式，否则入口会整个消失。
     const template = codexPlusRailTemplateButton(rail);
 
-    // 旧逻辑把"点原生导航就关掉 Codex++ 页面"的监听挂在侧边栏的 navigation 上，
+    // 旧逻辑把"点原生导航就关掉 RoseCode 页面"的监听挂在侧边栏的 navigation 上，
     // 但 rail 模式下那个函数会提前 return，监听压根装不上，所以这里补一份。
     if (rail.dataset.codexPlusRailNavigationListener !== "true") {
       rail.dataset.codexPlusRailNavigationListener = "true";
@@ -2383,7 +2367,7 @@
     };
 
     const specs = [
-      { id: codexPlusRailNavId, label: "Codex++", iconMarkup: icons.home, withStatus: true, onActivate: openCodexPlusPage },
+      { id: codexPlusRailNavId, label: "RoseCode", iconMarkup: icons.home, withStatus: true, onActivate: openCodexPlusPage },
       { id: codexPlusRailExtensionsId, label: "拓展", iconMarkup: icons.extensions, withStatus: false, onActivate: openCodexPlusExtensions },
       { id: codexPlusRailSponsorId, label: "推荐内容", iconMarkup: icons.sponsor, withStatus: false, onActivate: openCodexPlusSponsor },
     ];
@@ -2400,7 +2384,7 @@
         wrapper = createCodexPlusRailButton({ ...spec, template });
         if (!wrapper) return;
       }
-      // 顺序：Codex++ 在前，「拓展」在后；紧跟在 primary 区锚点后面。
+      // 顺序：RoseCode 在前，「拓展」在后；紧跟在 primary 区锚点后面。
       if (cursor?.nextSibling) {
         host.insertBefore(wrapper, cursor.nextSibling);
       } else if (cursor) {

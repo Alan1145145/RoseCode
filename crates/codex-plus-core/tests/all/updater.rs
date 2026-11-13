@@ -37,8 +37,8 @@ fn github_payload_selects_platform_installer() {
         "assets": [
             {"name": "source.zip", "browser_download_url": "https://example.test/source.zip"},
             {"name": "codex-plus-plus-manager.exe", "browser_download_url": "https://example.test/manager.exe"},
-            {"name": "CodexPlusPlus_1.0.9_x64-setup.exe", "browser_download_url": "https://example.test/setup.exe"},
-            {"name": "CodexPlusPlus_1.0.9_x64.dmg", "browser_download_url": "https://example.test/app.dmg"}
+            {"name": "RoseCode_1.0.9_x64-setup.exe", "browser_download_url": "https://example.test/setup.exe"},
+            {"name": "RoseCode_1.0.9_x64.dmg", "browser_download_url": "https://example.test/app.dmg"}
         ]
     }))
     .unwrap();
@@ -47,12 +47,12 @@ fn github_payload_selects_platform_installer() {
     if cfg!(windows) {
         assert_eq!(
             release.asset_name.as_deref(),
-            Some("CodexPlusPlus_1.0.9_x64-setup.exe")
+            Some("RoseCode_1.0.9_x64-setup.exe")
         );
     } else if cfg!(target_os = "macos") {
         assert_eq!(
             release.asset_name.as_deref(),
-            Some("CodexPlusPlus_1.0.9_x64.dmg")
+            Some("RoseCode_1.0.9_x64.dmg")
         );
     } else {
         assert_eq!(release.asset_name.as_deref(), None);
@@ -67,8 +67,8 @@ fn latest_json_payload_selects_platform_installer_without_github_api_shape() {
         "body": "静态更新描述",
         "assets": [
             {"name": "source.zip", "url": "https://example.test/source.zip"},
-            {"name": "CodexPlusPlus-1.1.6-windows-x64-setup.exe", "url": "https://example.test/setup.exe"},
-            {"name": "CodexPlusPlus-1.1.6-macos-x64.dmg", "url": "https://example.test/app.dmg"}
+            {"name": "RoseCode-1.1.6-windows-x64-setup.exe", "url": "https://example.test/setup.exe"},
+            {"name": "RoseCode-1.1.6-macos-x64.dmg", "url": "https://example.test/app.dmg"}
         ]
     }))
     .unwrap();
@@ -78,12 +78,12 @@ fn latest_json_payload_selects_platform_installer_without_github_api_shape() {
     if cfg!(windows) {
         assert_eq!(
             release.asset_name.as_deref(),
-            Some("CodexPlusPlus-1.1.6-windows-x64-setup.exe")
+            Some("RoseCode-1.1.6-windows-x64-setup.exe")
         );
     } else if cfg!(target_os = "macos") {
         assert_eq!(
             release.asset_name.as_deref(),
-            Some("CodexPlusPlus-1.1.6-macos-x64.dmg")
+            Some("RoseCode-1.1.6-macos-x64.dmg")
         );
     } else {
         assert_eq!(release.asset_name.as_deref(), None);
@@ -102,21 +102,21 @@ fn asset_selection_prefers_current_platform_artifacts() {
             "https://example.test/manager.exe".to_string(),
         ),
         (
-            "CodexPlusPlus_1.0.9_x64-setup.exe".to_string(),
+            "RoseCode_1.0.9_x64-setup.exe".to_string(),
             "https://example.test/setup.exe".to_string(),
         ),
         (
-            "CodexPlusPlus_1.0.9_x64.dmg".to_string(),
+            "RoseCode_1.0.9_x64.dmg".to_string(),
             "https://example.test/app.dmg".to_string(),
         ),
     ];
 
     if cfg!(windows) {
         let selected = select_update_asset(&assets).unwrap();
-        assert_eq!(selected.name, "CodexPlusPlus_1.0.9_x64-setup.exe");
+        assert_eq!(selected.name, "RoseCode_1.0.9_x64-setup.exe");
     } else if cfg!(target_os = "macos") {
         let selected = select_update_asset(&assets).unwrap();
-        assert_eq!(selected.name, "CodexPlusPlus_1.0.9_x64.dmg");
+        assert_eq!(selected.name, "RoseCode_1.0.9_x64.dmg");
     } else {
         assert!(select_update_asset(&assets).is_none());
     }
@@ -129,11 +129,11 @@ fn asset_selection_distinguishes_x64_and_arm64_macos_dmgs() {
     // not check the arch token in the filename.
     let assets = vec![
         (
-            "CodexPlusPlus-1.2.17-macos-arm64.dmg".to_string(),
+            "RoseCode-1.2.17-macos-arm64.dmg".to_string(),
             "https://example.test/app-arm64.dmg".to_string(),
         ),
         (
-            "CodexPlusPlus-1.2.17-macos-x64.dmg".to_string(),
+            "RoseCode-1.2.17-macos-x64.dmg".to_string(),
             "https://example.test/app-x64.dmg".to_string(),
         ),
     ];
@@ -142,8 +142,8 @@ fn asset_selection_distinguishes_x64_and_arm64_macos_dmgs() {
         let selected = select_update_asset(&assets)
             .expect("a macOS DMG should be selected for the running arch");
         let expected = match std::env::consts::ARCH {
-            "x86_64" => "CodexPlusPlus-1.2.17-macos-x64.dmg",
-            "aarch64" => "CodexPlusPlus-1.2.17-macos-arm64.dmg",
+            "x86_64" => "RoseCode-1.2.17-macos-x64.dmg",
+            "aarch64" => "RoseCode-1.2.17-macos-arm64.dmg",
             other => panic!("unexpected target arch in test: {other}"),
         };
         assert_eq!(
@@ -164,14 +164,14 @@ fn asset_selection_accepts_universal_macos_dmg_on_either_arch() {
     // makes the universal build work, so pin it down here: if someone later
     // makes an arch token mandatory, this test is what catches it.
     let assets = vec![(
-        "CodexPlusPlus-1.5.4-macos-universal.dmg".to_string(),
+        "RoseCode-1.5.4-macos-universal.dmg".to_string(),
         "https://example.test/app-universal.dmg".to_string(),
     )];
 
     if cfg!(target_os = "macos") {
         let selected = select_update_asset(&assets)
             .expect("the universal DMG must be selectable on any macOS arch");
-        assert_eq!(selected.name, "CodexPlusPlus-1.5.4-macos-universal.dmg");
+        assert_eq!(selected.name, "RoseCode-1.5.4-macos-universal.dmg");
     } else {
         assert!(select_update_asset(&assets).is_none());
     }
@@ -185,11 +185,11 @@ fn asset_selection_prefers_universal_over_single_arch_dmg() {
     // one wins: the point is that a mixed release is ambiguous.
     let assets = vec![
         (
-            "CodexPlusPlus-1.5.4-macos-universal.dmg".to_string(),
+            "RoseCode-1.5.4-macos-universal.dmg".to_string(),
             "https://example.test/app-universal.dmg".to_string(),
         ),
         (
-            "CodexPlusPlus-1.5.4-macos-arm64.dmg".to_string(),
+            "RoseCode-1.5.4-macos-arm64.dmg".to_string(),
             "https://example.test/app-arm64.dmg".to_string(),
         ),
     ];

@@ -139,7 +139,7 @@ pub fn parse_market_manifest(raw: Value) -> anyhow::Result<ScriptMarketManifest>
 /// 否则需要代理的网络里会一直连不上（#1329 / #1339）。
 fn market_http_client(url: &str) -> anyhow::Result<reqwest::Client> {
     crate::http_client::proxied_client_for_url_with_timeouts(
-        "CodexPlusPlus/script-market",
+        "RoseCode/script-market",
         url,
         MARKET_CONNECT_TIMEOUT,
         MARKET_TOTAL_TIMEOUT,

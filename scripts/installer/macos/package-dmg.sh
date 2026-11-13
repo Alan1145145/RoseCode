@@ -7,11 +7,11 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 DIST="$ROOT/dist/macos"
 STAGE="$DIST/stage"
 BINARY_DIR="${BINARY_DIR:-$ROOT/target/release}"
-DMG="$DIST/CodexPlusPlus-${VERSION}-macos-${ARCH}.dmg"
+DMG="$DIST/RoseCode-${VERSION}-macos-${ARCH}.dmg"
 # macOS 用带圆角方形底的版本：macOS 26 会把不是标准圆角方形的图标放进一块灰色底板。没有时退回通用图标。
 ICON_SOURCE="$ROOT/apps/codex-plus-manager/src-tauri/icons/icon-macos.png"
 [ -f "$ICON_SOURCE" ] || ICON_SOURCE="$ROOT/apps/codex-plus-manager/src-tauri/icons/icon.png"
-ICON_NAME="codex-plus-plus.icns"
+ICON_NAME="rosecode.icns"
 ICON_ICNS="$DIST/$ICON_NAME"
 BACKGROUND_SOURCE="$ROOT/assets/installer/macos/dmg-background.svg"
 BACKGROUND_PATH="$STAGE/.background/background.png"
@@ -39,7 +39,7 @@ prepare_background() {
 }
 
 prepare_icon() {
-  local iconset="$DIST/codex-plus-plus.iconset"
+  local iconset="$DIST/rosecode.iconset"
   rm -rf "$iconset"
   mkdir -p "$iconset"
 
@@ -77,12 +77,12 @@ create_app() {
   cp "$ICON_ICNS" "$app_dir/Contents/Resources/$ICON_NAME"
   chmod +x "$app_dir/Contents/MacOS/$executable_name"
   printf 'APPL????' > "$app_dir/Contents/PkgInfo"
-  if [ "$executable_name" = "CodexPlusPlus" ]; then
+  if [ "$executable_name" = "RoseCode" ]; then
     url_types='  <key>CFBundleURLTypes</key>
   <array>
     <dict>
       <key>CFBundleURLName</key>
-      <string>Codex++ Links</string>
+      <string>RoseCode Links</string>
       <key>CFBundleURLSchemes</key>
       <array>
         <string>codexplusplus</string>
@@ -234,24 +234,23 @@ verify_app() {
 
 prepare_icon
 prepare_background
-create_app "Codex++" "CodexPlusPlus" "$BINARY_DIR/codex-plus-plus" "com.bigpizzav3.codexplusplus" "false"
-# 旧版 1.7.x 更新器要求第二个 manager bundle。它使用独立的小型兼容壳，
-# 启动后立即退出；新版启动主 app 后会把这个壳归档到 legacy-migrations。
-create_app "Codex++ 管理工具" "CodexPlusPlusManager" "$BINARY_DIR/codex-plus-legacy-shim" "com.bigpizzav3.codexplusplus.manager" "true"
+create_app "RoseCode" "RoseCode" "$BINARY_DIR/rosecode" "com.alan1145145.rosecode" "false"
+# 保留隐藏的管理工具入口壳；启动时转交给 RoseCode，主程序会归档旧入口。
+create_app "RoseCode 管理工具" "RoseCodeManager" "$BINARY_DIR/codex-plus-legacy-shim" "com.alan1145145.rosecode.manager" "true"
 
-sign_app "$STAGE/Codex++.app"
-sign_app "$STAGE/Codex++ 管理工具.app"
+sign_app "$STAGE/RoseCode.app"
+sign_app "$STAGE/RoseCode 管理工具.app"
 
-verify_app "$STAGE/Codex++.app"
-verify_app "$STAGE/Codex++ 管理工具.app"
+verify_app "$STAGE/RoseCode.app"
+verify_app "$STAGE/RoseCode 管理工具.app"
 
-# Finder 隐藏兼容壳；旧更新器按精确路径读取它，不能改名或放入子目录。
-printf '%s\n' "Codex++ 管理工具.app" > "$STAGE/.hidden"
-chflags hidden "$STAGE/Codex++ 管理工具.app"
+# Finder 隐藏管理工具入口壳。
+printf '%s\n' "RoseCode 管理工具.app" > "$STAGE/.hidden"
+chflags hidden "$STAGE/RoseCode 管理工具.app"
 
 ln -s /Applications "$STAGE/Applications"
 
-DMG_WORK_DIR="$(mktemp -d "${TMPDIR:-/tmp}/codex-plus-plus-dmg.XXXXXX")"
+DMG_WORK_DIR="$(mktemp -d "${TMPDIR:-/tmp}/rosecode-dmg.XXXXXX")"
 DMG_WORK_PATH="$DMG_WORK_DIR/$(basename "$DMG")"
 DMG_CREATED=false
 MOUNT_POINT=""
@@ -333,7 +332,7 @@ trap cleanup_dmg_work_dir EXIT
 
 DMG_CREATED=false
 for attempt in 1 2 3 4 5; do
-  if hdiutil create -volname "Codex++" -srcfolder "$STAGE" -ov -format UDRW "$DMG_WORK_PATH"; then
+  if hdiutil create -volname "RoseCode" -srcfolder "$STAGE" -ov -format UDRW "$DMG_WORK_PATH"; then
     DMG_CREATED=true
     break
   fi
@@ -380,8 +379,8 @@ with timeout of 30 seconds
 
     tell dmgDisk
       set position of item "Applications" to {1000, 390}
-      set position of item "Codex++.app" to {460, 390}
-      set visible of item "Codex++ 管理工具.app" to false
+      set position of item "RoseCode.app" to {460, 390}
+      set visible of item "RoseCode 管理工具.app" to false
     end tell
 
     close dmgWindow

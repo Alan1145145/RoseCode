@@ -1,4 +1,4 @@
-// ClaudeMom 的入口（claude-mom.html）。和 Codex++ 的 main.tsx 分开：自己的界面、自己的样式，只复用后端命令。
+// ClaudeMom 的入口（claude-mom.html）。和 RoseCode 的 main.tsx 分开：自己的界面、自己的样式，只复用后端命令。
 import "../legacy-webkit";
 import { Component, type ErrorInfo, type ReactNode } from "react";
 import { createRoot } from "react-dom/client";

@@ -107,7 +107,7 @@ test("启动 Codex 一眼可见：Codex 页面顶栏最右侧一个主按钮，�
   assert.match(button, /disabled=\{state\.busy \|\| unavailable\}/);
   assert.match(button, /<span className=\{`codex-launch \$\{className\}`\.trim\(\)\} data-running=\{state\.running\} data-unavailable=\{unavailable\} title=\{hint\}>/);
   assert.match(button, /variant="default"/);
-  // 顶栏：只在 Codex 的页面里、排在页面操作挂载点之后。Codex++ 不只服务 Codex，
+  // 顶栏：只在 Codex 的页面里、排在页面操作挂载点之后。RoseCode 不只服务 Codex，
   // 网关、全局管理、工具类页面和 Claude Code / Grok 的页面都不放。
   assert.match(entry, /const onCodexPage = \(routeTool\(route\) === "codex" && \(route !== "userScripts" \|\| extensionHost === "codex"\)\) \|\| \(route === "overview" && activeTool === "codex"\);/);
   assert.match(
@@ -244,10 +244,10 @@ test("「Codex 连接」页顶部是连接方式（经网关 / 直连）：没�
   const hint = functionSource("LegacyRelayGatewayHint");
   assert.match(hint, /t\("建议改用新版网关"\)/);
   assert.match(hint, /form\.activeRelayId === CODEX_GATEWAY_RELAY_ID/);
-  assert.match(hint, /t\("Codex 当前经 Codex\+\+ 网关（新版）"\)/);
+  assert.match(hint, /t\("Codex 当前经 RoseCode 网关（新版）"\)/);
   assert.match(hint, /t\("Codex 已从网关切回直连"\)/);
-  // 一行：标题写现在怎么连（经 Codex++ 网关 / 直连 · 供应商名），右侧切换 + 三点菜单；断开并还原在菜单里。
-  assert.match(hint, /\? t\("经 Codex\+\+ 网关"\)/);
+  // 一行：标题写现在怎么连（经 RoseCode 网关 / 直连 · 供应商名），右侧切换 + 三点菜单；断开并还原在菜单里。
+  assert.match(hint, /\? t\("经 RoseCode 网关"\)/);
   assert.match(hint, /tf\("直连 · \{0\}", \[direct\.name \|\| t\("未命名供应商"\)\]\)/);
   assert.match(hint, /\{viaGateway \? <MenuItem danger onClick=\{onDisconnect\}>\{t\("断开并还原"\)\}<\/MenuItem> : null\}/);
   // 列表里托管的网关供应商单独标出，只能「使用」，不能编辑、删除。
@@ -434,7 +434,7 @@ test("直连供应商和网关供应商池打通：每行标出是否已在池�
   assert.doesNotMatch(screen, /\{poolBanner\}/);
   // 接管期间直连供应商整块隐藏，只留「被网关接管」一行说明，没有使用 / 编辑 / 删除。
   const takenOver = screen.slice(screen.indexOf("{normalized.relayProfilesEnabled && takenOverByGateway ? ("), screen.indexOf("{normalized.relayProfilesEnabled && !takenOverByGateway ? ("));
-  assert.match(takenOver, /title=\{t\("Codex 正由 Codex\+\+ 网关接管"\)\}/);
+  assert.match(takenOver, /title=\{t\("Codex 正由 RoseCode 网关接管"\)\}/);
   assert.doesNotMatch(takenOver, /directProfiles\.map|onSwitchProfile|onEdit|removeRelayProfile/);
   assert.match(functionSource("SortableRelayProfileCard"), /\{gatewayManaged \|\| !poolLink \? null : <PoolLinkControl link=\{poolLink\} profileId=\{profile\.id\} \/>\}/);
 });
@@ -712,7 +712,7 @@ test("侧栏 Claude 播放键读 claude_local_status / claude_local_action，不
     /setTimeout|setInterval/,
   );
   // Claude 正开着时 launch 会被后端拒绝，前端直接置灰并给原因。
-  assert.match(entry, /Claude 正在运行，请先完全退出，再从 Codex\+\+ 启动/);
+  assert.match(entry, /Claude 正在运行，请先完全退出，再从 RoseCode 启动/);
 });
 
 test("「Agent 接入」的 Codex 行复用同一份启动状态；Claude 页把新状态回传给 App 的侧栏键", () => {

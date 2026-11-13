@@ -13,7 +13,7 @@ use std::path::{Path, PathBuf};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 const DEFAULT_PROVIDER: &str = "openai";
-/// Codex++ 受管会话连接使用的内部别名供应商（渲染层 managed session connection
+/// RoseCode 受管会话连接使用的内部别名供应商（渲染层 managed session connection
 /// 只在单个会话的连接覆盖里临时声明它）。历史会话的 session_meta 会记下这个名字，
 /// 但它不是用户的供应商，不能作为把历史会话迁移过去的「同步目标」（#2791）。
 const MANAGED_SESSION_PROVIDER_ALIAS: &str = "codex_plus_managed";
@@ -2022,7 +2022,7 @@ fn resolve_provider_sync_target_snapshot(
         }
         if is_provider_sync_internal_alias(trimmed) {
             return Err(format!(
-                "Provider sync target {trimmed:?} is an internal Codex++ session alias"
+                "Provider sync target {trimmed:?} is an internal RoseCode session alias"
             ));
         }
     }
@@ -2076,7 +2076,7 @@ fn revalidate_provider_sync_target_snapshot(
     Ok(())
 }
 
-/// 是否为 Codex++ 内部会话别名供应商；这类 id 不进入同步目标列表，也不能被显式选为目标。
+/// 是否为 RoseCode 内部会话别名供应商；这类 id 不进入同步目标列表，也不能被显式选为目标。
 pub fn is_provider_sync_internal_alias(value: &str) -> bool {
     value.trim() == MANAGED_SESSION_PROVIDER_ALIAS
 }

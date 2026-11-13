@@ -46,10 +46,10 @@ npm run check
 npm test
 npm run vite:build
 cd ../..
-cargo build --release -p codex-plus-manager --bin codex-plus-plus
+cargo build --release -p codex-plus-manager --bin rosecode
 ```
 
-主程序位于 `target/release/codex-plus-plus.exe`（Windows）或 `target/release/codex-plus-plus`（其他平台）。日常使用的 Claude 功能已内置于主程序。
+主程序位于 `target/release/rosecode.exe`（Windows）或 `target/release/rosecode`（其他平台）。日常使用的 Claude 功能已内置于主程序。
 
 核心测试示例：
 
@@ -80,7 +80,7 @@ node scripts/release.mjs X.Y.Z --dry-run
 node scripts/release.mjs X.Y.Z
 ```
 
-脚本会统一版本号、提交、打 `vX.Y.Z` 标签并推送到 `origin`。本仓库的 `Release assets` 工作流使用 `github.repository` 构建附件并生成 `latest.json`，附件齐备后发布。安装包文件名沿用兼容标识 `CodexPlusPlus-*`，发布地址和更新来源属于 RoseCode。
+脚本会统一版本号、提交、打 `vX.Y.Z` 标签并推送到 `origin`。本仓库的 `Release assets` 工作流使用 `github.repository` 构建附件并生成 `latest.json`，附件齐备后发布。安装包文件名统一使用 `RoseCode-*`，发布地址和更新来源属于 RoseCode。
 
 默认发布 Windows 安装版与便携版，Linux DEB 构建成功时一并提供。macOS 需维护者配置本仓库自己的 Apple Developer ID 签名与公证凭据，并将仓库变量 `RELEASE_MACOS_ENABLED` 设为 `true` 后才启用；不会借用上游证书或发布未签名的 macOS 包。
 

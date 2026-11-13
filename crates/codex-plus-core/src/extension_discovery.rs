@@ -152,9 +152,9 @@ pub struct CommunityEntry {
     pub icon: String,
     #[serde(default)]
     pub keywords: Vec<String>,
-    /// 整数表示拓展 API 版本，字符串表示 Codex++ 的 semver 范围。
+    /// 整数表示拓展 API 版本，字符串表示 RoseCode 的 semver 范围。
     pub engine: Value,
-    /// 本机拓展 API 或 Codex++ 版本满足 `engines.codexpp`。
+    /// 本机拓展 API 或 RoseCode 版本满足 `engines.codexpp`。
     pub compatible: bool,
     /// 默认分支清单声明的能力；实际安装版本的权限在 prepare 时重新读。
     pub permissions: Value,
@@ -502,7 +502,7 @@ impl CuratedFilter {
         let owner_official = self.official_owners.iter().any(|owner| owner.eq_ignore_ascii_case(&entry.owner));
         let text = format!("{} {} {}", entry.name, entry.description, entry.author).to_lowercase();
         if !owner_official && ["官方", "official", "codex++ 出品", "codex++出品"].iter().any(|word| text.contains(word)) {
-            warnings.push("自称官方，但不是 Codex++ 官方仓库".to_string());
+            warnings.push("自称官方，但不是 RoseCode 官方仓库".to_string());
         }
         warnings
     }
@@ -538,7 +538,7 @@ struct DiscoveryCache {
     problems: Vec<String>,
 }
 
-/// 社区拓展的本地文件都在 Codex++ 用户脚本配置目录下。
+/// 社区拓展的本地文件都在 RoseCode 用户脚本配置目录下。
 #[derive(Debug, Clone)]
 pub struct CommunityStore {
     config_dir: PathBuf,
@@ -676,12 +676,12 @@ impl CommunityStore {
         if !entry.compatible {
             if let Some(range) = entry.engine.as_str() {
                 bail!(
-                    "这个拓展需要 Codex++ {range}，当前版本为 {}",
+                    "这个拓展需要 RoseCode {range}，当前版本为 {}",
                     crate::extension_semver::codexpp_version()
                 );
             }
             bail!(
-                "这个拓展需要拓展 API v{}，当前 Codex++ 提供 v{}，请先升级 Codex++",
+                "这个拓展需要拓展 API v{}，当前 RoseCode 提供 v{}，请先升级 Codex++",
                 entry.engine,
                 EXTENSION_API_VERSION
             );

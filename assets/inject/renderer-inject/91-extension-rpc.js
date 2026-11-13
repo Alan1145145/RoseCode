@@ -207,7 +207,7 @@
         if (typeof config.model === "string" && config.model && config.model !== seed.model) {
           result.model = config.model;
         } else if (typeof config.provider === "string" && config.provider && config.provider !== provider && base) {
-          // 只换了供应商：沿用 Codex++ 的「供应商/模型」写法拼回去。
+          // 只换了供应商：沿用 RoseCode 的「供应商/模型」写法拼回去。
           result.model = `${config.provider}/${base}`;
         }
         if (typeof config.reasoningEffort === "string" && config.reasoningEffort !== seed.reasoningEffort) {
@@ -438,7 +438,7 @@
         Promise.resolve().then(() => plan(controller.signal)),
         new Promise((resolve) => {
           timer = setTimeout(() => {
-            controller.abort(new Error("Codex++ 拓展中间件超时"));
+            controller.abort(new Error("RoseCode 拓展中间件超时"));
             resolve(null);
           }, codexPlusRpcMiddlewareTimeoutMs);
         }),

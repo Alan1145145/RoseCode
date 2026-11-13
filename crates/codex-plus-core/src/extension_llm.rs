@@ -1,4 +1,4 @@
-//! 拓展自己调模型（页面 `ctx.llm`、后台 / 工具里的 `llm`）：经 Codex++ 的协议代理，用当前的
+//! 拓展自己调模型（页面 `ctx.llm`、后台 / 工具里的 `llm`）：经 RoseCode 的协议代理，用当前的
 //! 供应商与模型路由发一次 Responses 请求，把回复整理成 `{ text, model, usage }`。
 //!
 //! 这一跳不跑拓展的网关中间件（免得拓展自己的请求再被拓展改写、甚至递归）。
@@ -290,7 +290,7 @@ pub async fn complete(params: &Value) -> anyhow::Result<Value> {
 pub async fn stream(params: &Value, mut on_delta: impl FnMut(Value) + Send) -> anyhow::Result<Value> {
     let body = request_body(params, default_model())?;
     let run = async {
-        let mut response = crate::protocol_proxy::open_responses_proxy_request(&body.to_string(), Some("CodexPlusPlus/extension-llm")).await?;
+        let mut response = crate::protocol_proxy::open_responses_proxy_request(&body.to_string(), Some("RoseCode/extension-llm")).await?;
         let status = response.status_code;
         let mut deltas = SseDeltas::default();
         // 代理预读的流开头要先处理，再接着读剩下的。

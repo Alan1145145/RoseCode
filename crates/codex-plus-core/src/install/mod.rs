@@ -10,17 +10,17 @@ pub mod macos;
 pub mod windows;
 
 // 保留旧名称供存量安装识别；新入口统一使用 APP_*。
-pub const APP_NAME: &str = "Codex++";
-pub const APP_BINARY: &str = "codex-plus-plus";
-pub const APP_BUNDLE_ID: &str = "com.bigpizzav3.codexplusplus";
-pub const MACOS_APP_EXECUTABLE: &str = "CodexPlusPlus";
-pub const SILENT_NAME: &str = "Codex++";
-pub const MANAGER_NAME: &str = "Codex++ 管理工具";
-pub const SILENT_BINARY: &str = "codex-plus-plus";
-pub const MACOS_SILENT_EXECUTABLE: &str = "CodexPlusPlus";
+pub const APP_NAME: &str = "RoseCode";
+pub const APP_BINARY: &str = "rosecode";
+pub const APP_BUNDLE_ID: &str = "com.alan1145145.rosecode";
+pub const MACOS_APP_EXECUTABLE: &str = "RoseCode";
+pub const SILENT_NAME: &str = "RoseCode";
+pub const MANAGER_NAME: &str = "RoseCode 管理工具";
+pub const SILENT_BINARY: &str = "rosecode";
+pub const MACOS_SILENT_EXECUTABLE: &str = "RoseCode";
 pub const MANAGER_BINARY: &str = "codex-plus-plus-manager";
-pub const SILENT_BUNDLE_ID: &str = "com.bigpizzav3.codexplusplus";
-pub const MANAGER_BUNDLE_ID: &str = "com.bigpizzav3.codexplusplus.manager";
+pub const SILENT_BUNDLE_ID: &str = "com.alan1145145.rosecode";
+pub const MANAGER_BUNDLE_ID: &str = "com.alan1145145.rosecode.manager";
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
@@ -84,11 +84,11 @@ impl ShortcutState {
 }
 
 pub fn shortcut_names() -> (&'static str, &'static str) {
-    ("Codex++.lnk", "Codex++.lnk")
+    ("RoseCode.lnk", "RoseCode.lnk")
 }
 
 pub fn app_bundle_names() -> (&'static str, &'static str) {
-    ("Codex++.app", "Codex++.app")
+    ("RoseCode.app", "RoseCode.app")
 }
 
 pub fn inspect_entrypoints() -> EntryPointState {
@@ -219,7 +219,7 @@ fn platform_install(options: &InstallOptions) -> anyhow::Result<()> {
     #[cfg(not(any(windows, target_os = "macos", target_os = "linux")))]
     {
         let _ = options;
-        anyhow::bail!("当前平台暂不支持安装 Codex++ 入口")
+        anyhow::bail!("当前平台暂不支持安装 RoseCode 入口")
     }
 }
 
@@ -242,7 +242,7 @@ fn platform_uninstall(options: &InstallOptions) -> anyhow::Result<()> {
     #[cfg(not(any(windows, target_os = "macos", target_os = "linux")))]
     {
         let _ = options;
-        anyhow::bail!("当前平台暂不支持卸载 Codex++ 入口")
+        anyhow::bail!("当前平台暂不支持卸载 RoseCode 入口")
     }
 }
 
@@ -276,12 +276,12 @@ fn entrypoint_candidates(root: &Option<PathBuf>) -> Vec<PathBuf> {
     } else {
         let mut list = vec![
             root.join(format!("{name}.desktop")),
-            root.join("codex-plus-plus.desktop"),
+            root.join("rosecode.desktop"),
         ];
         if let Some(base_dirs) = directories::BaseDirs::new() {
-            list.push(base_dirs.data_local_dir().join("applications/codex-plus-plus.desktop"));
+            list.push(base_dirs.data_local_dir().join("applications/rosecode.desktop"));
         }
-        list.push(PathBuf::from("/usr/share/applications/codex-plus-plus.desktop"));
+        list.push(PathBuf::from("/usr/share/applications/rosecode.desktop"));
         list
     }
 }
@@ -293,7 +293,7 @@ pub(crate) fn application_source(options: &InstallOptions) -> PathBuf {
     if let Some(source) = &options.manager_path {
         if matches!(
             source.file_stem().and_then(|name| name.to_str()),
-            Some(MANAGER_BINARY | "CodexPlusPlusManager")
+            Some(MANAGER_BINARY | "RoseCodeManager" | "CodexPlusPlusManager")
         ) {
             return companion_binary_path_from_exe(source, APP_BINARY);
         }

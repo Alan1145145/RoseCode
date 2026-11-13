@@ -203,7 +203,7 @@ fn generated_claude_plugin_contains_only_public_declarations_and_persistent_mcp(
     let hooks: Value = serde_json::from_slice(&fs::read(root.join("hooks/hooks.json")).unwrap()).unwrap();
     let registration = fs::read_to_string(root.join("hooks/register.js")).unwrap();
     assert_eq!(manifest["name"], extension_claude::PLUGIN_NAME);
-    assert_eq!(manifest["author"]["name"], "CodexPlusPlus");
+    assert_eq!(manifest["author"]["name"], "RoseCode");
     assert_eq!(mcp["mcpServers"]["codexpp-extensions"]["command"], executable.display().to_string());
     assert_eq!(mcp["mcpServers"]["codexpp-extensions"]["args"][0], extension_claude::MCP_FLAG);
     assert_eq!(mcp["mcpServers"]["codexpp-extensions"]["args"][1], "--state-dir");

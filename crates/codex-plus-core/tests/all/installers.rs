@@ -10,17 +10,17 @@ use std::path::{Path, PathBuf};
 fn windows_entrypoint_plan_has_one_gui_executable_and_shortcut() {
     let options = InstallOptions {
         install_root: Some("C:/Users/A/Desktop".into()),
-        launcher_path: Some("C:/Tools/codex-plus-plus.exe".into()),
+        launcher_path: Some("C:/Tools/rosecode.exe".into()),
         manager_path: Some("C:/Tools/codex-plus-plus-manager.exe".into()),
         remove_owned_data: false,
     };
     let plan = build_windows_entrypoint_plan(&options);
-    assert!(plan.silent_shortcut.ends_with("Codex++.lnk"));
+    assert!(plan.silent_shortcut.ends_with("RoseCode.lnk"));
     assert_eq!(plan.silent_shortcut, plan.manager_shortcut);
-    assert_eq!(plan.launcher_path, "C:/Tools/codex-plus-plus.exe");
+    assert_eq!(plan.launcher_path, "C:/Tools/rosecode.exe");
     assert_eq!(plan.launcher_path, plan.manager_path);
     assert_eq!(plan.silent_icon_path, plan.manager_icon_path);
-    assert_eq!(plan.uninstall_key, "CodexPlusPlus");
+    assert_eq!(plan.uninstall_key, "RoseCode");
     assert_eq!(plan.legacy_uninstall_key, "Codex++");
     assert_eq!(
         plan.uninstaller_path.replace('\\', "/"),
@@ -52,21 +52,21 @@ fn windows_entrypoint_plan_keeps_owned_data_removal_option() {
 fn macos_bundle_metadata_has_one_native_gui_app_with_url_protocols() {
     let options = InstallOptions {
         install_root: Some("/Applications".into()),
-        launcher_path: Some("/opt/Codex++.app/Contents/MacOS/CodexPlusPlus".into()),
+        launcher_path: Some("/opt/RoseCode.app/Contents/MacOS/RoseCode".into()),
         manager_path: Some("/opt/old-manager".into()),
         remove_owned_data: false,
     };
     let app = build_macos_app_bundle(&options, false);
     assert_eq!(app, build_macos_app_bundle(&options, true));
-    assert!(app.app_path.ends_with("Codex++.app"));
-    assert!(app.info_plist.contains("<string>Codex++</string>"));
+    assert!(app.app_path.ends_with("RoseCode.app"));
+    assert!(app.info_plist.contains("<string>RoseCode</string>"));
     assert!(
         app.info_plist
             .contains("<key>CodexPlusUnifiedApp</key>\n  <true/>")
     );
     assert!(
         app.info_plist
-            .contains("<string>com.bigpizzav3.codexplusplus</string>")
+            .contains("<string>com.alan1145145.rosecode</string>")
     );
     assert!(app.info_plist.contains("<string>dreamskin</string>"));
     assert!(app.info_plist.contains("<string>codexplusplus</string>"));
@@ -74,19 +74,19 @@ fn macos_bundle_metadata_has_one_native_gui_app_with_url_protocols() {
         app.info_plist
             .contains("<key>LSUIElement</key>\n  <false/>")
     );
-    assert_eq!(app.binary_target_name.as_deref(), Some("CodexPlusPlus"));
+    assert_eq!(app.binary_target_name.as_deref(), Some("RoseCode"));
     assert!(app.launch_script.is_empty());
     assert_eq!(app.binary_source, options.launcher_path);
 }
 
 #[test]
 fn installer_name_helpers_and_legacy_constants_keep_api_compatibility() {
-    assert_eq!(shortcut_names(), ("Codex++.lnk", "Codex++.lnk"));
-    assert_eq!(app_bundle_names(), ("Codex++.app", "Codex++.app"));
+    assert_eq!(shortcut_names(), ("RoseCode.lnk", "RoseCode.lnk"));
+    assert_eq!(app_bundle_names(), ("RoseCode.app", "RoseCode.app"));
     assert_eq!(SILENT_BINARY, APP_BINARY);
     assert_eq!(SILENT_BUNDLE_ID, APP_BUNDLE_ID);
     assert_eq!(MANAGER_BINARY, "codex-plus-plus-manager");
-    assert_eq!(MANAGER_BUNDLE_ID, "com.bigpizzav3.codexplusplus.manager");
+    assert_eq!(MANAGER_BUNDLE_ID, "com.alan1145145.rosecode.manager");
 }
 
 #[test]
@@ -142,50 +142,48 @@ fn windows_workflows_verify_nsis_and_support_both_program_files_directories() {
 
 #[test]
 fn windows_installer_writes_the_same_uninstall_key_as_the_runtime() {
-    let nsi = std::fs::read_to_string("../../scripts/installer/windows/CodexPlusPlus.nsi").unwrap();
-    assert!(nsi.contains(r"Uninstall\CodexPlusPlus"));
-    assert!(nsi.contains(
-        r#"DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\CodexPlusPlus""#
-    ));
-    assert!(nsi.contains(
-        r#"DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\Codex++""#
-    ));
-    assert!(!nsi.contains(
-        r#"WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\Codex++""#
-    ));
+    let nsi = std::fs::read_to_string("../../scripts/installer/windows/RoseCode.nsi").unwrap();
+    assert!(nsi.contains(r#"WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\RoseCode" "DisplayName" "RoseCode""#));
+    assert!(nsi.contains(r#"DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\RoseCode""#));
+    assert!(!nsi.contains(r#"WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\CodexPlusPlus""#));
+    let install = nsi.split_once("Section \"Install\"").unwrap().1;
+    let migration = install.find(r#"StrCmp $LegacyInstall "" legacy_entries_done"#).unwrap();
+    let old_key = install.find(r#"DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\CodexPlusPlus""#).unwrap();
+    assert!(migration < old_key);
+    assert!(nsi.contains("VersionInfo.ProductName -ceq 'RoseCode'"));
 }
 
 #[test]
 fn windows_installer_migrates_existing_shortcuts_without_reviving_deleted_ones() {
-    let nsi = std::fs::read_to_string("../../scripts/installer/windows/CodexPlusPlus.nsi").unwrap();
+    let nsi = std::fs::read_to_string("../../scripts/installer/windows/RoseCode.nsi").unwrap();
     let lf = nsi.replace("\r\n", "\n");
     for text in [&lf, &lf.replace('\n', "\r\n")] {
         let text = text.replace("\r\n", "\n");
-        for key in ["CodexPlusPlus", "Codex++"] {
+        for (var, key) in [("ExistingInstall", "RoseCode"), ("LegacyInstall", "CodexPlusPlus")] {
             let read = format!(
-                r#"ReadRegStr $ExistingInstall HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\{key}" "InstallLocation""#
+                r#"ReadRegStr ${var} HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\{key}" "InstallLocation""#
             );
             assert!(text.find(&read).unwrap() < text.find("CreateShortcut").unwrap());
         }
         assert!(text.contains("StrCmp $ExistingInstall \"\" desktop_entry_create 0"));
         assert!(text.contains("StrCmp $HadDesktopEntry 1 desktop_entry_create desktop_entry_done"));
         assert!(
-            text.contains(r#"IfFileExists "$DESKTOP\Codex++ 管理工具.lnk" desktop_entry_found 0"#)
+            text.contains(r#"IfFileExists "$DESKTOP\Codex++.lnk" desktop_entry_found desktop_entry_checked"#)
         );
         assert!(
             text.contains(
-                r#"CreateShortcut "$DESKTOP\Codex++.lnk" "$INSTDIR\codex-plus-plus.exe""#
+                r#"CreateShortcut "$DESKTOP\RoseCode.lnk" "$INSTDIR\RoseCode.exe""#
             )
         );
-        assert!(text.contains(r#"CreateShortcut "$SMPROGRAMS\Codex++\Codex++.lnk""#));
-        assert!(!text.contains(r#"CreateShortcut "$DESKTOP\Codex++ 管理工具.lnk""#));
+        assert!(text.contains(r#"CreateShortcut "$SMPROGRAMS\RoseCode\RoseCode.lnk""#));
+        assert!(!text.contains(r#"CreateShortcut "$DESKTOP\RoseCode 管理工具.lnk""#));
         assert!(!text.contains(r#"File "${ROOT}\dist\windows\app\codex-plus-plus-manager.exe""#));
     }
 }
 
 #[test]
 fn windows_installer_waits_for_normal_exit_and_cancels_without_writing_apps() {
-    let nsi = std::fs::read_to_string("../../scripts/installer/windows/CodexPlusPlus.nsi")
+    let nsi = std::fs::read_to_string("../../scripts/installer/windows/RoseCode.nsi")
         .unwrap()
         .replace("\r\n", "\n");
     assert!(!nsi.contains("taskkill"));
@@ -217,7 +215,7 @@ fn windows_installer_waits_for_normal_exit_and_cancels_without_writing_apps() {
 fn windows_uninstaller_restores_proxy_config_before_deleting_main_exe() {
     // issue #406：卸载后 config.toml 仍指向本机代理，官方 Codex 一直 502。
     // 卸载器必须在进程退出后、删除主程序前让主程序清理一次。
-    let nsi = std::fs::read_to_string("../../scripts/installer/windows/CodexPlusPlus.nsi")
+    let nsi = std::fs::read_to_string("../../scripts/installer/windows/RoseCode.nsi")
         .unwrap()
         .replace("\r\n", "\n");
     let section = nsi
@@ -228,10 +226,10 @@ fn windows_uninstaller_restores_proxy_config_before_deleting_main_exe() {
         .unwrap()
         .0;
     let cleanup = section
-        .find(r#"ExecWait '"$INSTDIR\codex-plus-plus.exe" --codex-plus-uninstall-cleanup'"#)
+        .find(r#"ExecWait '"$INSTDIR\RoseCode.exe" --codex-plus-uninstall-cleanup'"#)
         .expect("卸载器应调用主程序清理代理配置");
     let last_wait = section.rfind("Call un.WaitForProcessExit").unwrap();
-    let delete_exe = section.find(r#"Delete "$INSTDIR\codex-plus-plus.exe""#).unwrap();
+    let delete_exe = section.find(r#"Delete "$INSTDIR\RoseCode.exe""#).unwrap();
     assert!(last_wait < cleanup);
     assert!(cleanup < delete_exe);
 }
@@ -240,10 +238,9 @@ fn windows_uninstaller_restores_proxy_config_before_deleting_main_exe() {
 fn macos_dmg_includes_one_visible_app_and_hidden_legacy_updater() {
     let script = std::fs::read_to_string("../../scripts/installer/macos/package-dmg.sh").unwrap();
     assert!(script.contains("ln -s /Applications \"$STAGE/Applications\""));
-    assert!(script.contains("Codex++.app"));
-    // The legacy updater still looks up this exact companion path. It is
-    // intentionally shipped as a hidden, self-exiting compatibility shim.
-    assert!(script.contains("Codex++ 管理工具.app"));
+    assert!(script.contains("RoseCode.app"));
+    // The manager shim is hidden and hands off to the branded main bundle.
+    assert!(script.contains("RoseCode 管理工具.app"));
     assert!(script.contains("codex-plus-legacy-shim"));
     let app_commands: Vec<_> = script
         .lines()
@@ -253,18 +250,18 @@ fn macos_dmg_includes_one_visible_app_and_hidden_legacy_updater() {
     assert_eq!(
         app_commands,
         [
-            r#"create_app "Codex++" "CodexPlusPlus" "$BINARY_DIR/codex-plus-plus" "com.bigpizzav3.codexplusplus" "false""#,
-            r#"create_app "Codex++ 管理工具" "CodexPlusPlusManager" "$BINARY_DIR/codex-plus-legacy-shim" "com.bigpizzav3.codexplusplus.manager" "true""#,
+            r#"create_app "RoseCode" "RoseCode" "$BINARY_DIR/rosecode" "com.alan1145145.rosecode" "false""#,
+            r#"create_app "RoseCode 管理工具" "RoseCodeManager" "$BINARY_DIR/codex-plus-legacy-shim" "com.alan1145145.rosecode.manager" "true""#,
         ]
     );
-    assert!(script.contains("printf '%s\\n' \"Codex++ 管理工具.app\" > \"$STAGE/.hidden\""));
-    assert!(script.contains("chflags hidden \"$STAGE/Codex++ 管理工具.app\""));
-    assert!(script.contains("set visible of item \"Codex++ 管理工具.app\" to false"));
+    assert!(script.contains("printf '%s\\n' \"RoseCode 管理工具.app\" > \"$STAGE/.hidden\""));
+    assert!(script.contains("chflags hidden \"$STAGE/RoseCode 管理工具.app\""));
+    assert!(script.contains("set visible of item \"RoseCode 管理工具.app\" to false"));
 }
 
 #[test]
 fn both_companion_names_resolve_to_current_unified_app() {
-    let exe = Path::new("/Applications/Codex++.app/Contents/MacOS/CodexPlusPlus");
+    let exe = Path::new("/Applications/RoseCode.app/Contents/MacOS/RoseCode");
     for binary in [APP_BINARY, MANAGER_BINARY] {
         assert_eq!(companion_binary_path_from_exe(exe, binary), exe);
         assert_eq!(
@@ -277,15 +274,15 @@ fn both_companion_names_resolve_to_current_unified_app() {
 #[test]
 fn legacy_macos_layout_redirects_companions_to_unified_app() {
     for old in [
-        "/Applications/Codex++.app/Contents/MacOS/CodexPlusPlus",
-        "/Applications/Codex++ 管理工具.app/Contents/MacOS/CodexPlusPlusManager",
+        "/Applications/RoseCode.app/Contents/MacOS/RoseCode",
+        "/Applications/RoseCode 管理工具.app/Contents/MacOS/RoseCodeManager",
     ] {
         for binary in [APP_BINARY, MANAGER_BINARY] {
             assert!(
                 companion_binary_path_from_exe(Path::new(old), binary)
                     .to_string_lossy()
                     .replace('\\', "/")
-                    .eq_ignore_ascii_case("/Applications/Codex++.app/Contents/MacOS/CodexPlusPlus")
+                    .eq_ignore_ascii_case("/Applications/RoseCode.app/Contents/MacOS/RoseCode")
             );
             assert_eq!(
                 macos_companion_bundle_identifier_from_exe(Path::new(old), binary),
@@ -298,7 +295,7 @@ fn legacy_macos_layout_redirects_companions_to_unified_app() {
 #[test]
 fn translocated_unified_app_uses_stable_bundle_id() {
     let exe = Path::new(
-        "/private/var/folders/x/AppTranslocation/id/d/Codex++.app/Contents/MacOS/CodexPlusPlus",
+        "/private/var/folders/x/AppTranslocation/id/d/RoseCode.app/Contents/MacOS/RoseCode",
     );
     assert_eq!(
         macos_companion_bundle_identifier_from_exe(exe, MANAGER_BINARY),
@@ -308,7 +305,7 @@ fn translocated_unified_app_uses_stable_bundle_id() {
 
 #[test]
 fn bare_unified_executable_resolves_both_roles_to_itself() {
-    let exe = Path::new("/tmp/target/debug/codex-plus-plus");
+    let exe = Path::new("/tmp/target/debug/rosecode");
     for binary in [APP_BINARY, MANAGER_BINARY] {
         assert_eq!(companion_binary_path_from_exe(exe, binary), exe);
         assert_eq!(
@@ -337,8 +334,8 @@ mod macos_install {
     use super::*;
 
     fn write_native_app(root: &Path) -> Vec<PathBuf> {
-        let contents = root.join("Codex++.app/Contents");
-        let binary = contents.join("MacOS/CodexPlusPlus");
+        let contents = root.join("RoseCode.app/Contents");
+        let binary = contents.join("MacOS/RoseCode");
         std::fs::create_dir_all(binary.parent().unwrap()).unwrap();
         let mut bytes = vec![0_u8; 2048];
         bytes[..4].copy_from_slice(&[0xcf, 0xfa, 0xed, 0xfe]);
@@ -346,7 +343,7 @@ mod macos_install {
         std::fs::create_dir_all(contents.join("_CodeSignature")).unwrap();
         std::fs::create_dir_all(contents.join("Resources")).unwrap();
         let plist = contents.join("Info.plist");
-        std::fs::write(&plist, "<plist><dict><key>CodexPlusUnifiedApp</key><true/><key>CFBundleName</key><string>Codex++</string><key>CFBundleIdentifier</key><string>com.bigpizzav3.codexplusplus</string><key>CFBundleExecutable</key><string>CodexPlusPlus</string><key>CFBundleIconFile</key><string>native.icns</string><key>LSUIElement</key><false/></dict></plist>").unwrap();
+        std::fs::write(&plist, "<plist><dict><key>CodexPlusUnifiedApp</key><true/><key>CFBundleName</key><string>RoseCode</string><key>CFBundleIdentifier</key><string>com.alan1145145.rosecode</string><key>CFBundleExecutable</key><string>RoseCode</string><key>CFBundleIconFile</key><string>native.icns</string><key>LSUIElement</key><false/></dict></plist>").unwrap();
         let signature = contents.join("_CodeSignature/CodeResources");
         std::fs::write(&signature, b"sealed resource sentinel").unwrap();
         let icon = contents.join("Resources/native.icns");
@@ -382,10 +379,10 @@ mod macos_install {
         assert!(
             !root
                 .path()
-                .join("Codex++.app/Contents/MacOS/codex-plus-plus")
+                .join("RoseCode.app/Contents/MacOS/rosecode")
                 .exists()
         );
-        assert!(!root.path().join("Codex++ 管理工具.app").exists());
+        assert!(!root.path().join("RoseCode 管理工具.app").exists());
     }
 
     #[test]
@@ -422,7 +419,7 @@ mod macos_install {
             .collect::<Vec<_>>();
         assert_eq!(snapshot(&copied), before);
         assert_eq!(snapshot(&files), before);
-        assert!(!target.path().join("Codex++ 管理工具.app").exists());
+        assert!(!target.path().join("RoseCode 管理工具.app").exists());
     }
 
     #[test]
@@ -430,10 +427,10 @@ mod macos_install {
         let root = tempfile::tempdir().unwrap();
         let files = write_native_app(root.path());
         let before_gui = snapshot(&files);
-        let original = root.path().join("Codex++.app");
-        let renamed = root.path().join("Codex++ 2.app");
-        std::fs::rename(root.path().join("Codex++.app"), &renamed).unwrap();
-        let current = renamed.join("Contents/MacOS/CodexPlusPlus");
+        let original = root.path().join("RoseCode.app");
+        let renamed = root.path().join("RoseCode 2.app");
+        std::fs::rename(root.path().join("RoseCode.app"), &renamed).unwrap();
+        let current = renamed.join("Contents/MacOS/RoseCode");
         let legacy = write_native_app(root.path());
         let plist = std::fs::read_to_string(&legacy[0]).unwrap().replace(
             "<key>CodexPlusUnifiedApp</key><true/>",
@@ -470,19 +467,19 @@ mod macos_install {
         let error =
             codex_plus_core::install::macos::native_application_bundle_from_executable(&auxiliary)
                 .unwrap_err();
-        assert!(error.to_string().contains("不是 Codex++ 原生界面的主程序"));
+        assert!(error.to_string().contains("不是 RoseCode 原生界面的主程序"));
     }
 
     #[test]
     fn bare_binary_cannot_create_a_partial_or_unsigned_wrapper_app() {
         let root = tempfile::tempdir().unwrap();
-        let binary = root.path().join("codex-plus-plus");
+        let binary = root.path().join("rosecode");
         std::fs::write(&binary, vec![0_u8; 2048]).unwrap();
         let target = root.path().join("apps");
         let error =
             codex_plus_core::install::macos::install_app_bundles(&options(&target, &binary))
                 .unwrap_err();
-        assert!(error.to_string().contains("完整的 Codex++.app"));
+        assert!(error.to_string().contains("完整的 RoseCode.app"));
         assert!(!target.exists());
     }
 
@@ -499,7 +496,7 @@ mod macos_install {
         let error =
             codex_plus_core::install::macos::install_app_bundles(&options(root.path(), &files[1]))
                 .unwrap_err();
-        assert!(error.to_string().contains("Codex++ 原生界面包"));
+        assert!(error.to_string().contains("RoseCode 原生界面包"));
         assert_eq!(snapshot(&files), before);
     }
 

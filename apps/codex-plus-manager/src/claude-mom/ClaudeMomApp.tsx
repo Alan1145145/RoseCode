@@ -554,7 +554,7 @@ function Toggle({ label, detail, checked, disabled, onChange }: { label: string;
 
 type ModelState = { modelReady: boolean; phase?: string; completedBytes?: number; totalBytes?: number; message?: string };
 
-/** 本地 SenseVoice 模型：状态、下载（约 230MB，和 Codex++ 共用 ~/.codex/speech-to-text）。 */
+/** 本地 SenseVoice 模型：状态、下载（约 230MB，和 RoseCode 共用 ~/.codex/speech-to-text）。 */
 function VoiceModel({ onReady }: { onReady: () => void }) {
   const [state, setState] = useState<ModelState | null>(null);
   const [error, setError] = useState<string | null>(null);

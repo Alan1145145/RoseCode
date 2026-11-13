@@ -31,7 +31,7 @@ const claudeMom = args.has("--claude-mom");
 
 /** 两个产品各自的固定 bundle。端口与 Codex++ 的 63122 / 63123 错开，两个实例可以同时开。 */
 const products = {
-  codex: { app: "Codex++.app", executable: "CodexPlusPlus", bin: "codex-plus-plus" },
+  codex: { app: "Codex++.app", executable: "CodexPlusPlus", bin: "rosecode" },
   claudeMom: {
     app: "ClaudeMom.app",
     executable: "ClaudeMom",

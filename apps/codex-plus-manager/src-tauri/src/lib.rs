@@ -254,7 +254,7 @@ pub fn run() {
     }
     // 恢复本地代理前先恢复选中的直连上游；主应用无上游配置时沿用供应商池。
     claude_mom_commands::apply_saved_upstream();
-    // Codex++ 重启后在原端口恢复 Claude 仍挂接着的本地代理（后台做，不阻塞启动）。
+    // RoseCode 重启后在原端口恢复 Claude 仍挂接着的本地代理（后台做，不阻塞启动）。
     std::thread::spawn(|| {
         match codex_plus_core::claude_local_backend::resume_attached_proxy() {
             Ok(Some(port)) => {
@@ -304,7 +304,7 @@ pub fn run() {
             let url = if show_update && !claude_mom {
                 "/index.html?showUpdate=1"
             } else {
-                // 主窗口按需重建时也按变体加载（Codex++ 的 index.html / ClaudeMom 的 claude-mom.html）。
+                // 主窗口按需重建时也按变体加载（RoseCode 的 index.html / ClaudeMom 的 claude-mom.html）。
                 flavor::main_window().url
             };
             lightweight::install_ready_listener(app.handle());
@@ -721,7 +721,7 @@ pub fn run() {
                                 serde_json::json!({ "message": error.to_string() }),
                             );
                         }
-                        // 常驻本地代理只在 Codex++ 退出时停止；Codex 会话结束
+                        // 常驻本地代理只在 RoseCode 退出时停止；Codex 会话结束
                         // 不会关它（见 core::resident_helper）。
                         gateway_commands::restore_for_exit();
                         codex_plus_core::claude_local_backend::stop_backend();
@@ -1126,7 +1126,7 @@ fn update_tray_labels<R: tauri::Runtime>(
     }
 }
 
-/// 托盘快捷面板的「打开 Codex++」。
+/// 托盘快捷面板的「打开 RoseCode」。
 pub(crate) fn show_main_window_from<R: tauri::Runtime>(app_handle: &tauri::AppHandle<R>) {
     show_main_window(app_handle);
 }
@@ -1199,7 +1199,7 @@ pub fn focus_existing_manager_window() {
             let names: &[&str] = if flavor::is_claude_mom() {
                 &["claude-mom.exe", "ClaudeMom.exe"]
             } else {
-                &["codex-plus-plus.exe", "codex-plus-plus-manager.exe"]
+                &["RoseCode.exe", "codex-plus-plus.exe", "codex-plus-plus-manager.exe"]
             };
             if names
                 .iter()

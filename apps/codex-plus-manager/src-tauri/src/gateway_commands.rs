@@ -105,11 +105,11 @@ pub struct GatewayAgentView {
     /// 网关默认模型的成员与可编辑供应商池不一致时，界面只显示模型 ID。
     pub default_model_differs: bool,
     pub models: Vec<String>,
-    /// 开着网关、但配置已被别的工具改掉（请求不再经过 Codex++）。
+    /// 开着网关、但配置已被别的工具改掉（请求不再经过 RoseCode）。
     pub drift: Option<codex_plus_core::gateway::drift::Drift>,
     /// 配置证据与真实网关流量合并后的诊断。
     pub diagnostics: Option<codex_plus_core::gateway::diagnostics::AgentDiagnostics>,
-    /// Agent 自带的模型（用它自己的登录或 Key 直连厂商，不经 Codex++）；没有时为 None。
+    /// Agent 自带的模型（用它自己的登录或 Key 直连厂商，不经 RoseCode）；没有时为 None。
     pub own_models: Option<codex_plus_core::gateway::own_models::OwnModels>,
 }
 
@@ -866,7 +866,7 @@ pub fn save_gateway_binding(
     })();
     let name = codex_plus_core::tools::tool_display_name(&ToolId::parse(&agent));
     respond(
-        &format!("{name} 已接入 Codex++ 网关，新开的会话生效。"),
+        &format!("{name} 已接入 RoseCode 网关，新开的会话生效。"),
         "接入网关失败",
         result,
     )
@@ -891,7 +891,7 @@ pub fn disable_gateway_binding(
     )
 }
 
-/// 选 Agent 自带的模型：接入着就断开并还原，再把模型写进 Agent 自己的配置（直连，不经 Codex++）。
+/// 选 Agent 自带的模型：接入着就断开并还原，再把模型写进 Agent 自己的配置（直连，不经 RoseCode）。
 #[tauri::command]
 pub fn use_gateway_own_model(
     agent: String,
@@ -920,7 +920,7 @@ pub fn use_gateway_own_model(
     })();
     let name = codex_plus_core::tools::tool_display_name(&ToolId::parse(&agent));
     respond(
-        &format!("{name} 已改用自带的 {}，直连、不经 Codex++，新开的会话生效。", model.trim()),
+        &format!("{name} 已改用自带的 {}，直连、不经 RoseCode，新开的会话生效。", model.trim()),
         "切换失败",
         result,
     )
@@ -1096,7 +1096,7 @@ pub fn save_gateway_image_inline(
     respond("生图选项已保存。", "保存生图选项失败", result)
 }
 
-/// 模型下拉里列不列这个 Agent 自带的模型（直连，不经 Codex++）。
+/// 模型下拉里列不列这个 Agent 自带的模型（直连，不经 RoseCode）。
 #[tauri::command]
 pub fn save_gateway_own_models_shown(
     agent: String,
@@ -3012,7 +3012,7 @@ pub fn start_from_saved_state_in_background() {
 
 /// 管理器启动时：有 Agent 开着网关就拉起常驻 helper，并在端口变化或退出 / 更新前恢复过直连的情况下重写配置。
 pub fn start_from_saved_state() {
-    // Codex 在 WSL 里运行时（仅 Windows）定期核对网关的 WSL 网卡地址：WSL 往往比 Codex++ 晚启动（#2773）。
+    // Codex 在 WSL 里运行时（仅 Windows）定期核对网关的 WSL 网卡地址：WSL 往往比 RoseCode 晚启动（#2773）。
     codex_plus_core::wsl_network::start_codex_gateway_wsl_watch();
     let Ok(gateway) = GatewayStore::default().load() else {
         return;
@@ -3091,7 +3091,7 @@ pub fn restore_for_uninstall() {
     );
 }
 
-/// 更新没装成、Codex++ 继续运行：把更新前恢复成直连的 Agent 重新接回网关。
+/// 更新没装成、RoseCode 继续运行：把更新前恢复成直连的 Agent 重新接回网关。
 pub fn undo_restore_for_update() {
     start_from_saved_state();
 }

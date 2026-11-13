@@ -2,7 +2,7 @@ use std::path::{Path, PathBuf};
 
 use super::{APP_NAME, InstallOptions, application_source, install_root_or_default};
 
-const UNINSTALL_SUBKEY: &str = r"Software\Microsoft\Windows\CurrentVersion\Uninstall\CodexPlusPlus";
+const UNINSTALL_SUBKEY: &str = r"Software\Microsoft\Windows\CurrentVersion\Uninstall\RoseCode";
 const LEGACY_UNINSTALL_SUBKEY: &str =
     r"Software\Microsoft\Windows\CurrentVersion\Uninstall\Codex++";
 const URL_PROTOCOL_SUBKEY: &str = r"Software\Classes\codexplusplus";
@@ -40,11 +40,11 @@ pub fn build_windows_entrypoint_plan(options: &InstallOptions) -> WindowsEntrypo
     let quiet_uninstall_command = format!("{uninstall_command} /S");
     WindowsEntrypointPlan {
         silent_shortcut: install_root
-            .join("Codex++.lnk")
+            .join("RoseCode.lnk")
             .to_string_lossy()
             .to_string(),
         manager_shortcut: install_root
-            .join("Codex++.lnk")
+            .join("RoseCode.lnk")
             .to_string_lossy()
             .to_string(),
         install_root: install_root.to_string_lossy().to_string(),
@@ -56,7 +56,7 @@ pub fn build_windows_entrypoint_plan(options: &InstallOptions) -> WindowsEntrypo
         uninstaller_path: uninstaller_path.to_string_lossy().to_string(),
         uninstall_command,
         quiet_uninstall_command,
-        uninstall_key: "CodexPlusPlus".to_string(),
+        uninstall_key: "RoseCode".to_string(),
         legacy_uninstall_key: "Codex++".to_string(),
         remove_owned_data: options.remove_owned_data,
     }
@@ -78,7 +78,7 @@ pub fn install_shortcuts(options: &InstallOptions) -> anyhow::Result<()> {
             create_entrypoint_shortcut(
                 PathBuf::from(&plan.silent_shortcut),
                 PathBuf::from(&plan.launcher_path),
-                "Open Codex++",
+                "Open RoseCode",
                 PathBuf::from(&plan.silent_icon_path),
             )
         },
@@ -140,7 +140,6 @@ pub fn uninstall_shortcuts(options: &InstallOptions) -> anyhow::Result<()> {
         r"{DREAM_SKIN_URL_PROTOCOL_SUBKEY}\shell"
     ));
     let _ = crate::windows_integration::delete_current_user_key(DREAM_SKIN_URL_PROTOCOL_SUBKEY);
-    let _ = crate::windows_integration::delete_current_user_key(LEGACY_UNINSTALL_SUBKEY);
     let _ = crate::windows_integration::delete_current_user_key(UNINSTALL_SUBKEY);
     Ok(())
 }
@@ -175,7 +174,6 @@ fn create_entrypoint_shortcut(
 
 #[cfg(windows)]
 fn write_uninstall_registration(plan: &WindowsEntrypointPlan) -> anyhow::Result<()> {
-    let _ = crate::windows_integration::delete_current_user_key(LEGACY_UNINSTALL_SUBKEY);
     let install_location = Path::new(&plan.manager_path)
         .parent()
         .map(Path::to_path_buf)
@@ -185,7 +183,7 @@ fn write_uninstall_registration(plan: &WindowsEntrypointPlan) -> anyhow::Result<
     for (name, value) in [
         ("DisplayName", APP_NAME.to_string()),
         ("DisplayVersion", crate::version::VERSION.to_string()),
-        ("Publisher", "BigPizzaV3".to_string()),
+        ("Publisher", "Alan1145145".to_string()),
         ("DisplayIcon", plan.manager_icon_path.clone()),
         ("InstallLocation", install_location),
         ("UninstallString", plan.uninstall_command.clone()),
@@ -200,7 +198,7 @@ fn write_uninstall_registration(plan: &WindowsEntrypointPlan) -> anyhow::Result<
 fn register_url_protocol(manager_path: &str) -> anyhow::Result<()> {
     register_url_protocol_key(
         URL_PROTOCOL_SUBKEY,
-        "URL:Codex++ Import Protocol",
+        "URL:RoseCode Import Protocol",
         manager_path,
     )?;
     register_url_protocol_key(
@@ -230,8 +228,8 @@ fn default_icon_path() -> PathBuf {
     std::env::current_exe()
         .ok()
         .and_then(|path| path.parent().map(Path::to_path_buf))
-        .map(|path| path.join("codex-plus-plus.ico"))
-        .unwrap_or_else(|| PathBuf::from("codex-plus-plus.ico"))
+        .map(|path| path.join("RoseCode.ico"))
+        .unwrap_or_else(|| PathBuf::from("RoseCode.ico"))
 }
 
 #[allow(dead_code)]
@@ -272,7 +270,7 @@ mod tests {
     fn first_install_creates_missing_shortcuts_and_preserves_existing_ones() {
         let root = tempfile::tempdir().unwrap();
         let installed = has_existing_installation(|_| Ok(Vec::new())).unwrap();
-        let shortcut = root.path().join("Codex++.lnk");
+        let shortcut = root.path().join("RoseCode.lnk");
         create_desktop_shortcut_on_first_install(&shortcut, installed, || {
             std::fs::write(&shortcut, b"original shortcut")?;
             Ok(())
@@ -297,7 +295,7 @@ mod tests {
             })
         })
         .unwrap();
-        let shortcut = root.path().join("Codex++.lnk");
+        let shortcut = root.path().join("RoseCode.lnk");
         create_desktop_shortcut_on_first_install(&shortcut, installed, || {
             std::fs::write(&shortcut, b"unwanted shortcut")?;
             Ok(())

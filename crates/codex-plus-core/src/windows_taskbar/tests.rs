@@ -127,11 +127,11 @@ fn both_taskbar_apis_preserve_native_icons_and_unrelated_properties() {
             for (key, expected) in [
                 (
                     PKEY_AppUserModel_ID,
-                    "com.bigpizzav3.codexplusplus.codex".to_string(),
+                    "com.alan1145145.rosecode.codex".to_string(),
                 ),
                 (
                     PKEY_AppUserModel_RelaunchDisplayNameResource,
-                    "Codex++".to_string(),
+                    "RoseCode".to_string(),
                 ),
                 (
                     PKEY_AppUserModel_RelaunchCommand,
