@@ -1520,11 +1520,11 @@ mod tests {
 
         assert!(script.contains(&format!("start \"\" /b \"{WINDOWS_EXE}\"")));
         assert!(script.contains(
-            "--user-data-dir=\"C:\\Users\\a b\\AppData\\Local\\Codex++\\instance 1\\user data\""
+            "--user-data-dir=\"C:\\Users\\a b\\AppData\\Local\\RoseCode\\instance 1\\user data\""
         ));
         assert!(script.contains("set \"CODEX_HOME=C:\\Users\\a b\\.codex\""));
         assert!(script.contains(
-            "set \"CODEX_ELECTRON_USER_DATA_PATH=C:\\Users\\a b\\AppData\\Local\\Codex++\\instance 1\\user data\""
+            "set \"CODEX_ELECTRON_USER_DATA_PATH=C:\\Users\\a b\\AppData\\Local\\RoseCode\\instance 1\\user data\""
         ));
     }
 

@@ -1828,7 +1828,7 @@ mod tests {
             root
         );
         assert_eq!(
-            installed_root_from_executable(&executable_path("codex++.app", "RoseCode"))
+            installed_root_from_executable(&executable_path("rosecode.app", "RoseCode"))
                 .unwrap(),
             root
         );

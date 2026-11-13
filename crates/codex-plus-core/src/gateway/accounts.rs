@@ -2522,7 +2522,7 @@ mod tests {
         assert!(url.starts_with(
             "https://auth.openai.com/api/accounts/authorize?client_id=dynamic_agent_client"
         ));
-        assert!(url.contains("agent_name_hint=Codex%2B%2B"));
+        assert!(url.contains("agent_name_hint=RoseCode"));
         assert!(url.contains("resource=https%3A%2F%2Fapi.openai.com%2Fv1"));
         assert!(url.contains("chatgpt.tokens.use.direct"));
         assert!(url.contains("nonce=nn"));

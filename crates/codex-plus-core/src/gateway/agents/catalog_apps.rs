@@ -2135,7 +2135,7 @@ mod tests {
         let files = connect(&JETBRAINS_AIR, &env, "jetbrains-air");
         let acp = json_of(&files[&dir.join("acp.json")]);
         assert_eq!(acp["agent_servers"]["Mine"]["command"], "x");
-        let ours = &acp["agent_servers"]["Codex++"];
+        let ours = &acp["agent_servers"]["RoseCode"];
         assert_eq!(ours["args"][0], "acp");
         assert_eq!(
             ours["env"]["OPENCODE_CONFIG"],

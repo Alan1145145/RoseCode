@@ -720,7 +720,7 @@ mod tests {
     #[test]
     fn listener_firewall_hint_points_to_windows_firewall() {
         assert!(WSL_LISTENER_FIREWALL_HINT.contains("Windows 防火墙"));
-        assert!(WSL_LISTENER_FIREWALL_HINT.contains("Codex++"));
+        assert!(WSL_LISTENER_FIREWALL_HINT.contains("RoseCode"));
         assert!(!WSL_LISTENER_FIREWALL_HINT.contains("  "));
     }
 
