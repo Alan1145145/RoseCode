@@ -1,0 +1,74 @@
+/* RoseCode：主窗口、菜单 portal 与独立 ClaudeMom 共用的设计令牌。 */
+:root[data-rosecode-ui] {
+  --rose-radius: 12px;
+  --rose-sidebar-width: 200px;
+  --rose-ease: cubic-bezier(.2,.8,.2,1);
+  --rose-motion: 180ms;
+  --font-sans: "Segoe UI Variable", "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --cx-radius: 12px;
+  --cx-content: 1180px;
+  --focus-ring: 0 0 0 3px hsl(var(--ring) / .1);
+}
+:root[data-rosecode-ui]:not(.light), :root[data-rosecode-ui] .shell.rosecode-ui.dark {
+  --background: 0 0% 11%; --foreground: 0 0% 92%;
+  --card: 0 0% 14%; --card-foreground: 0 0% 92%;
+  --popover: 0 0% 15%; --popover-foreground: 0 0% 94%;
+  --primary: 0 0% 92%; --primary-foreground: 0 0% 11%;
+  --secondary: 0 0% 19%; --secondary-foreground: 0 0% 90%;
+  --muted: 0 0% 17%; --muted-foreground: 0 0% 64%;
+  --accent: 0 0% 21%; --accent-foreground: 0 0% 94%;
+  --border: 0 0% 23%; --input: 0 0% 28%; --ring: 0 0% 68%;
+  --brand-accent: 0 0% 88%; --brand-accent-2: 0 0% 78%;
+  --shell-bg: 0 0% 11%; --sidebar-bg: 0 0% 9%; --sidebar-border: 0 0% 22%;
+  --sidebar-foreground: 0 0% 84%; --sidebar-icon: 0 0% 72%; --sidebar-section: 0 0% 64%;
+  --sidebar-hover: 0 0% 16%; --sidebar-selected: 0 0% 22%;
+  --selection: 0 0% 23%; --selection-hover: 0 0% 26%;
+  --sidebar-muted: 0 0% 18%; --surface-raised: 0 0% 16%; --surface-sunken: 0 0% 10%;
+  --status-success: 153 39% 64%; --switch-on: 153 42% 43%; --switch-track: 225 6% 25%;
+  --cx-row-divider: 0 0% 23%; --shadow-color: 0 0% 0%;
+}
+:root[data-rosecode-ui].light, :root[data-rosecode-ui] .shell.rosecode-ui.light {
+  --background: 0 0% 100%; --foreground: 222 25% 20%;
+  --card: 0 0% 100%; --card-foreground: 222 25% 20%;
+  --popover: 0 0% 100%; --popover-foreground: 222 25% 20%;
+  --primary: 219 76% 55%; --primary-foreground: 0 0% 100%;
+  --secondary: 218 45% 97%; --secondary-foreground: 222 22% 28%;
+  --muted: 218 35% 98%; --muted-foreground: 219 12% 43%;
+  --accent: 216 85% 97%; --accent-foreground: 218 65% 39%;
+  --border: 218 32% 92%; --input: 218 25% 85%; --ring: 217 80% 66%;
+  --brand-accent: 219 72% 51%; --brand-accent-2: 252 65% 62%;
+  --shell-bg: 0 0% 100%; --sidebar-bg: 220 35% 98%; --sidebar-border: 218 32% 93%;
+  --sidebar-foreground: 220 19% 29%; --sidebar-icon: 218 18% 44%; --sidebar-section: 218 12% 47%;
+  --sidebar-hover: 216 70% 97%; --sidebar-selected: 216 100% 95%;
+  --selection: 216 100% 96%; --selection-hover: 216 100% 94%;
+  --sidebar-muted: 216 70% 96%; --surface-raised: 0 0% 100%; --surface-sunken: 218 45% 98%;
+  --status-success: 154 50% 31%; --switch-on: 154 50% 35%; --switch-track: 240 8% 87%;
+  --cx-row-divider: 218 32% 93%; --shadow-color: 220 25% 25%;
+}
+:root[data-rosecode-ui] body { font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }
+:root[data-rosecode-ui] :is(button, input, select, textarea) { font-family: inherit; }
+:root[data-rosecode-ui] :is(button, a, input, textarea):focus-visible { outline: 2px solid hsl(var(--ring) / .65); outline-offset: 2px; }
+:root[data-rosecode-ui] :is(button, a) { -webkit-tap-highlight-color: transparent; }
+:root[data-rosecode-ui] :is(button, a, .cx-row[data-clickable="true"]) {
+  transition: color 140ms var(--rose-ease), background-color 140ms var(--rose-ease), border-color 140ms var(--rose-ease), box-shadow 140ms var(--rose-ease);
+}
+:root[data-rosecode-ui] button:active:not(:disabled):not([role="option"]) { filter: brightness(.97); }
+:root[data-rosecode-ui] .rose-tooltip {
+  position: fixed; z-index: 3000; pointer-events: none; width: max-content; max-width: min(300px, calc(100vw - 16px));
+  padding: 7px 10px; border: 1px solid hsl(var(--border)); border-radius: 7px;
+  color: hsl(var(--popover-foreground)); background: hsl(var(--popover)); box-shadow: 0 5px 18px hsl(var(--shadow-color) / .12);
+  font: 12px/1.5 var(--font-sans); overflow-wrap: anywhere;
+  animation: rose-tip-in 140ms var(--rose-ease) both;
+}
+:root[data-rosecode-ui] .rose-tooltip[data-open="false"] { animation: rose-tip-out 100ms ease-in both; }
+@keyframes rose-tip-in { from { opacity: 0; transform: translateX(-4px); } to { opacity: 1; transform: none; } }
+@keyframes rose-tip-out { to { opacity: 0; transform: translateX(-3px); } }
+@keyframes rose-panel-in { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: none; } }
+@keyframes rose-menu-in { from { opacity: 0; transform: translateY(-4px) scale(.985); } to { opacity: 1; transform: none; } }
+@keyframes rose-menu-out { to { opacity: 0; transform: translateY(-3px) scale(.99); } }
+@keyframes rose-drawer-in { from { opacity: .6; transform: translateX(26px); } to { opacity: 1; transform: none; } }
+@keyframes rose-backdrop-in { from { background-color: transparent; } }
+@media (prefers-reduced-motion: reduce) {
+  :root[data-rosecode-ui] { --rose-motion: 0ms; }
+  :root[data-rosecode-ui] *, :root[data-rosecode-ui] *::before, :root[data-rosecode-ui] *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}

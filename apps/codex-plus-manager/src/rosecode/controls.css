@@ -1,0 +1,42 @@
+:root[data-rosecode-ui] .app-select { position: relative; min-width: 0; font-size: 13px; }
+/* 组合搜索框由外壳统一绘制焦点，内部输入框不再叠一层方形描边。 */
+:root[data-rosecode-ui] .shell.rosecode-ui .cx-search:focus-within { border-color: hsl(var(--ring) / .6); box-shadow: var(--focus-ring); }
+:root[data-rosecode-ui] .shell.rosecode-ui .cx-search input,
+:root[data-rosecode-ui] .shell.rosecode-ui .cx-search input:is(:focus,:focus-visible) { border: 0; outline: none; outline-offset: 0; box-shadow: none; background: transparent; }
+:root[data-rosecode-ui] .app-select-trigger {
+  display: flex; width: 100%; min-height: 34px; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 7px 10px; border: 1px solid hsl(var(--input)); border-radius: 7px;
+  background: hsl(var(--card)); color: hsl(var(--foreground)); font: inherit; text-align: left; cursor: pointer;
+}
+:root[data-rosecode-ui] .app-select-trigger > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+:root[data-rosecode-ui] .app-select-trigger svg { width: 14px; height: 14px; flex: none; color: hsl(var(--muted-foreground)); transition: transform var(--rose-motion) var(--rose-ease); }
+:root[data-rosecode-ui] .app-select.open .app-select-trigger svg { transform: rotate(180deg); }
+:root[data-rosecode-ui] .app-select-trigger:hover:not(:disabled) { border-color: hsl(var(--muted-foreground) / .5); }
+:root[data-rosecode-ui] .app-select.open .app-select-trigger { border-color: hsl(var(--brand-accent) / .6); box-shadow: var(--focus-ring); }
+:root[data-rosecode-ui] .app-select-menu-portal {
+  z-index: 2000; padding: 5px; overflow-y: auto; overscroll-behavior: contain;
+  border: 1px solid hsl(var(--border)); border-radius: 10px; background: hsl(var(--popover)); color: hsl(var(--popover-foreground));
+  box-shadow: 0 12px 34px hsl(var(--shadow-color) / .14), 0 2px 5px hsl(var(--shadow-color) / .06);
+  animation: rose-menu-in 150ms var(--rose-ease) both; scrollbar-width: thin;
+}
+:root[data-rosecode-ui] .app-select-menu-portal[data-state="closed"] { pointer-events: none; animation: rose-menu-out 120ms ease-in both; }
+:root[data-rosecode-ui] .app-select-option {
+  display: flex; width: 100%; min-height: 34px; align-items: center; justify-content: space-between; gap: 14px;
+  padding: 8px 10px; border: 0; border-radius: 6px; background: transparent; color: inherit;
+  font: 13px/1.45 var(--font-sans); text-align: left; cursor: pointer;
+}
+:root[data-rosecode-ui] .app-select-option.selected { color: hsl(var(--brand-accent)); background: hsl(var(--brand-accent) / .08); }
+:root[data-rosecode-ui] .app-select-option:is(:hover,[data-highlighted="true"]):not(:disabled) { background: hsl(var(--accent)); }
+:root[data-rosecode-ui] .app-select-option-label { min-width: 0; white-space: normal; overflow-wrap: anywhere; }
+:root[data-rosecode-ui] .app-select-check { height: 14px; width: 14px; flex: none; color: hsl(var(--brand-accent)); }
+:root[data-rosecode-ui] .app-select-option-text { display: grid; gap: 3px; min-width: 0; }
+:root[data-rosecode-ui] .app-select-option-text small { color: hsl(var(--muted-foreground)); font-size: 11px; }
+:root[data-rosecode-ui] .app-select-placeholder { color: hsl(var(--muted-foreground)); }
+:root[data-rosecode-ui] .app-select-trigger:disabled, :root[data-rosecode-ui] .app-select-option:disabled { opacity: .45; cursor: default; }
+:root[data-rosecode-ui] .app-select-sm .app-select-trigger { min-height: 29px; padding-block: 4px; }
+:root[data-rosecode-ui] :is(.gw-primary-button, .cx-primary, .pf-submit, .cm-btn-primary) { background: hsl(var(--primary)); color: hsl(var(--primary-foreground)); border-color: transparent; }
+:root[data-rosecode-ui] :is(.gw-soft-button, .cx-secondary, .pf-cancel, .cm-btn) { border-radius: 7px; }
+:root[data-rosecode-ui] :is(.gw-primary-button, .gw-soft-button, .cx-primary, .cx-secondary) { min-height: 34px; font-size: 13px; }
+:root[data-rosecode-ui] .shell.rosecode-ui :is(.cx-primary,.cx-secondary,.gw-primary-button,.gw-soft-button) { min-height: 34px; border-radius: 7px; padding: 6px 12px; font-size: 12px; }
+:root[data-rosecode-ui] .shell.rosecode-ui :is(.cx-primary,.gw-primary-button) { background: hsl(var(--primary)); color: hsl(var(--primary-foreground)); border-color: transparent; }
+:root[data-rosecode-ui] :is(.gw-switch, .cm-switch)::after { transition: transform var(--rose-motion) var(--rose-ease); }

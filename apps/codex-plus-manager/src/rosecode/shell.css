@@ -1,0 +1,97 @@
+/* 导航、应用顶栏、页面工作区三层独立；不让旧页面决定外壳的高度。 */
+:root[data-rosecode-ui] .shell.rosecode-ui {
+  grid-template-columns: var(--rose-sidebar-width) minmax(0,1fr);
+  transition: grid-template-columns 220ms var(--rose-ease);
+}
+:root[data-rosecode-ui][data-rose-sidebar-compact="true"] { --rose-sidebar-width: 66px; }
+:root[data-rosecode-ui] .shell.rosecode-ui .workspace { display: grid; grid-template-rows: 45px minmax(0,1fr); height: 100%; min-height: 0; min-width: 0; overflow: hidden; background: hsl(var(--background)); }
+:root[data-rosecode-ui] .rose-workspace-bar { display: flex; align-items: center; justify-content: space-between; min-width: 0; gap: 14px; padding: 0 25px; background: hsl(var(--card) / .55); border-bottom: 1px solid hsl(var(--border)); }
+:root[data-rosecode-ui] .rose-workspace-bar nav { display: flex; align-items: center; gap: 9px; min-width: 0; color: hsl(var(--muted-foreground)); font-size: 11px; }
+:root[data-rosecode-ui] .rose-workspace-bar nav > svg { width: 11px; height: 11px; opacity: .6; }
+:root[data-rosecode-ui] .rose-workspace-bar nav > strong { font-size: 11px; font-weight: 500; color: hsl(var(--foreground)); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+:root[data-rosecode-ui] .rose-global-search { display: flex; flex: none; align-items: center; gap: 8px; height: 28px; padding: 0 8px; background: transparent; border: 1px solid transparent; border-radius: 6px; color: hsl(var(--muted-foreground)); font: 11px/1.4 var(--font-sans); cursor: pointer; }
+:root[data-rosecode-ui] .rose-global-search:hover { background: hsl(var(--accent)); border-color: hsl(var(--border)); }
+:root[data-rosecode-ui] .rose-global-search svg { width: 13px; height: 13px; }
+:root[data-rosecode-ui] .rose-global-search kbd { margin-left: 6px; font: 10px/1.4 var(--font-sans); opacity: .6; }
+:root[data-rosecode-ui] .shell.rosecode-ui .cx-side { gap: 6px; padding: 12px 10px 0; background: hsl(var(--sidebar-bg)); }
+:root[data-rosecode-ui] .shell.rosecode-ui .rose-workspace-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 48px; padding: 2px 7px 10px; }
+:root[data-rosecode-ui] .rose-workspace-heading > div { display: grid; gap: 2px; min-width: 0; white-space: nowrap; }
+:root[data-rosecode-ui] .rose-workspace-heading strong { font-size: 13px; font-weight: 600; }
+:root[data-rosecode-ui] .rose-workspace-heading small { color: hsl(var(--muted-foreground)); font-size: 11px; }
+:root[data-rosecode-ui] .shell.rosecode-ui .cx-side-search { min-height: 32px; height: 32px; border-color: hsl(var(--border)); border-radius: 7px; background: hsl(var(--card)); font-size: 12px; }
+:root[data-rosecode-ui] .shell.rosecode-ui .cx-side-search kbd { font-size: 10px; background: hsl(var(--background)); border-color: hsl(var(--border)); }
+:root[data-rosecode-ui] .shell.rosecode-ui .cx-side[data-mode="main"] > .cx-side-search { display: none; }
+:root[data-rosecode-ui] .shell.rosecode-ui .cx-side-nav { gap: 15px; margin-top: 4px; scrollbar-gutter: auto; scrollbar-width: thin; overflow-x: hidden; }
+:root[data-rosecode-ui] .shell.rosecode-ui .cx-side-heading { height: 25px; font-size: 11px; font-weight: 500; color: hsl(var(--sidebar-section)); }
+:root[data-rosecode-ui] .shell.rosecode-ui .cx-side-item { height: 35px; min-height: 35px; padding: 0 10px; border: 1px solid transparent; font-size: 13px; color: hsl(var(--sidebar-foreground)); border-radius: 7px; }
+:root[data-rosecode-ui] .shell.rosecode-ui .cx-side-item:hover:not(:disabled):not(.active) { background: hsl(var(--sidebar-hover)); color: hsl(var(--foreground)); }
+:root[data-rosecode-ui] .shell.rosecode-ui .cx-side-item.active { border-color: transparent; background: hsl(var(--sidebar-selected)); color: hsl(var(--foreground)); box-shadow: none; font-weight: 550; }
+:root[data-rosecode-ui] .shell.rosecode-ui .cx-side-item.active.has-subnav { background: transparent; }
+:root[data-rosecode-ui] .shell.rosecode-ui .cx-side-item.active.has-subnav:hover { background: hsl(var(--sidebar-hover)); }
+:root[data-rosecode-ui] .shell.rosecode-ui .cx-side-item.active .cx-side-icon { color: hsl(var(--brand-accent)); }
+:root[data-rosecode-ui] .shell.rosecode-ui .cx-side-item:focus-visible { outline: none; box-shadow: inset 0 0 0 1.5px hsl(var(--ring) / .65); }
+:root[data-rosecode-ui] .shell.rosecode-ui .cx-side-icon { color: hsl(var(--sidebar-icon)); width: 16px; height: 16px; }
+:root[data-rosecode-ui] .shell.rosecode-ui .cx-side .side-dot { width: 5px; height: 5px; }
+:root[data-rosecode-ui] .shell.rosecode-ui .cx-side-subnav { margin: 4px 0 8px 13px; padding-left: 7px; gap: 2px; animation: rose-panel-in 160ms var(--rose-ease) both; }
+:root[data-rosecode-ui] .shell.rosecode-ui .cx-side-subitem { flex: none; gap: 9px; min-height: 32px; height: 32px; padding: 0 8px; border-radius: 6px; font-size: 12px; color: hsl(var(--sidebar-foreground)); }
+:root[data-rosecode-ui] .shell.rosecode-ui .cx-side-subicon { flex: none; width: 14px; height: 14px; color: hsl(var(--sidebar-icon)); }
+:root[data-rosecode-ui] .shell.rosecode-ui .cx-side-subitem > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+:root[data-rosecode-ui] .shell.rosecode-ui .cx-side-subitem:hover { color: hsl(var(--foreground)); background: hsl(var(--sidebar-hover)); }
+:root[data-rosecode-ui] .shell.rosecode-ui .cx-side-subitem.active { color: hsl(var(--foreground)); background: hsl(var(--sidebar-selected)); font-weight: 550; }
+:root[data-rosecode-ui] .shell.rosecode-ui .cx-side-subitem.active .cx-side-subicon { color: currentColor; }
+:root[data-rosecode-ui] .shell.rosecode-ui .cx-side-card { margin: 8px 0 0; padding: 10px 7px; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+:root[data-rosecode-ui] .shell.rosecode-ui .cx-side-card-title { font-size: 11px; }
+:root[data-rosecode-ui] .shell.rosecode-ui .cx-side-card-meta { padding-left: 12px; font-size: 10.5px; }
+:root[data-rosecode-ui] .shell.rosecode-ui .cx-side-foot { min-height: 49px; margin-top: 4px; padding: 10px 4px; gap: 4px; border-top: 1px solid hsl(var(--border)); }
+:root[data-rosecode-ui] .shell.rosecode-ui .cx-side-version { min-width: 0; flex: 1; font-size: 11px; color: hsl(var(--muted-foreground)); }
+:root[data-rosecode-ui] .shell.rosecode-ui .cx-icon-button { width: 27px; height: 27px; border-radius: 6px; }
+:root[data-rosecode-ui] .shell.rosecode-ui .cx-icon-button:hover { background: hsl(var(--accent)); }
+:root[data-rosecode-ui] .shell.rosecode-ui .cx-side .onboarding-setup { padding: 11px 9px; border: 1px solid hsl(var(--border)); border-radius: 9px; box-shadow: none; }
+:root[data-rosecode-ui] .shell.rosecode-ui .setup-header { position: relative; display: block; }
+:root[data-rosecode-ui] .shell.rosecode-ui .setup-header > div:first-child { display: grid; grid-template-columns: minmax(0,1fr); gap: 5px; }
+:root[data-rosecode-ui] .shell.rosecode-ui .setup-header strong { max-width: calc(100% - 62px); font-size: 11px; white-space: nowrap; overflow: visible; }
+:root[data-rosecode-ui] .shell.rosecode-ui .setup-header > div:first-child > span:last-child { max-width: calc(100% - 29px); font-size: 9px; line-height: 1.65; }
+:root[data-rosecode-ui] .shell.rosecode-ui .setup-progress { position: absolute; bottom: 0; right: 0; display: flex; gap: 3px; font-size: 9px; }
+:root[data-rosecode-ui] .shell.rosecode-ui .setup-ring { display: none; }
+:root[data-rosecode-ui] .shell.rosecode-ui .setup-tools { position: absolute; top: -4px; right: -3px; gap: 1px; }
+:root[data-rosecode-ui] .shell.rosecode-ui .setup-tools button { width: 20px; height: 22px; }
+:root[data-rosecode-ui] .shell.rosecode-ui .setup-tools svg { width: 12px; height: 12px; }
+:root[data-rosecode-ui] .shell.rosecode-ui .setup-next { font-size: 10px; min-height: 28px; }
+:root[data-rosecode-ui] .shell.rosecode-ui .screen { display: flex; flex-direction: column; align-items: stretch; width: 100%; height: 100%; min-height: 0; gap: 18px; padding: 22px 25px 25px; background: hsl(var(--background)); animation: none; overflow-y: auto; }
+:root[data-rosecode-ui] .shell.rosecode-ui :is(.gw-content, .cu-content) { width: 100%; max-width: 100%; margin-right: 0; padding-right: 0; }
+:root[data-rosecode-ui] .shell.rosecode-ui .cx-page-head { position: relative; top: auto; min-height: 60px; align-items: center; gap: 16px; padding: 0; background: transparent; border: 0; flex: none; }
+:root[data-rosecode-ui] .shell.rosecode-ui .cx-page-title { min-width: 0; display: grid; gap: 6px; }
+:root[data-rosecode-ui] .shell.rosecode-ui .cx-page-title h1 { color: hsl(var(--foreground)); font-size: 24px; line-height: 1.3; font-weight: 600; letter-spacing: -.55px; }
+:root[data-rosecode-ui] .shell.rosecode-ui .rose-page-description { display: block; color: hsl(var(--muted-foreground)); margin: 0; max-width: 720px; font-size: 12px; line-height: 1.5; }
+:root[data-rosecode-ui] .shell.rosecode-ui .topbar-actions { gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+:root[data-rosecode-ui] .shell.rosecode-ui :is(.cx-card, .gw-card, .cx-set-card) { background: hsl(var(--card)); border: 1px solid hsl(var(--border)); border-radius: var(--rose-radius); }
+:root[data-rosecode-ui] .shell.rosecode-ui .cx-section-head h2 { font-size: 13px; font-weight: 600; }
+:root[data-rosecode-ui] .shell.rosecode-ui .cx-row { min-height: 62px; }
+:root[data-rosecode-ui] .shell.rosecode-ui :is(.cx-row-title, .cx-set-title) { font-size: 13px; font-weight: 550; }
+:root[data-rosecode-ui] .shell.rosecode-ui :is(.cx-row-detail, .cx-set-description) { font-size: 12px; line-height: 1.5; }
+:root[data-rosecode-ui] .shell.rosecode-ui .tp-tabs { background: transparent; border: 0; border-bottom: 1px solid hsl(var(--border)); border-radius: 0; padding: 0; gap: 20px; }
+:root[data-rosecode-ui] .shell.rosecode-ui .tp-tabs > button { height: 34px; padding: 0 2px; margin-bottom: -1px; border: 0; border-radius: 0; border-bottom: 2px solid transparent; background: transparent; color: hsl(var(--muted-foreground)); box-shadow: none; font-size: 12px; }
+:root[data-rosecode-ui] .shell.rosecode-ui .tp-tabs > button:is([aria-selected="true"],[data-active="true"]) { border-bottom-color: hsl(var(--brand-accent)); background: transparent; color: hsl(var(--foreground)); box-shadow: none; }
+:root[data-rosecode-ui][data-rose-sidebar-compact="true"] .rose-workspace-heading > div,
+:root[data-rosecode-ui][data-rose-sidebar-compact="true"] .cx-side :is(.cx-side-label,.cx-side-heading,.cx-side-search>span,.cx-side-search>kbd,.cx-side-subnav,.cx-side-card,.cx-side-version,.cx-side-run,.rose-theme-toggle,.onboarding-setup,.cx-side-back>span) { display: none; }
+:root[data-rosecode-ui][data-rose-sidebar-compact="true"] .shell.rosecode-ui .cx-side { padding-inline: 9px; }
+:root[data-rosecode-ui][data-rose-sidebar-compact="true"] .shell.rosecode-ui .cx-side .cx-side-heading { display: flex; width: 100%; min-width: 0; overflow: hidden; visibility: hidden; }
+:root[data-rosecode-ui][data-rose-sidebar-compact="true"] .rose-workspace-heading { justify-content: center; padding-inline: 0; }
+:root[data-rosecode-ui][data-rose-sidebar-compact="true"] .shell.rosecode-ui :is(.cx-side-item,.cx-side-search-button) { justify-content: center; height: 38px; padding: 0; }
+:root[data-rosecode-ui][data-rose-sidebar-compact="true"] .cx-side .side-dot { position: absolute; right: 7px; bottom: 6px; }
+:root[data-rosecode-ui][data-rose-sidebar-compact="true"] .cx-side-item { position: relative; }
+:root[data-rosecode-ui][data-rose-sidebar-compact="true"] .cx-side-foot { justify-content: center; }
+:root[data-rosecode-ui][data-rose-sidebar-compact="true"] .cx-side[data-mode="settings"] .cx-side-search { display: none; }
+@media (max-width: 1040px) {
+  :root[data-rosecode-ui] { --rose-sidebar-width: 180px; }
+  :root[data-rosecode-ui][data-rose-sidebar-compact="true"] { --rose-sidebar-width: 66px; }
+  :root[data-rosecode-ui] .shell.rosecode-ui .screen { padding-inline: 20px; }
+  :root[data-rosecode-ui] .rose-workspace-bar { padding-inline: 20px; }
+}
+@media (max-height: 700px) {
+  :root[data-rosecode-ui] .shell.rosecode-ui .screen { gap: 14px; padding-top: 16px; padding-bottom: 18px; }
+  :root[data-rosecode-ui] .shell.rosecode-ui .cx-page-head { min-height: 52px; }
+  :root[data-rosecode-ui] .shell.rosecode-ui .cx-side-nav { gap: 11px; }
+  :root[data-rosecode-ui] .rose-workspace-heading { min-height: 39px; }
+}
+:root[data-rosecode-ui].mac-titlebar .rose-workspace-bar { padding-left: 24px; }

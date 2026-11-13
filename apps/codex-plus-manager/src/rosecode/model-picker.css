@@ -1,0 +1,15 @@
+/* 模型左侧保留明确的图标列；选中整行铺底，正文与辅助信息分层。 */
+:root[data-rosecode-ui] .gw-portal .gw-mp-item { gap: 12px; min-height: 59px; margin: 2px 6px; padding: 9px 12px; border-radius: 8px; }
+:root[data-rosecode-ui] .gw-portal .gw-mp-model-icon { display: grid; place-items: center; flex: none; width: 30px; height: 30px; border: 1px solid hsl(var(--border)); border-radius: 8px; background: hsl(var(--card)); color: hsl(var(--foreground)); }
+:root[data-rosecode-ui] .gw-portal .gw-mp-model-icon > svg { width: 17px; height: 17px; }
+:root[data-rosecode-ui] .gw-portal .gw-mp .gw-mp-model-icon .gw-avatar { width: 20px; height: 20px; background: transparent; box-shadow: none; font-size: 10px; }
+:root[data-rosecode-ui] .gw-portal .gw-mp-text { gap: 3px; }
+:root[data-rosecode-ui] .gw-portal .gw-mp-text strong { color: hsl(var(--foreground)); font-weight: 550; }
+:root[data-rosecode-ui] .gw-portal .gw-mp-text small { color: hsl(var(--muted-foreground)); }
+:root[data-rosecode-ui] .gw-portal .gw-mp-item:is(:hover,:focus-visible) { background: hsl(var(--accent)); }
+:root[data-rosecode-ui] .gw-portal .gw-mp-item[data-selected="true"] { background: hsl(var(--selection)); }
+:root[data-rosecode-ui] .gw-portal .gw-mp-item[data-selected="true"]:is(:hover,:focus-visible) { background: hsl(var(--selection-hover)); }
+:root[data-rosecode-ui] .gw-portal .gw-mp-item[data-selected="true"]::before { content: none; }
+:root[data-rosecode-ui] .gw-portal .gw-mp-direct { border-color: hsl(var(--border)); color: hsl(var(--muted-foreground)); background: hsl(var(--card)); }
+:root[data-rosecode-ui] .gw-portal .gw-mp-item:focus-visible { outline: 2px solid hsl(var(--ring)); outline-offset: -2px; }
+@media (max-width: 800px) { :root[data-rosecode-ui] .gw-portal .gw-mp-direct { max-width: 34%; font-size: 10px; } }

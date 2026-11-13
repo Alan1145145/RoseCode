@@ -1,0 +1,6 @@
+{
+  "identifier": "main-appearance",
+  "description": "Allow only the main window to synchronize its native title bar with the selected appearance.",
+  "windows": ["main"],
+  "permissions": ["core:window:allow-set-theme"]
+}

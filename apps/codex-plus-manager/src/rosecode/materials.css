@@ -1,0 +1,13 @@
+/* 中性的深浅外观；只模糊背景层，不对文字和表单内容使用 filter。 */
+:root[data-rosecode-ui].light { color-scheme: light; }
+:root[data-rosecode-ui].dark { color-scheme: dark; }
+:root[data-rosecode-ui] .shell.rosecode-ui .cx-side { background: hsl(var(--sidebar-bg) / .92); backdrop-filter: blur(12px); }
+:root[data-rosecode-ui] .rose-workspace-bar { background: hsl(var(--card) / .78); backdrop-filter: blur(14px); }
+:root[data-rosecode-ui] :is(.gw-modal-backdrop,.rose-palette-backdrop) { background: hsl(0 0% 4% / .23); backdrop-filter: blur(7px); }
+:root[data-rosecode-ui] :is(.app-select-menu-portal,.rose-tooltip) { background: hsl(var(--popover) / .94); backdrop-filter: blur(14px); }
+:root[data-rosecode-ui] .rose-palette { background: hsl(var(--popover) / .97); backdrop-filter: blur(16px); }
+:root[data-rosecode-ui] summary:focus-visible { outline: none; border-radius: 6px; box-shadow: inset 0 0 0 1px hsl(var(--ring) / .55); }
+@media (prefers-reduced-transparency: reduce) {
+  :root[data-rosecode-ui] :is(.cx-side,.rose-workspace-bar,.app-select-menu-portal,.rose-palette,.rose-tooltip) { backdrop-filter: none; background: hsl(var(--popover)); }
+  :root[data-rosecode-ui] :is(.gw-modal-backdrop,.rose-palette-backdrop) { backdrop-filter: none; }
+}

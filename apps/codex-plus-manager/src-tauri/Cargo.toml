@@ -1,0 +1,46 @@
+[package]
+name = "codex-plus-manager"
+default-run = "codex-plus-plus"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[lib]
+name = "codex_plus_manager_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[[bin]]
+name = "codex-plus-plus"
+path = "src/main.rs"
+
+# ClaudeMom：只做 Claude Desktop 完整功能模式的独立程序，与 Codex++ 共用全部代码（见 src/flavor.rs）。
+[[bin]]
+name = "claude-mom"
+path = "src/claude_mom.rs"
+
+[[bin]]
+name = "codex-plus-legacy-shim"
+path = "src/legacy_shim.rs"
+
+[dependencies]
+anyhow.workspace = true
+async-trait = "0.1"
+base64.workspace = true
+codex-plus-core = { path = "../../../crates/codex-plus-core" }
+codex-plus-data = { path = "../../../crates/codex-plus-data" }
+codex-plus-launcher = { path = "../../codex-plus-launcher" }
+directories.workspace = true
+rusqlite.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tauri = { version = "2", features = ["protocol-asset", "custom-protocol", "tray-icon"] }
+tauri-plugin-dialog = "2"
+tokio.workspace = true
+toml_edit.workspace = true
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dev-dependencies]
+tempfile.workspace = true

@@ -1,0 +1,60 @@
+/* 各工作区采用各自的信息结构；连接、策略、统计不再共用一整页设置行。 */
+/* Agent 身份与开关在标题行，默认模型和配置操作在下一行。 */
+:root[data-rosecode-ui] .rose-access-summary { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding: 4px 0 7px; }
+:root[data-rosecode-ui] .rose-access-summary > div { display: grid; gap: 6px; }
+:root[data-rosecode-ui] .rose-access-summary strong { font-size: 13px; font-weight: 500; }
+:root[data-rosecode-ui] .rose-access-summary span { font-size: 11px; color: hsl(var(--muted-foreground)); }
+:root[data-rosecode-ui] .shell.rosecode-ui .rose-access-grid { display: grid; grid-template-columns: minmax(0,1fr); gap: 13px; }
+:root[data-rosecode-ui] .shell.rosecode-ui .rose-access-grid .gw-agent-card { margin: 0; overflow: hidden; }
+:root[data-rosecode-ui] .shell.rosecode-ui .rose-access-grid .gw-agent > .gw-agent-row.cx-row { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; padding: 0; gap: 0; }
+:root[data-rosecode-ui] .shell.rosecode-ui .rose-access-grid .gw-agent-row .cx-row-main { grid-column: 1; grid-row: 1; min-width: 0; width: 100%; padding: 20px; }
+:root[data-rosecode-ui] .shell.rosecode-ui .rose-access-grid .gw-agent-icon-box { flex: none; width: 38px; height: 38px; background: transparent; }
+:root[data-rosecode-ui] .shell.rosecode-ui .rose-access-grid .gw-agent-glyph { display: flex; align-items: center; justify-content: center; flex: none; width: 38px; height: 38px; border-radius: 10px; background: hsl(var(--background)); border: 1px solid hsl(var(--border)); }
+:root[data-rosecode-ui] .shell.rosecode-ui .rose-access-grid .gw-agent-glyph .gw-agent-icon { width: 25px; height: 25px; }
+:root[data-rosecode-ui] .rose-agent-access-toggle { display: flex; grid-column: 2; grid-row: 1; align-items: center; gap: 10px; padding-right: 21px; }
+:root[data-rosecode-ui] .rose-agent-access-toggle > span { color: hsl(var(--muted-foreground)); font-size: 11px; }
+:root[data-rosecode-ui] .rose-agent-access-toggle > span[data-connected=true] { color: hsl(var(--status-success)); }
+:root[data-rosecode-ui] .shell.rosecode-ui .rose-access-grid .gw-agent-row .rose-agent-connection-controls { display: flex; grid-column: 1/-1; grid-row: 2; width: 100%; min-width: 0; flex-wrap: wrap; justify-content: space-between; gap: 12px; margin: 0; padding: 14px 20px; border-top: 1px solid hsl(var(--border)); background: hsl(var(--background) / .45); }
+:root[data-rosecode-ui] .rose-agent-default-model { display: flex; flex-wrap: wrap; align-items: center; gap: 13px; min-width: 0; }
+:root[data-rosecode-ui] .rose-agent-default-model > span { font-size: 11px; color: hsl(var(--muted-foreground)); }
+:root[data-rosecode-ui] .rose-agent-tools { display: flex; gap: 10px; align-items: center; margin-left: auto; }
+:root[data-rosecode-ui] .rose-agent-configure { display: inline-flex; align-items: center; gap: 7px; padding: 6px 10px; min-height: 31px; border: 1px solid hsl(var(--border)); border-radius: 7px; background: hsl(var(--card)); color: hsl(var(--foreground)); font: 11px/1.4 var(--font-sans); cursor: pointer; }
+:root[data-rosecode-ui] .rose-agent-configure:disabled { opacity: .4; cursor: default; }
+:root[data-rosecode-ui] .rose-agent-configure svg { transition: transform 170ms var(--rose-ease); }
+:root[data-rosecode-ui] .rose-agent-configure[aria-expanded=true] svg { transform: rotate(90deg); }
+:root[data-rosecode-ui] .shell.rosecode-ui .rose-access-grid .gw-agent-detail { padding: 3px 20px 17px; border-top: 1px solid hsl(var(--border)); }
+:root[data-rosecode-ui] .shell.rosecode-ui .rose-routing-board { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(390px,100%),1fr)); align-items: start; gap: 15px; }
+:root[data-rosecode-ui] .shell.rosecode-ui .rose-routing-board:empty { display: none; }
+:root[data-rosecode-ui] .shell.rosecode-ui .rose-routing-board .gw-route-group { min-width: 0; overflow: hidden; }
+:root[data-rosecode-ui] .shell.rosecode-ui .rose-routing-board .gw-route-group-head { display: grid; grid-template-columns: 30px minmax(0,1fr) auto; gap: 12px; padding: 17px; align-items: center; }
+:root[data-rosecode-ui] .shell.rosecode-ui .rose-routing-board .gw-route-group-icon { grid-column: 1; grid-row: 1; width: 30px; height: 30px; border-radius: 7px; }
+:root[data-rosecode-ui] .shell.rosecode-ui .rose-routing-board .gw-route-group-title { grid-column: 2; grid-row: 1; display: flex; flex-wrap: wrap; gap: 4px 7px; min-width: 0; }
+:root[data-rosecode-ui] .shell.rosecode-ui .rose-routing-board .gw-route-group-title strong { width: 100%; font-size: 14px; }
+:root[data-rosecode-ui] .shell.rosecode-ui .rose-routing-board .gw-route-group-title code { max-width: 100%; overflow-wrap: anywhere; font-size: 10px; }
+:root[data-rosecode-ui] .shell.rosecode-ui .rose-routing-board .gw-route-group-switch { grid-column: 3; grid-row: 1; }
+:root[data-rosecode-ui] .shell.rosecode-ui .rose-routing-board .gw-route-group-controls { grid-column: 1/-1; grid-row: 2; display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr) 27px; gap: 10px; margin-top: 5px; align-items: end; width: 100%; }
+:root[data-rosecode-ui] .rose-route-field { display: grid; gap: 5px; min-width: 0; }
+:root[data-rosecode-ui] .rose-route-field > span { font-size: 10px; color: hsl(var(--muted-foreground)); }
+:root[data-rosecode-ui] .rose-route-field .app-select { width: 100%; min-width: 0; }
+:root[data-rosecode-ui] .shell.rosecode-ui .rose-routing-board .gw-route-members { padding: 5px 10px 10px; border-top: 1px solid hsl(var(--border)); }
+:root[data-rosecode-ui] .shell.rosecode-ui .rose-routing-board .gw-route-member-row { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; min-height: 54px; padding: 9px 6px; }
+:root[data-rosecode-ui] .shell.rosecode-ui .rose-routing-board .gw-route-member-name { flex: 1; min-width: 110px; }
+:root[data-rosecode-ui] .shell.rosecode-ui .rose-routing-board .gw-route-member-status { max-width: 100%; font-size: 10px; overflow-wrap: anywhere; }
+:root[data-rosecode-ui] .shell.rosecode-ui .rose-routing-board .gw-route-member-speed { font-size: 10px; }
+:root[data-rosecode-ui] .shell.rosecode-ui .gw-usage .cx-stats { gap: 12px; border: 0; background: transparent; }
+:root[data-rosecode-ui] .shell.rosecode-ui :is(.gw-usage,.hub-page) .cx-stat { padding: 16px; border: 1px solid hsl(var(--border)); border-radius: 10px; background: hsl(var(--card)); }
+:root[data-rosecode-ui] .shell.rosecode-ui :is(.gw-usage,.hub-page) .cx-stat-value { font-size: 23px; font-weight: 550; }
+:root[data-rosecode-ui] .rose-usage-chart-grid { display: grid; grid-template-columns: minmax(0,1fr); gap: 17px; align-items: start; }
+:root[data-rosecode-ui] .rose-usage-chart-grid[data-balances="true"] { grid-template-columns: minmax(0,1fr) 240px; }
+:root[data-rosecode-ui] .rose-usage-chart-grid .gw-chart-card { min-width: 0; height: 100%; }
+:root[data-rosecode-ui] .shell.rosecode-ui .rose-usage-balances .cx-row { min-height: 66px; padding: 11px 14px; flex-wrap: wrap; }
+:root[data-rosecode-ui] .shell.rosecode-ui .rose-usage-balances .cx-row-main { padding: 0; }
+:root[data-rosecode-ui] .shell.rosecode-ui .rose-usage-balances .cx-row-controls { padding: 0 0 0 26px; margin-top: 4px; }
+:root[data-rosecode-ui] .shell.rosecode-ui .rose-usage-balances .cx-row-title { font-size: 12px; }
+:root[data-rosecode-ui] .shell.rosecode-ui .gw-usage-table { max-width: 100%; overflow-x: auto; }
+:root[data-rosecode-ui] .shell.rosecode-ui .gw-usage-row { min-width: 680px; }
+@media (max-width: 1060px) {
+  :root[data-rosecode-ui] .rose-usage-chart-grid[data-balances="true"] { grid-template-columns: minmax(0,1fr); }
+  :root[data-rosecode-ui] .shell.rosecode-ui .rose-usage-balances > .cx-card { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); }
+  :root[data-rosecode-ui] .shell.rosecode-ui .rose-usage-balances .cx-row { border-bottom: 1px solid hsl(var(--border)); }
+}

@@ -1,0 +1,43 @@
+/* 短窗口只收紧留白，不缩小正文字号；列表和表单保留各自的滚动区。 */
+@media (max-height: 760px) {
+  :root .shell .screen {
+    padding: 20px 32px;
+    gap: 12px;
+  }
+
+  :root .shell .screen[data-claude-workspace] {
+    padding-top: 20px;
+    padding-bottom: 16px;
+    gap: 10px;
+  }
+
+  :root .shell .cx-side-nav { gap: 10px; margin-top: 6px; }
+  :root .shell .home-hero-image { height: 112px; }
+  :root .shell .home-hero-body { gap: 6px; padding: 10px 14px; }
+
+  :root .shell .claude-workspace .cm-shell { min-height: 0; }
+  :root .shell .claude-workspace .cm-body { padding: 12px 16px 16px; }
+  :root .shell .claude-workspace .cm-editor { gap: 10px; }
+  :root .shell .claude-workspace .cm-editor-foot {
+    position: sticky;
+    bottom: -16px;
+    z-index: 1;
+    flex-wrap: wrap;
+    padding-block: 8px;
+    background: var(--cm-bg);
+  }
+}
+
+@media (max-width: 1040px) {
+  :root .shell .screen { padding-inline: 24px; }
+  :root .shell .home-shortcuts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  :root .shell .claude-workspace .cm-shell { --cm-side-width: 176px; }
+  :root .shell .claude-workspace .cm-field { grid-template-columns: 72px minmax(0, 1fr); }
+  :root .shell .claude-workspace .cm-toolbar-actions { flex-wrap: wrap; }
+}
+
+@media (max-height: 680px) {
+  :root .shell .screen { padding-top: 16px; padding-bottom: 16px; }
+  :root .shell .screen[data-claude-workspace] { padding-top: 16px; }
+  :root .shell .claude-workspace .cm-editor { gap: 8px; }
+}

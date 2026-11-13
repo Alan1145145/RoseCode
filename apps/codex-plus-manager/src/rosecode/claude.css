@@ -1,0 +1,99 @@
+/* Claude Desktop 与主窗口共用配色和交互，独立 ClaudeMom 同样适用。 */
+:root[data-rosecode-ui] .cm-shell {
+  --cm-bg: hsl(var(--background)); --cm-side: hsl(var(--sidebar-bg)); --cm-panel: hsl(var(--card));
+  --cm-line: hsl(var(--border)); --cm-line-strong: hsl(var(--input)); --cm-text: hsl(var(--foreground));
+  --cm-muted: hsl(var(--muted-foreground)); --cm-accent: hsl(var(--brand-accent)); --cm-accent-hover: hsl(var(--brand-accent-2));
+  --cm-accent-soft: hsl(var(--brand-accent) / .08); --cm-ok: hsl(var(--status-success));
+  --cm-warn: hsl(var(--status-warning)); --cm-danger: hsl(var(--status-error)); --cm-radius: 7px;
+  --cm-font: var(--font-sans); --cm-side-width: 205px;
+  font-size: 13px; line-height: 1.5;
+}
+:root[data-rosecode-ui] .shell.rosecode-ui .screen[data-claude-workspace] { padding-bottom: 22px; }
+:root[data-rosecode-ui] .shell.rosecode-ui .claude-workspace { gap: 14px; }
+:root[data-rosecode-ui] .shell.rosecode-ui .claude-workspace-body { overflow: hidden; }
+:root[data-rosecode-ui] .claude-workspace-gateway[hidden] { display: none; }
+:root[data-rosecode-ui] .shell.rosecode-ui .claude-workspace .cm-shell { min-height: 0; border: 0; border-radius: 0; background: transparent; }
+:root[data-rosecode-ui] .cm-shell[data-embedded] .cm-main { gap: 12px; min-height: 0; overflow-y: auto; scrollbar-width: thin; }
+:root[data-rosecode-ui] .cm-shell[data-embedded] :is(.cm-workspace-controls,.cm-toolbar,.cm-banners,.cm-status) { flex-shrink: 0; }
+:root[data-rosecode-ui] .shell.rosecode-ui .cm-shell[data-embedded] .cm-body { flex: 1 0 auto; overflow: visible; }
+:root[data-rosecode-ui] .cm-shell[data-embedded] .cm-placeholder { min-height: 180px; }
+:root[data-rosecode-ui] .cm-workspace-controls { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; flex: none; }
+:root[data-rosecode-ui] .cm-workspace-controls .cm-upstream-select { flex: 1 1 180px; max-width: 310px; min-width: 160px; }
+:root[data-rosecode-ui] .cm-workspace-controls .cm-gateway-mode { width: auto; font-size: 11px; }
+:root[data-rosecode-ui] .cm-shell .cm-btn { height: 33px; padding: 0 11px; border-radius: 7px; font-size: 12px; border-color: var(--cm-line); background: var(--cm-panel); }
+:root[data-rosecode-ui] .cm-shell .cm-btn-primary { background: hsl(var(--primary)); color: hsl(var(--primary-foreground)); border-color: transparent; }
+:root[data-rosecode-ui] .cm-shell .cm-btn-primary:hover:not(:disabled) { background: hsl(var(--primary) / .9); }
+:root[data-rosecode-ui] .cm-shell .cm-btn-quiet { background: transparent; border-color: transparent; }
+:root[data-rosecode-ui] .cm-shell .cm-btn-small { height: 28px; padding: 0 8px; font-size: 11px; }
+:root[data-rosecode-ui] .cm-shell .cm-btn-danger { color: var(--cm-danger); background: transparent; border-color: transparent; }
+:root[data-rosecode-ui] .cm-shell .cm-btn:disabled { opacity: .45; }
+:root[data-rosecode-ui] .cm-shell[data-embedded] .cm-toolbar { padding: 14px 16px; min-height: 67px; border: 1px solid var(--cm-line); border-radius: var(--rose-radius); background: var(--cm-panel); gap: 11px; }
+:root[data-rosecode-ui] .cm-shell .cm-toolbar-text strong { font-size: 13px; }
+:root[data-rosecode-ui] .cm-shell .cm-toolbar-text span { margin-top: 3px; font-size: 11px; }
+:root[data-rosecode-ui] .cm-shell .cm-dot { width: 6px; height: 6px; box-shadow: none; }
+:root[data-rosecode-ui] .cm-shell .cm-tabs { padding: 0; gap: 20px; min-height: 32px; }
+:root[data-rosecode-ui] .cm-shell .cm-tabs button { padding: 0 1px 9px; height: 32px; font-size: 12px; }
+:root[data-rosecode-ui] .cm-shell .cm-banners { border: 0; gap: 7px; }
+:root[data-rosecode-ui] .cm-shell .cm-banner { padding: 9px 12px; border-radius: 7px; font-size: 12px; background: hsl(var(--status-warning) / .06); }
+:root[data-rosecode-ui] .shell.rosecode-ui .cm-body, :root[data-rosecode-ui] .cm-shell[data-embedded] .cm-body { padding: 0 1px 8px; }
+:root[data-rosecode-ui] .cm-shell .cm-body { scrollbar-gutter: stable; }
+:root[data-rosecode-ui] .cm-shell .cm-editor { max-width: none; gap: 0; border: 1px solid var(--cm-line); border-radius: var(--rose-radius); background: var(--cm-panel); overflow: visible; }
+:root[data-rosecode-ui] .cm-editor .cm-editor-head { padding: 15px 18px; gap: 8px; border-bottom: 1px solid var(--cm-line); }
+:root[data-rosecode-ui] .cm-editor .cm-title-input { font-size: 15px; }
+:root[data-rosecode-ui] .cm-editor-columns { display: grid; grid-template-columns: minmax(0,1.4fr) minmax(235px,.95fr); align-items: start; }
+:root[data-rosecode-ui] .cm-shell .cm-editor-columns .cm-form { display: grid; padding: 18px; gap: 17px; }
+:root[data-rosecode-ui] .cm-connection-heading { margin: 0 0 -2px; font-size: 12px; font-weight: 550; }
+:root[data-rosecode-ui] .cm-saved-status { display: inline-flex; gap: 5px; align-items: center; font-size: 11px; color: hsl(var(--status-success)); }
+:root[data-rosecode-ui] .cm-saved-status svg { width: 12px; height: 12px; }
+:root[data-rosecode-ui] .cm-shell .cm-field { display: flex; flex-direction: column; align-items: stretch; gap: 6px; min-width: 0; }
+:root[data-rosecode-ui] .cm-shell .cm-field-label { text-align: left; color: var(--cm-text); font-size: 12px; font-weight: 500; }
+:root[data-rosecode-ui] .cm-shell .cm-field-control { width: 100%; min-width: 0; }
+:root[data-rosecode-ui] .cm-shell .cm-field-control > .app-select { min-width: 0; flex: 1; }
+:root[data-rosecode-ui] .cm-shell .cm-field-control input:not([type="checkbox"]) { width: 100%; min-height: 35px; padding: 7px 10px; border: 1px solid var(--cm-line-strong); border-radius: 7px; background: var(--cm-bg); font-size: 12px; }
+:root[data-rosecode-ui] .cm-shell .cm-field-hint { font-size: 11px; line-height: 1.5; }
+:root[data-rosecode-ui] .cm-model-selects { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
+:root[data-rosecode-ui] .cm-model-default-hint { margin: -4px 0 0; color: var(--cm-muted); font-size: 11px; line-height: 1.6; }
+:root[data-rosecode-ui] .cm-model-panel { min-width: 0; align-self: stretch; border-left: 1px solid var(--cm-line); padding-bottom: 12px; }
+:root[data-rosecode-ui] .cm-model-panel-head { display: flex; align-items: center; gap: 8px; justify-content: space-between; min-height: 53px; padding: 12px 14px; border-bottom: 1px solid var(--cm-line); }
+:root[data-rosecode-ui] .cm-model-panel-head strong { font-size: 12px; font-weight: 600; }
+:root[data-rosecode-ui] .cm-model-panel-head small { padding-left: 6px; color: var(--cm-muted); font-size: 11px; font-weight: 400; }
+:root[data-rosecode-ui] .cm-model-rows { max-height: 340px; overflow-y: auto; scrollbar-width: thin; }
+:root[data-rosecode-ui] .cm-model-row { display: flex; align-items: stretch; gap: 4px; border-bottom: 1px solid var(--cm-line); }
+:root[data-rosecode-ui] .cm-model-row > button { display: flex; align-items: center; gap: 8px; padding: 12px; border: 0; background: transparent; text-align: left; font-size: 12px; }
+:root[data-rosecode-ui] .cm-model-row > button:first-child { flex: 1; min-width: 0; }
+:root[data-rosecode-ui] .cm-model-row > button > span:nth-child(2) { min-width: 0; flex: 1; overflow-wrap: anywhere; }
+:root[data-rosecode-ui] .cm-model-row > button > small { color: var(--cm-accent); font-size: 10px; flex: none; }
+:root[data-rosecode-ui] .cm-model-row .cm-model-remove { color: var(--cm-muted); padding: 7px; width: 27px; flex: none; }
+:root[data-rosecode-ui] .cm-model-remove svg { width: 12px; height: 12px; }
+:root[data-rosecode-ui] .cm-model-row[data-primary] { color: var(--cm-accent); background: var(--cm-accent-soft); }
+:root[data-rosecode-ui] .cm-model-row:hover { background: hsl(var(--accent) / .6); }
+:root[data-rosecode-ui] .cm-model-radio { width: 13px; height: 13px; border: 1px solid var(--cm-line-strong); border-radius: 50%; flex: none; }
+:root[data-rosecode-ui] .cm-model-row[data-primary] .cm-model-radio { border: 4px solid var(--cm-accent); }
+:root[data-rosecode-ui] .cm-shell .cm-model-rows .cm-chip-input { width: calc(100% - 24px); height: 33px; margin: 12px; min-width: 0; padding: 6px 8px; border: 1px solid var(--cm-line); border-radius: 7px; background: var(--cm-bg); font-size: 11px; }
+:root[data-rosecode-ui] .cm-model-panel-hint { padding: 0 12px; margin: 10px 0 0; color: var(--cm-muted); font-size: 11px; line-height: 1.5; }
+:root[data-rosecode-ui] .shell.rosecode-ui .cm-editor-foot, :root[data-rosecode-ui] .cm-shell .cm-editor-foot { position: sticky; bottom: -8px; z-index: 2; margin-top: auto; padding: 12px 18px; border-top: 1px solid var(--cm-line); border-radius: 0 0 var(--rose-radius) var(--rose-radius); background: var(--cm-panel); flex-wrap: wrap; }
+:root[data-rosecode-ui] .cm-shell .cm-tag { border: 1px solid var(--cm-line); background: var(--cm-bg); font-size: 10px; border-radius: 5px; }
+:root[data-rosecode-ui] .cm-shell .cm-status { min-height: 27px; padding-inline: 1px; border: 0; color: var(--cm-muted); background: transparent; font-size: 11px; }
+:root[data-rosecode-ui] .cm-shell .cm-status .cm-notice { font-size: 11px; }
+:root[data-rosecode-ui] .cm-shell .cm-settings { max-width: 900px; gap: 16px; }
+:root[data-rosecode-ui] .cm-shell .cm-group { border-radius: var(--rose-radius); background: var(--cm-panel); padding: 18px; gap: 16px; }
+:root[data-rosecode-ui] .cm-shell .cm-toggle-row { min-height: 38px; }
+:root[data-rosecode-ui] .cm-shell .cm-pool-picker { padding: 17px; border: 1px solid var(--cm-line); border-radius: var(--rose-radius); background: var(--cm-panel); animation: rose-panel-in 180ms var(--rose-ease) both; }
+:root[data-rosecode-ui] .cm-shell .cm-pool-source { background: var(--cm-panel); border-radius: 8px; padding: 14px; }
+:root[data-rosecode-ui] .cm-shell .cm-pool-source:hover { background: var(--cm-accent-soft); }
+:root[data-rosecode-ui] .cm-menu.app-select-menu-portal { bottom: auto; margin: 0; background: hsl(var(--popover)); color: hsl(var(--foreground)); border-color: hsl(var(--border)); }
+:root[data-rosecode-ui] .cm-menu.app-select-menu-portal button { font: 12px/1.5 var(--font-sans); padding: 9px 10px; }
+:root[data-rosecode-ui] .cm-menu.app-select-menu-portal button:hover { background: hsl(var(--accent)); }
+:root[data-rosecode-ui] .cm-menu.app-select-menu-portal span { font-size: 11px; color: hsl(var(--muted-foreground)); }
+:root[data-rosecode-ui] .cm-shell .cm-brand::before { display: none; }
+@media (max-width: 1060px) {
+  :root[data-rosecode-ui] .cm-editor-columns { grid-template-columns: minmax(0,1fr); }
+  :root[data-rosecode-ui] .cm-model-panel { border-left: 0; border-top: 1px solid var(--cm-line); }
+  :root[data-rosecode-ui] .cm-model-rows { max-height: 240px; }
+}
+@media (max-height: 700px) {
+  :root[data-rosecode-ui] .cm-shell[data-embedded] .cm-main { gap: 9px; }
+  :root[data-rosecode-ui] .cm-shell[data-embedded] .cm-toolbar { min-height: 58px; padding-block: 10px; }
+  :root[data-rosecode-ui] .cm-editor .cm-editor-head { padding-block: 11px; }
+  :root[data-rosecode-ui] .cm-shell .cm-editor-columns .cm-form { gap: 13px; padding: 15px; }
+}

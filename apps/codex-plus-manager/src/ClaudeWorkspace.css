@@ -1,0 +1,37 @@
+:root .shell .screen[data-claude-workspace] {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding-bottom: 20px;
+}
+
+.claude-workspace {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  gap: 12px;
+}
+
+.claude-workspace > .tp-tabs { flex: none; }
+.claude-workspace-body { flex: 1; min-height: 0; overflow: auto; }
+.claude-workspace-gateway { height: 100%; }
+.claude-workspace .cm-shell {
+  --cm-bg: hsl(var(--background));
+  --cm-side: hsl(var(--muted));
+  --cm-panel: hsl(var(--background));
+  --cm-line: hsl(var(--border));
+  --cm-line-strong: hsl(var(--input));
+  --cm-text: hsl(var(--foreground));
+  --cm-muted: hsl(var(--muted-foreground));
+  --cm-side-width: 200px;
+  min-height: 430px;
+  overflow: hidden;
+  border: 1px solid var(--cm-line);
+  border-radius: 10px;
+}
+
+.claude-workspace .cm-toolbar { flex-wrap: wrap; }
+.claude-workspace .cm-toolbar-text { flex-basis: 180px; }
+.claude-workspace .cm-side-foot { flex-wrap: wrap; }
+.claude-workspace .cm-gateway-mode { width: 100%; justify-content: center; }

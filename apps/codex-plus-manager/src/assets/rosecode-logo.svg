@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="tile" x1="60" y1="35" x2="430" y2="490" gradientUnits="userSpaceOnUse"><stop stop-color="#fff"/><stop offset="1" stop-color="#eef3ff"/></linearGradient>
+    <linearGradient id="rose" x1="192" y1="100" x2="303" y2="240" gradientUnits="userSpaceOnUse"><stop stop-color="#fb8f9f"/><stop offset="1" stop-color="#ef6688"/></linearGradient>
+    <linearGradient id="blue" x1="320" y1="177" x2="410" y2="320" gradientUnits="userSpaceOnUse"><stop stop-color="#77b5ff"/><stop offset="1" stop-color="#5486ee"/></linearGradient>
+    <linearGradient id="violet" x1="198" y1="286" x2="301" y2="410" gradientUnits="userSpaceOnUse"><stop stop-color="#a396f8"/><stop offset="1" stop-color="#7e78e4"/></linearGradient>
+    <linearGradient id="peach" x1="100" y1="178" x2="230" y2="318" gradientUnits="userSpaceOnUse"><stop stop-color="#ffc0a8"/><stop offset="1" stop-color="#f28d9e"/></linearGradient>
+  </defs>
+  <rect x="20" y="24" width="472" height="472" rx="118" fill="#c8d3ec" opacity=".18"/>
+  <rect x="20" y="16" width="472" height="472" rx="118" fill="url(#tile)" stroke="#e3e9f5" stroke-width="2"/>
+  <path d="M256 98C309 131 324 166 298 200L256 242L214 200C188 166 203 131 256 98Z" fill="url(#rose)"/>
+  <path d="M414 256C381 309 346 324 312 298L270 256L312 214C346 188 381 203 414 256Z" fill="url(#blue)"/>
+  <path d="M256 414C203 381 188 346 214 312L256 270L298 312C324 346 309 381 256 414Z" fill="url(#violet)"/>
+  <path d="M98 256C131 203 166 188 200 214L242 256L200 298C166 324 131 309 98 256Z" fill="url(#peach)"/>
+</svg>
