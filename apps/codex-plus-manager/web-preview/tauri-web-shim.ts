@@ -265,7 +265,7 @@ const overview = ok({
     debugger: { status: "disconnected", address: null, message: "等待 Codex 连接" },
     protocol_conversion_enabled: true,
   },
-  current_version: "1.0.1",
+  current_version: "1.0.2",
   update_status: "up_to_date",
   settings_path: "演示模式",
   logs_path: "演示模式",
@@ -328,7 +328,7 @@ const gateway = ok({
   ],
   agents: [
     { agent: "codex", name: "Codex", version: "26.1029", enabled: true, baseUrl: "http://127.0.0.1:63130/codex", defaultModel: "group/coding", models: [] },
-    { agent: "claude", name: "Claude Code", version: "1.0.1", enabled: true, baseUrl: "http://127.0.0.1:63130/claude", defaultModel: "deepseek-v4-pro", models: [] },
+    { agent: "claude", name: "Claude Code", version: "1.0.2", enabled: true, baseUrl: "http://127.0.0.1:63130/claude", defaultModel: "deepseek-v4-pro", models: [] },
     { agent: "grok", name: "Grok", enabled: false, baseUrl: "http://127.0.0.1:63130/grok", defaultModel: "", models: [] },
   ],
   health: { keys: [{ relayId: "zhipu", keyId: "k1", state: "cooling", remainingMs: 42000 }], providers: [] },
@@ -563,7 +563,7 @@ const demoSkills = {
 
 // 插件市场演示数据：几条长短不一的说明，看卡片排版。
 const demoMarketPlugin = (id: string, description: string, extra: Record<string, unknown> = {}) =>
-  ({ id, name: id, displayName: id, description, version: "1.0.1", author: "demo", tags: [], license: "MIT", path: "", tree: "", bytes: 64_000, skills: 1, requiresAuth: false, installed: false, updateAvailable: false, ...extra });
+  ({ id, name: id, displayName: id, description, version: "1.0.2", author: "demo", tags: [], license: "MIT", path: "", tree: "", bytes: 64_000, skills: 1, requiresAuth: false, installed: false, updateAvailable: false, ...extra });
 const demoPluginMarket = {
   status: "ok", message: "", source: "public", repository: "demo/plugins", total: 6, cached: true,
   plugins: [
@@ -672,7 +672,7 @@ const demoUserScripts = { enabled: true, claude_enabled: false, skip_next_start:
       ],
       config: { minutes: 25, sound: true, theme: "red", note: "休息一下\n喝口水", tags: ["工作"], webhook: { url: "", retry: 1 } } } },
   { key: "user:future-ext", name: "未来拓展", source: "user", kind: "package", enabled: true, status: "failed",
-    error: "需要拓展 API v2，当前 RoseCode 提供 v1，请升级 RoseCode", package: { id: "future-ext", version: "1.0.1", description: "", engine: 2, routes: [] } },
+    error: "需要拓展 API v2，当前 RoseCode 提供 v1，请升级 RoseCode", package: { id: "future-ext", version: "1.0.2", description: "", engine: 2, routes: [] } },
   { key: "user:claude-extension-demo", name: "Claude 连通测试", source: "user", kind: "package",
     enabled: false, claude_enabled: true, status: "disabled", error: "",
     package: { id: "claude-extension-demo", version: "0.1.0", description: "按钮、后台工具与会话事件", engine: 1, routes: [], backend: true,
@@ -719,16 +719,16 @@ export async function invoke<T = unknown>(command: string, args: Record<string, 
     ] : [] }) as T;
     case "load_request_logs": return ok({ entries: demoRequestLogs() }) as T;
     // 「版本与更新」演示：有新版本，后台下载 1 秒后完成（只下载不安装）。
-    case "check_update": if (!new URLSearchParams(window.location.search).has("showUpdate")) return ok({ currentVersion: "1.0.1", latestVersion: "1.0.1", releaseSummary: "", assetName: null, assetUrl: null, updateAvailable: false, progress: 0 }) as T;
-      return ok({ currentVersion: "1.0.1", latestVersion: "1.0.1", releaseSummary: "### 新增\n- 界面整体重做", assetName: "RoseCode-2.3.0.dmg", assetUrl: "https://example.test/RoseCode-2.3.0.dmg", updateAvailable: true, downloaded: false, progress: 0 }) as T;
-    case "download_update": await new Promise((resolve) => setTimeout(resolve, 1000)); return ok({ downloaded: true, latestVersion: "1.0.1" }) as T;
+    case "check_update": if (!new URLSearchParams(window.location.search).has("showUpdate")) return ok({ currentVersion: "1.0.2", latestVersion: "1.0.2", releaseSummary: "", assetName: null, assetUrl: null, updateAvailable: false, progress: 0 }) as T;
+      return ok({ currentVersion: "1.0.2", latestVersion: "1.0.2", releaseSummary: "### 新增\n- 界面整体重做", assetName: "RoseCode-2.3.0.dmg", assetUrl: "https://example.test/RoseCode-2.3.0.dmg", updateAvailable: true, downloaded: false, progress: 0 }) as T;
+    case "download_update": await new Promise((resolve) => setTimeout(resolve, 1000)); return ok({ downloaded: true, latestVersion: "1.0.2" }) as T;
     // 「日志与诊断」演示：几条诊断日志（含出错和重试）和一份诊断报告。
     case "read_latest_logs": {
       const now = Date.now();
       const line = (offset: number, event: string, detail: unknown) => JSON.stringify({ timestamp_ms: now - offset, pid: 17040, event, detail });
       const text = [
         'ount":0,"models":[]}',
-        line(3_600_000, "manager.start", { version: "1.0.1", platform: "macos" }),
+        line(3_600_000, "manager.start", { version: "1.0.2", platform: "macos" }),
         line(1_800_000, "gateway.helper_started", { port: 63130, agents: 2 }),
         line(900_000, "manager.save_settings", { activeRelayId: "codex-plus-gateway", relayProfiles: [{ id: "default", modelCount: 2 }, { id: "sub2api-demo", modelCount: 3 }] }),
         line(600_000, "gateway.retry", { provider: "zhipu", status: 429, attempt: 2 }),
@@ -737,7 +737,7 @@ export async function invoke<T = unknown>(command: string, args: Record<string, 
       ].join("\n");
       return ok({ path: "~/Library/Application Support/RoseCode/codex-plus.log", text, lines: 7, truncated: true, fileSize: 2_400_000 }) as T;
     }
-    case "copy_diagnostics": return ok({ report: JSON.stringify({ generatedAtMs: Date.now(), version: "1.0.1", overview: { codex_app: { status: "found", path: "/Applications/ChatGPT.app" }, codex_version: "26.1027.61615", silent_shortcut: { status: "missing", path: "/Applications/Codex++.app" }, management_shortcut: { status: "missing", path: "/Applications/Codex++.app" }, latest_launch: { status: "stopped", phase: "user_stopped" } } }, null, 2) }) as T;
+    case "copy_diagnostics": return ok({ report: JSON.stringify({ generatedAtMs: Date.now(), version: "1.0.2", overview: { codex_app: { status: "found", path: "/Applications/ChatGPT.app" }, codex_version: "26.1027.61615", silent_shortcut: { status: "missing", path: "/Applications/Codex++.app" }, management_shortcut: { status: "missing", path: "/Applications/Codex++.app" }, latest_launch: { status: "stopped", phase: "user_stopped" } } }, null, 2) }) as T;
     case "load_request_flow": return ok({ entries: demoRequestFlow(Number(args.limit) || 30) }) as T;
     case "startup_options": return ok({ showUpdate: false }) as T;
     case "consume_pending_manager_navigation": return null as T;
@@ -792,13 +792,13 @@ export async function invoke<T = unknown>(command: string, args: Record<string, 
     case "load_pending_dream_skin_community": return ok({ versionId: "" }) as T;
     case "load_watcher_state": return ok({ enabled: false, running: false, status: "disabled", message: "演示模式" }) as T;
     case "load_auto_takeover_state": return ok({ running: false, enabled: false, message: "演示模式" }) as T;
-    case "update_check": return ok({ currentVersion: "1.0.1", latestVersion: "1.0.1", updateAvailable: false }) as T;
+    case "update_check": return ok({ currentVersion: "1.0.2", latestVersion: "1.0.2", updateAvailable: false }) as T;
     case "refresh_script_market": return ok({ market: { status: "ok", message: "演示模式", updatedAt: "2026-10-26T12:51:00Z", scripts: [
       { id: "relay-balance", name: "Codex Relay Balance", description: "通用中转站余额与模型用量监控，支持自动读取或手动填写接口、日期范围、Token 明细和实际扣费倍率。", version: "0.3.7", author: "RoseCode Community", tags: ["codex", "relay", "balance", "usage", "quota"], homepage: "https://github.com/demo/relay-balance", script_url: "", installed: false, installedVersion: "", updateAvailable: false },
-      { id: "model-matrix", name: "Codex Model Matrix", description: "紧凑且适配主题的 Codex 模型选择器，配备可拖动吸附的推理强度滑块。", version: "1.0.1", author: "lx", tags: ["codex", "models", "reasoning"], homepage: "https://github.com/demo/model-matrix", script_url: "", installed: true, installedVersion: "1.0.1", updateAvailable: false },
+      { id: "model-matrix", name: "Codex Model Matrix", description: "紧凑且适配主题的 Codex 模型选择器，配备可拖动吸附的推理强度滑块。", version: "1.0.2", author: "lx", tags: ["codex", "models", "reasoning"], homepage: "https://github.com/demo/model-matrix", script_url: "", installed: true, installedVersion: "1.0.2", updateAvailable: false },
       { id: "context-meter", name: "Codex Context Used Meter", description: "在 Codex App 对话界面显示当前会话上下文余量。", version: "101", author: "Minghou-Lei", tags: ["context", "tokens"], homepage: "", script_url: "", installed: false, installedVersion: "", updateAvailable: false },
     ], packages: [
-      { kind: "package", id: "session-search", name: L("会话搜索", "Session search"), description: L("在侧边栏搜索全部历史会话，回车跳到命中的那一轮。", "Search all past sessions from the sidebar and jump to the matching turn."), version: "1.0.1", author: "RoseCode", tags: ["history"], homepage: "", icon: "", updatedAt: "2026-10-30", repo: "BigPizzaV3/codexpp-session-search", tag: "v1.0.0", sha: "9c1e0b7d3a5f6e8c9d0a1b2c3d4e5f6a7b8c4f2a", official: true, channel: "official", installed: false, installedVersion: "", installedSha: "", updateAvailable: false },
+      { kind: "package", id: "session-search", name: L("会话搜索", "Session search"), description: L("在侧边栏搜索全部历史会话，回车跳到命中的那一轮。", "Search all past sessions from the sidebar and jump to the matching turn."), version: "1.0.2", author: "RoseCode", tags: ["history"], homepage: "", icon: "", updatedAt: "2026-10-30", repo: "BigPizzaV3/codexpp-session-search", tag: "v1.0.0", sha: "9c1e0b7d3a5f6e8c9d0a1b2c3d4e5f6a7b8c4f2a", official: true, channel: "official", installed: false, installedVersion: "", installedSha: "", updateAvailable: false },
       { kind: "package", id: "word-guard", name: L("命令守卫", "Command guard"), description: L("拦截危险的 shell 命令，并给出更安全的替代写法。", "Block dangerous shell commands and suggest safer alternatives."), version: "1.2.0", author: "alice", tags: ["hooks"], homepage: "", icon: "", updatedAt: "2026-10-28", repo: "alice/codexpp-word-guard", tag: "v1.2.0", sha: "4f2a9c1e0b7d3a5f6e8c9d0a1b2c3d4e5f6a7b8c", official: false, channel: "curated", installed: true, installedVersion: "1.1.0", installedSha: "0b7d3a5f6e8c9d0a1b2c3d4e5f6a7b8c4f2a9c1e", updateAvailable: true },
     ], blockedInstalled: [] }, user_scripts: demoUserScripts }) as T;
     case "load_ccs_providers": return ok({ providers: [] }) as T;
@@ -814,7 +814,7 @@ export async function invoke<T = unknown>(command: string, args: Record<string, 
     // Computer Use 演示数据：找到了 ChatGPT.app，Claude Code 与 DeepSeek Harness 已接入（Claude Desktop 用增强版自带的那份）。
     case "computer_use_status": return ok({ runtimeFound: true, appPath: "/Applications/ChatGPT.app", packageVersion: "1.2026.300", targets: demoComputerUseTargets() }) as T;
     case "computer_use_browser_extension_status": return { installed: true, storeUrl: "" } as T;
-    case "computer_use_approval_get": return ok({ mode: "auto", cuMode: "js", pip: true, approvals: [], lastClient: { name: "claude-code", version: "1.0.1", at: Date.now() - 120_000 } }) as T;
+    case "computer_use_approval_get": return ok({ mode: "auto", cuMode: "js", pip: true, approvals: [], lastClient: { name: "claude-code", version: "1.0.2", at: Date.now() - 120_000 } }) as T;
     // Claude 增强演示数据：增强版已制作，开了界面汉化与 Computer Use。
     case "claude_localization_status": return ok(demoClaudeEnhance) as T;
     case "claude_local_status":
@@ -866,15 +866,15 @@ export async function invoke<T = unknown>(command: string, args: Record<string, 
     } as T;
     // 社区拓展演示数据：一个带钩子与后台的、一个只有页面脚本且已安装的、一个需要新版 RoseCode 的。
     case "extension_publish_request": {
-      const report = { id: args.payload?.id, name: L("字数统计", "Word count"), version: args.action === "bump" ? "1.0.1" : "1.0.1", description: L("统计输入框字数", "Count characters"), errors: [], warnings: [L("没有 README，发布时会按清单生成一份", "No README; one will be generated from the manifest")], secrets: [], files: 4, bytes: 5120, hasReadme: false, hasLicense: false, publishedRepo: null, suggestedRepoName: `codexpp-${args.payload?.id}`, gh: { ready: true, account: "demo-user" } };
-      if (args.action === "publish") return { ok: true, repo: `demo-user/codexpp-${args.payload?.id}`, url: "https://github.com/", version: "1.0.1", steps: ["发布前检查", "确认 GitHub 账号", "确认 git 身份", "创建仓库", "初始化工作副本", "整理文件", "提交", "打标签", "推送", "创建 release", "添加 topic"].map((step) => ({ step, ok: true, output: "" })) } as T;
+      const report = { id: args.payload?.id, name: L("字数统计", "Word count"), version: args.action === "bump" ? "1.0.2" : "1.0.2", description: L("统计输入框字数", "Count characters"), errors: [], warnings: [L("没有 README，发布时会按清单生成一份", "No README; one will be generated from the manifest")], secrets: [], files: 4, bytes: 5120, hasReadme: false, hasLicense: false, publishedRepo: null, suggestedRepoName: `codexpp-${args.payload?.id}`, gh: { ready: true, account: "demo-user" } };
+      if (args.action === "publish") return { ok: true, repo: `demo-user/codexpp-${args.payload?.id}`, url: "https://github.com/", version: "1.0.2", steps: ["发布前检查", "确认 GitHub 账号", "确认 git 身份", "创建仓库", "初始化工作副本", "整理文件", "提交", "打标签", "推送", "创建 release", "添加 topic"].map((step) => ({ step, ok: true, output: "" })) } as T;
       return report as T;
     }
     case "extension_community_request": {
       const perms = (extra: Record<string, unknown> = {}) => ({ backend: null, hooks: [], gatewayRequest: 0, gatewayResponse: 0, tools: [], routes: [], renderer: ["main.js"], ...extra });
       const entry = (repo: string, extra: Record<string, unknown>) => ({
         repo, url: `https://github.com/${repo}`, owner: repo.split("/")[0], ownerAvatar: "", description: "", stars: 0, license: "MIT",
-        pushedAt: "2026-10-28T09:00:00Z", id: repo.split("/")[1], name: repo.split("/")[1], version: "1.0.1", author: "", homepage: "",
+        pushedAt: "2026-10-28T09:00:00Z", id: repo.split("/")[1], name: repo.split("/")[1], version: "1.0.2", author: "", homepage: "",
         icon: "", keywords: [], engine: 1, compatible: true, permissions: perms(), installed: null, ...extra,
       });
       if (args.action === "prepare" || args.action === "preparePackage") return {
@@ -890,7 +890,7 @@ export async function invoke<T = unknown>(command: string, args: Record<string, 
         enabled: true, fetchedAt: Math.floor(Date.now() / 1000) - 180, stale: false, problems: [], message: "",
         entries: [
           entry("alice/word-guard", { name: L("命令守卫", "Command guard"), stars: 128, version: "1.3.0", description: L("拦下危险的 shell 命令，并在后台记录审计日志。", "Blocks dangerous shell commands and keeps an audit log."), permissions: perms({ backend: "backend/main.mjs", hooks: [{ event: "PreToolUse", matcher: "^Bash$" }], gatewayRequest: 1, tools: ["guard_status"] }) }),
-          entry("bob/word-count", { name: L("字数统计", "Word count"), stars: 37, description: L("在输入框旁显示字数。", "Shows a word count next to the composer."), installed: { version: "1.0.1", tag: "v1.0.0", sha: "1111111", fromDefaultBranch: false } }),
+          entry("bob/word-count", { name: L("字数统计", "Word count"), stars: 37, description: L("在输入框旁显示字数。", "Shows a word count next to the composer."), installed: { version: "1.0.2", tag: "v1.0.0", sha: "1111111", fromDefaultBranch: false } }),
           entry("carol/future-panel", { name: L("实验面板", "Experimental panel"), stars: 5, engine: 2, compatible: false, description: L("需要下一版拓展 API。", "Needs the next extension API.") }),
         ],
       } as T;
@@ -899,7 +899,7 @@ export async function invoke<T = unknown>(command: string, args: Record<string, 
     case "dsh_plugins_request": if (args.action === "browse_index") return {
       entries: [
         { name: "@deepseek-ai/dsh-persona", title: L("人设", "Persona"), description: L("给模型加一段人设提示词", "Adds a persona prompt"), version: "0.2.0", source: "@deepseek-ai/dsh-persona@0.2.0", note: null },
-        { name: "dsh-git-demo", title: "Git demo", description: L("从 git 仓库导入", "Imported from git"), version: "1.0.1", source: "https://github.com/x/y.git#abc123&path:packages/demo", note: null },
+        { name: "dsh-git-demo", title: "Git demo", description: L("从 git 仓库导入", "Imported from git"), version: "1.0.2", source: "https://github.com/x/y.git#abc123&path:packages/demo", note: null },
       ],
     } as T; else return {
       message: "",
