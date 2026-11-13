@@ -193,6 +193,33 @@ pub fn select_update_asset(assets: &[(String, String)]) -> Option<ReleaseAsset> 
     })
 }
 
+/// 安装命令的参数来自界面，只接受当前平台的 RoseCode 官方发布附件。
+pub fn validate_official_update_asset(release: &Release) -> anyhow::Result<()> {
+    let tag = release.version.as_str();
+    let name = release.asset_name.as_deref().unwrap_or_default();
+    let simple_segment = |value: &str| {
+        !value.is_empty()
+            && value
+                .bytes()
+                .all(|byte| byte.is_ascii_alphanumeric() || b"._-".contains(&byte))
+    };
+    if !simple_segment(tag)
+        || !tag.starts_with('v')
+        || parse_version_tag(tag).is_err()
+        || !simple_segment(name)
+        || !name.starts_with(&format!("RoseCode-{}-", &tag[1..]))
+        || platform_asset_rank(&name.to_ascii_lowercase()) >= 2
+    {
+        anyhow::bail!("更新安装包须来自 RoseCode 官方发布渠道，并与版本和当前平台匹配。");
+    }
+    let expected_url =
+        format!("https://github.com/{DEFAULT_REPOSITORY}/releases/download/{tag}/{name}");
+    if release.asset_url.as_deref() != Some(expected_url.as_str()) {
+        anyhow::bail!("更新安装包须来自 RoseCode 官方发布渠道，并与版本和当前平台匹配。");
+    }
+    Ok(())
+}
+
 pub async fn fetch_latest_release(latest_json_url: &str) -> anyhow::Result<Release> {
     let client = update_http_client()?;
     let payload = client
@@ -495,7 +522,7 @@ fn update_http_client() -> anyhow::Result<reqwest::Client> {
     // 直连会一直超时，用户看到的是「检查更新成功但下载/安装失败」（#1329）。
     // 复用统一构造器，保留原有连接/总超时语义。
     crate::http_client::proxied_client_with_timeouts(
-        &format!("Codex++/{}", crate::version::VERSION),
+        &format!("RoseCode/{}", crate::version::VERSION),
         UPDATE_CONNECT_TIMEOUT,
         UPDATE_DOWNLOAD_TIMEOUT,
     )

@@ -8202,20 +8202,6 @@ pub fn skip_update_version(version: String) -> CommandResult<SettingsPayload> {
     }
 }
 
-#[cfg(test)]
-mod update_policy_tests {
-    #[tokio::test]
-    async fn rosecode_cannot_check_or_install_original_project_updates() {
-        let checked = super::check_update().await;
-        assert_eq!(checked.status, "not_checked");
-        assert_eq!(checked.payload["updateAvailable"], false);
-        assert_eq!(checked.payload["currentVersion"], codex_plus_core::version::VERSION);
-        let install = super::perform_update_inner(None, |_| {}).await;
-        assert_eq!(install.status, "failed");
-        assert!(install.message.contains("独立更新渠道"));
-    }
-}
-
 #[tauri::command]
 pub async fn check_update() -> CommandResult<Value> {
     if let Some(reason) = crate::flavor::update_block_reason() {
@@ -8305,6 +8291,9 @@ pub async fn download_update(
             json!({ "downloaded": false }),
         );
     };
+    if let Err(error) = codex_plus_core::update::validate_official_update_asset(&release) {
+        return failed(&error.to_string(), json!({ "downloaded": false }));
+    }
     let emitter = app.clone();
     match codex_plus_core::update::download_update_with_progress(&release, &update_download_dir(), move |progress| {
         let _ = emitter.emit("update-download-progress", progress);
@@ -8394,6 +8383,12 @@ where
             }),
         );
     };
+    if let Err(error) = codex_plus_core::update::validate_official_update_asset(&release) {
+        return failed(
+            &error.to_string(),
+            json!({ "currentVersion": codex_plus_core::version::VERSION, "progress": 0 }),
+        );
+    }
     let download_dir = update_download_dir();
     match codex_plus_core::update::perform_update_with_progress(
         &release,
@@ -12073,13 +12068,23 @@ base_url = "https://example.invalid/v1"
     }
 
     #[test]
-    fn rosecode_update_is_blocked_without_an_independent_channel() {
+    fn rosecode_update_requires_a_selected_official_asset() {
         let mut progressed = false;
         let result = tauri::async_runtime::block_on(perform_update_inner(None, |_| progressed = true));
 
         assert_eq!(result.status, "failed");
-        assert_eq!(result.message, "RoseCode 尚未配置独立更新渠道，请使用本地构建。");
-        assert!(!progressed, "拦截更新时不能开始下载");
+        assert!(result.message.contains("请先检查更新"));
+        let upstream = codex_plus_core::update::Release {
+            version: "v9.0.0".into(),
+            url: String::new(),
+            body: String::new(),
+            asset_name: Some("RoseCode-9.0.0-windows-x64-setup.exe".into()),
+            asset_url: Some("https://github.com/BigPizzaV3/CodexPlusPlus/releases/download/v9.0.0/RoseCode-9.0.0-windows-x64-setup.exe".into()),
+        };
+        let result = tauri::async_runtime::block_on(perform_update_inner(Some(upstream), |_| progressed = true));
+        assert_eq!(result.status, "failed");
+        assert!(result.message.contains("官方发布渠道"));
+        assert!(!progressed, "未选中官方附件时不能开始下载");
     }
 
     #[test]

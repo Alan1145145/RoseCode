@@ -2,7 +2,7 @@
 //!
 //! ClaudeMom 只做 Claude Desktop 完整功能模式，由单独的二进制 `claude-mom`
 //! （`src/claude_mom.rs`）在进程最开始调用 [`init_claude_mom`] 标记出来；
-//! RoseCode 的 `codex-plus-plus` 不调用任何初始化，行为与以前完全一致。
+//! RoseCode 的 `rosecode` 不调用任何产品变体初始化。
 //!
 //! ClaudeMom 与 RoseCode 完全独立，可以同时运行：
 //! - 状态目录默认 `~/.claude-mom`（设置、上游列表、Claude 本地服务都在里面）；
@@ -47,12 +47,18 @@ pub fn app_name() -> &'static str {
     }
 }
 
-/// 两个产品均没有独立更新渠道，不能安装原项目的更新包。
+/// RoseCode 使用本项目的 GitHub Releases，ClaudeMom 暂无独立发布渠道。
 pub fn update_block_reason() -> Option<&'static str> {
-    Some(match current() {
-        Flavor::RoseCode => "RoseCode 尚未配置独立更新渠道，请使用本地构建。",
-        Flavor::ClaudeMom => "ClaudeMom 暂不支持自动更新，请重新构建。",
-    })
+    current().update_block_reason()
+}
+
+impl Flavor {
+    fn update_block_reason(self) -> Option<&'static str> {
+        match self {
+            Self::RoseCode => None,
+            Self::ClaudeMom => Some("ClaudeMom 暂不支持自动更新，请重新构建。"),
+        }
+    }
 }
 
 /// 主窗口：加载的页面、默认尺寸、最小尺寸。ClaudeMom 是自己的小工具页面。
@@ -181,5 +187,11 @@ mod tests {
         assert_eq!(window.url, "/index.html");
         assert_eq!(window.size, (1180.0, 720.0));
         assert_eq!(window.min_size, (960.0, 640.0));
+    }
+
+    #[test]
+    fn only_rosecode_has_an_update_channel() {
+        assert_eq!(update_block_reason(), None);
+        assert!(Flavor::ClaudeMom.update_block_reason().is_some());
     }
 }

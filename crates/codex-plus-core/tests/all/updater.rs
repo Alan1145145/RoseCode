@@ -1,6 +1,7 @@
 use codex_plus_core::update::{
     Release, download_asset_to, is_newer_version, parse_version_tag, release_from_github_payload,
     release_from_latest_json_payload, safe_asset_name, select_update_asset,
+    validate_official_update_asset,
 };
 use serde_json::json;
 
@@ -12,6 +13,41 @@ fn default_update_source_is_rosecode_repository() {
         DEFAULT_LATEST_JSON_URL,
         format!("https://github.com/{DEFAULT_REPOSITORY}/releases/latest/download/latest.json")
     );
+}
+
+#[test]
+fn official_update_asset_matches_release_version_and_platform() {
+    let name = if cfg!(windows) {
+        "RoseCode-1.0.3-windows-x64-setup.exe"
+    } else if cfg!(target_os = "macos") {
+        "RoseCode-1.0.3-macos-universal.dmg"
+    } else if cfg!(target_os = "linux") {
+        "RoseCode-1.0.3-linux-amd64.deb"
+    } else {
+        return;
+    };
+    let official_url = format!(
+        "https://github.com/Alan1145145/RoseCode/releases/download/v1.0.3/{name}"
+    );
+    let mut release = Release {
+        version: "v1.0.3".into(),
+        url: String::new(),
+        body: String::new(),
+        asset_name: Some(name.into()),
+        asset_url: Some(official_url.clone()),
+    };
+    assert!(validate_official_update_asset(&release).is_ok());
+    for url in [
+        official_url.replace("Alan1145145/RoseCode", "BigPizzaV3/CodexPlusPlus"),
+        official_url.replace("/v1.0.3/", "/v1.0.2/"),
+        official_url.replace("https://", "http://"),
+    ] {
+        release.asset_url = Some(url);
+        assert!(validate_official_update_asset(&release).is_err());
+    }
+    release.asset_url = Some(official_url);
+    release.version = "v1.0.2".into();
+    assert!(validate_official_update_asset(&release).is_err());
 }
 
 #[test]
